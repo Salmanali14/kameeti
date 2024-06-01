@@ -4,9 +4,38 @@ import logo from '../../images/Kameti (1).png'
 import { Link } from 'react-router-dom';
 import { FaRegEyeSlash } from "react-icons/fa";
 import { MdOutlineRemoveRedEye } from 'react-icons/md';
+import axios from 'axios';
+
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(true);
   const [emailSelected, setEmailSelected] = useState(false);
+  const [identity, setIdentity] = useState('');
+  const [password, setPassword] = useState('');
+  const [responseMessage, setresponseMessage] = useState('');
+
+  const apiBaseUrl = import.meta.env.VITE_APP_API_URL;
+  // console.log(apiBaseUrl);
+
+  const handleSignIn = async () => {
+    try {
+      const response = await axios.post(`${apiBaseUrl}login`, {
+        identity: identity, // Send the user's input (email or phone number) as the "identity" key
+        password: password, // Make sure to capture the password as well
+        loginWith: "signup"
+        
+      });
+      setresponseMessage('Sign-in successful! Redirecting...');
+      // console.error('Sign-in success:', response);
+      // console.error('Sign-in token:', response?.data?.data?.token);
+      localStorage.setItem('id',response?.data?.data?.id ? response?.data?.data?.id : 0);
+      localStorage.setItem('token',response?.data?.data?.token);
+      window.location.href = '/create';
+    } catch (error) {
+      // Handle sign-in error (e.g., display error message to the user)
+      setresponseMessage(error?.response?.data?.message);
+      // console.error('Sign-in error:', error);
+    }
+  };
   return (
    <>
    <div className='w-[100%] flex bg-black h-[100vh] justify-center items-center'>
@@ -21,13 +50,15 @@ export default function SignIn() {
       <button className=' text-white absolute right-0 rounded-[30px] h-[45px] text-[20px] w-[53%]' onClick={()=>setEmailSelected(true)} style={emailSelected?{backgroundColor:"#A87F0B",color:'black'}:null}>Email</button>
     </div>
   </div>
+  {responseMessage && <p className="text-white mt-3 w-[58%]">{responseMessage}</p>}
+
 {emailSelected ?(
-  <input className='bg-black border text-white outline-none	 border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 ' type='email' placeholder='Email' />
+  <input className='bg-black border text-white outline-none	 border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 ' type='email' placeholder='Email' onChange={(e) => setIdentity(e.target.value)} />
 ):(
-   <input className='bg-black border text-white outline-none	 border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 ' type='text' placeholder='Phone Number' />
+   <input className='bg-black border text-white outline-none	 border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 ' type='text' placeholder='Phone Number' onChange={(e) => setIdentity(e.target.value)} />
   )}
    <div className='bg-black flex items-center border border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 mb-3'>
-   <input  className=' bg-black w-[100%] h-[20px] outline-none	 text-white' type={showPassword ? 'password' : 'text'} placeholder='Password'/>
+   <input  className=' bg-black w-[100%] h-[20px] outline-none	 text-white' type={showPassword ? 'password' : 'text'} placeholder='Password' onChange={(e) => setPassword(e.target.value)} />
    {showPassword ? (
     <FaRegEyeSlash className='text-white ml-2 text-[22px]' onClick={() => setShowPassword(false)} />
   ) : (
@@ -36,7 +67,7 @@ export default function SignIn() {
   <div className='w-[55%]'>
   <Link to='/forgot' className='text-[#A87F0B] text-[15px] flex justify-end mb-3 '>Forgot Password?</Link>
   </div>
-   <Link to='/create' className='bg-[#A87F0B] rounded-[30px] h-[50px] text-[20px] w-[60%] flex justify-center'><button>Sign In</button> </Link>
+   <button className='bg-[#A87F0B] rounded-[30px] h-[50px] text-[20px] w-[60%] flex justify-center' onClick={handleSignIn}>Sign In</button>
    <p className='text-[white] mt-10'>Don’t have an account?<Link to='/signup' className='text-[#A87F0B] ml-1'>Sign Up</Link></p>
    </div>
    </div>
