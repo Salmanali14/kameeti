@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../../components/Sidebar/Sidebar'
 import editimg from '../../images/paymentImage/Edit.png'
-import remove from '../../images/paymentImage/Remove.png'
+import remove from '../../images/File22.png'
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { IoIosSearch } from "react-icons/io";
 import { FaSort } from "react-icons/fa";
@@ -27,7 +27,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
 import { FadeLoader, HashLoader } from 'react-spinners';
 
-export default function History() {
+export default function DeleteKameti() {
   const [payments, setPayments] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [showConfirmAlert, setShowConfirmAlert] = useState(false);
@@ -40,32 +40,13 @@ export default function History() {
   const [searchQuery, setSearchQuery] = useState('');
   const apiBaseUrl = import.meta.env.VITE_APP_API_URL;
   const token = localStorage.getItem('token');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [paymentsPerPage] = useState(2);
-  const getPayments = async () => {
-    setLoading(true)
-    try {
-      const response = await axios.get(`${apiBaseUrl}payment`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-      });
-      console.log(response);
-      setPayments(response?.data?.data ? response?.data?.data : []);
-      setLoading(false)
-    } catch (error) {
-      // console.error('Error fetching payments:', error);
-      setErrorMessage('An error occurred while fetching payments.');
-    }
-  };
+
 
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleDateString();
   };
-  useEffect(() => {
-    getPayments(); // Fetch payments when the component mounts
-  }, []);
+
 
 
   const handleRemoveConfirm = async () => {
@@ -102,18 +83,29 @@ export default function History() {
     setShowWithdrawModal(true);
   };
 
-  const indexOfLastPayment = currentPage * paymentsPerPage;
-  const indexOfFirstPayment = indexOfLastPayment - paymentsPerPage;
-  const currentPayments = payments
-    .filter(payment => payment.commHolderName.toLowerCase().includes(searchQuery.toLowerCase()))
-    .slice(indexOfFirstPayment, indexOfLastPayment);
 
-  const pageNumbers = [];
-  for (let i = 1; i <= Math.ceil(payments.length / paymentsPerPage); i++) {
-    pageNumbers.push(i);
-  }
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const [userData, setUserData] = useState(null);
+  console.log(userData)
+  const fetchUserData = async () => {
+     setLoading(true)
+    try {
+      const response = await axios.get(`${apiBaseUrl}deletedRecords`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setUserData(response?.data?.data);
+      setLoading(false)
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+console.log(payments)
   
   return (
   <>
@@ -127,16 +119,16 @@ export default function History() {
 ) : (
   <div className='w-[75%] bg-maincolor ml-[2px] rounded-r-[20px] flex flex-col'>
   <div className='w-[100%] flex justify-between items-center mt-6 border-b-[2px] border-[black] '>
-  <h1 className='text-[#A87F0B] text-[25px] font-bold ml-10 mb-6'>All kameties</h1>
+  <h1 className='text-[#A87F0B] text-[25px] font-bold ml-10 mb-6'>Deleted kameties</h1>
   <div className='flex items-center'>
-  <button className='flex justify-center items-center w-[180px] h-[40px]  rounded-[30px] bg-colorinput text-[white]  mb-6 mr-3' ><IoIosSearch className='text-[white] text-[20px]'/><input type='text'  value={searchQuery}
-  onChange={(e) => setSearchQuery(e.target.value)} placeholder='Search' className='outline-none bg-transparent border-none w-[130px] placeholder-white'/></button>
-  <button className='flex justify-center items-center w-[100px] h-[40px]  rounded-[30px] bg-colorinput text-[white]  mb-6 mr-10' ><MdOutlineRestartAlt className='text-[white] text-[20px]'/>Reset</button></div>
+  <button className='flex justify-center items-center  w-[380px] h-[40px]  rounded-[30px] bg-colorinput text-[white]  mb-6 mr-3' ><IoIosSearch className='text-[white] mr-1 ml-2  text-[20px]'/><input type='text'  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)} placeholder='Search' className='outline-none bg-transparent border-none w-[350px] pr-4 placeholder-white'/></button>
+ </div>
   </div>
   <div className='flex justify-evenly    flex-wrap  h-[400px] overflow-y-auto w-[100%]'>
     
-  {payments
-    .filter(payment => {
+  {userData
+    ?.filter(payment => {
       // Filter payments based on search query
       return payment.commHolderName.toLowerCase().includes(searchQuery.toLowerCase());
     })
@@ -151,27 +143,7 @@ export default function History() {
 
                     </div>
                     <div className='flex items-center'>
-                      <button className='flex justify-center items-center w-[80px] h-[29px] rounded-[30px] mr-2 text-white text-[12px] bg-paytxt1'
-                      onClick={() => {
-                        setConfirmMessage("Are you sure you want to edit?");
-                        setConfirmAction('edit');
-                        setShowConfirmAlert(true);
-                        setCommId(payment.id);
-                      }}
-                      >
-                        Edit {'\u00A0'}<img className='w-[15px]' src={editimg} />
-                      </button>
-                      <button className='flex justify-center items-center w-[80px] h-[29px] rounded-[30px] mr-5 text-white text-[12px] bg-paytxt1' 
-                      onClick={() => {
-                        setConfirmMessage("Are you sure you want to remove?");
-                        setConfirmAction('remove');
-                        setShowConfirmAlert(true);
-                        setCommId(payment.id);
-                        
-                      }}
-                      >
-                        Remove {'\u00A0'}<img className='w-[15px]' src={remove} />
-                      </button>
+                    <button className='flex justify-center items-center w-[80px] h-[29px] rounded-[30px] mr-5 text-white text-[12px] bg-paytxt1'>Restore {'\u00A0'}<img className='w-[15px]' src={remove}/></button>
                     </div>
                   </div>
                   <div className='flex justify-center items-center w-[100%] flex-wrap mt-3'>
@@ -237,65 +209,10 @@ export default function History() {
               )}
        
              
-{/* 
-  <div className='w-[40%] h-[370px] mt-1 rounded-[20px] bg-sidebar  '>
-  <div className='w-100% h-[60px] rounded-t-[20px] bg-colorinput flex justify-between items-center'>
- <div className='flex items-center ml-5'> <div className='w-[25px] ml-1 h-[25px] bg-customBlack text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
-  2
-  </div>
-  <p className='text-white text-[20px]'>Hilton</p></div>
-  <div className='flex items-center'>
-  <button className='flex justify-center items-center w-[80px] h-[29px] rounded-[30px] mr-2 text-white text-[12px] bg-paytxt1'>Edit {'\u00A0'}<img className='w-[15px]' src={editimg}/></button>
-  <button className='flex justify-center items-center w-[80px] h-[29px] rounded-[30px] mr-5 text-white text-[12px] bg-paytxt1'>Remove {'\u00A0'}<img className='w-[15px]' src={remove}/></button>
-  </div>
-  </div>
-  <div className='flex justify-center items-center w-[100%] flex-wrap mt-3'>
-  <div className='w-[30%] h-[90px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={bank}/>
-  <h2 className='text-paytxt text-[10px] mt-1'>Price(Each)</h2>
-  <h1 className='text-paytxt text-[12px] font-bold'>2000</h1>
-  </div>
-  <div className='w-[30%] ml-2 mr-2 h-[90px] rounded-[20px]  bg-colorinput flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={money2}/>
-  <h2 className='text-paytxt text-[10px] mt-1'>Total Price(All)</h2>
-  <h1 className='text-paytxt text-[12px] font-bold'>48000</h1>
-  </div>
-  <div className='w-[30%] h-[90px]  rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={box}/>
-  <h2 className='text-paytxt text-[10px] mt-1'>Your Committees</h2>
-  <h1 className='text-paytxt text-[12px] font-bold'>2</h1>
-  </div>
-  <div className='w-[30%] h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={lastdate}/>
-  <h2 className='text-paytxt text-[10px] mt-1'>Total Month</h2>
-  <h1 className='text-paytxt text-[12px] font-bold'>12</h1>
-  </div>
-    <div className='w-[30%] h-[90px] rounded-[20px] mt-2 ml-2 mr-2 bg-colorinput flex justify-center items-center flex-col'>
-    <img className='w-[30px]' src={payday1}/>
-    <h2 className='text-paytxt text-[10px] mt-1'>Payable per Month</h2>
-    <h1 className='text-paytxt text-[12px] font-bold'>2000</h1>
-    </div>
-  <div className='w-[30%] h-[90px]  rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={money1}/>
-  <h2 className='text-paytxt text-[10px] mt-1'>Paid Amount</h2>
-  <h1 className='text-paytxt text-[12px] font-bold'>2000</h1>
-  </div>
 
-  <div className='w-[30%] h-[90px] rounded-[20px] mt-2  bg-colorinput flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={startdate}/>
-  <h2 className='text-paytxt text-[10px] mt-1'>Starting Date</h2>
-  <h1 className='text-paytxt text-[12px] font-bold'>01/22/24</h1>
-  </div>
-  <div className='w-[60%] ml-4 h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
-  <div className='flex items-center ml-[-20px]'><img className='w-[30px]' src={calander}/>{'\u00A0'}
-  <h2 className='text-paytxt text-[12px]  mt-[-15px]'>Withdraw Date </h2></div>
-  <h1 className='text-white '>12/2/2023</h1>
-  </div>
-  </div>
-  </div> */} 
   </div>
   {/* 
-<div className='flex justify-center mb-3 items-center w-[100%]'>
+  <div className='flex justify-center mb-3 items-center w-[100%]'>
 <button className='flex justify-center items-center w-[90px] h-[30px] mb-1 bg-[#323232] text-[#999] text-[13px] rounded-3xl '>Previous</button>
 <div className='flex justify-center items-center w-[30px] h-[30px] rounded-full bg-[#A87F0B] ml-5 mr-2'>1</div>
 <div className='flex justify-center items-center w-[30px] h-[30px] rounded-full bg-[#323232] ml-2 mr-2'>2</div>

@@ -27,7 +27,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
 import { FadeLoader, HashLoader } from 'react-spinners';
 
-export default function History() {
+export default function AllRecords() {
   const [payments, setPayments] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [showConfirmAlert, setShowConfirmAlert] = useState(false);
@@ -127,7 +127,7 @@ export default function History() {
 ) : (
   <div className='w-[75%] bg-maincolor ml-[2px] rounded-r-[20px] flex flex-col'>
   <div className='w-[100%] flex justify-between items-center mt-6 border-b-[2px] border-[black] '>
-  <h1 className='text-[#A87F0B] text-[25px] font-bold ml-10 mb-6'>All kameties</h1>
+  <h1 className='text-[#A87F0B] text-[25px] font-bold ml-10 mb-6'>All Records</h1>
   <div className='flex items-center'>
   <button className='flex justify-center items-center w-[180px] h-[40px]  rounded-[30px] bg-colorinput text-[white]  mb-6 mr-3' ><IoIosSearch className='text-[white] text-[20px]'/><input type='text'  value={searchQuery}
   onChange={(e) => setSearchQuery(e.target.value)} placeholder='Search' className='outline-none bg-transparent border-none w-[130px] placeholder-white'/></button>

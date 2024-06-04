@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Sidebar from '../../components/Sidebar/Sidebar'
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { IoIosSearch } from "react-icons/io";
@@ -18,11 +18,43 @@ import money1 from '../../images/paymentImage/money (1) 2.png'
 import money2 from '../../images/paymentImage/money 2.png'
 import { MdOutlineRestartAlt } from "react-icons/md";
 import unpay from '../../images/paymentImage/unpay.png'
-export default function Payment() {
+import axios from 'axios';
+export default function Payment() { 
+   const apiBaseUrl = import.meta.env.VITE_APP_API_URL;
+   const token = localStorage.getItem('token');
+   const [userData, setUserData] = useState(null);
+   const [selectedUser, setSelectedUser] = useState(null);
+   console.log(userData)
+   const fetchUserData = async () => {
+     try {
+       const response = await axios.get(`${apiBaseUrl}payment`, {
+         headers: {
+           Authorization: `Bearer ${token}`
+         }
+       });
+       setUserData(response?.data?.data);
+   
+     } catch (error) {
+       console.error('Error fetching data:', error);
+     }
+   };
+ 
+   useEffect(() => {
+     fetchUserData();
+   }, []);
+   const handleUserChange = (event) => {
+      const userId = parseInt(event.target.value, 10); // Convert the value to an integer
+      const user = userData?.find(user => user?.id === userId);
+      console.log(user);
+      setSelectedUser(user);
+    };
+  
+console.log(selectedUser)
+
   return (
    <>
    <div className='w-[100%] h-[100vh] flex justify-center items-center bg-black'>
-   <div className='w-[97%] rounded-[40px] h-[90vh] flex  '>
+   <div className='w-[97%] rounded-[40px] h-[95vh] flex  '>
 <Sidebar/>
    <div className='w-[75%] bg-maincolor ml-[2px] rounded-r-[20px] h-[100%]'>
    <div className='w-[100%] flex justify-between items-center mt-6 border-b-[2px] border-[black] '>
@@ -32,11 +64,22 @@ export default function Payment() {
    <div className='w-[75%] flex justify-center items-center flex-col'>
    <div className='w-[96%] mt-1  rounded-[20px] items-center  flex justify-between  h-[100px] bg-sidebar '>
    <div className='w-[50%] ml-5 flex justify-start  flex-col'>
-   <p className='text-gray-200 font-bold'>Supereme Sdtrawa</p>
-   <h1 className='text-yellow-600 font-bold text-[30px]' >Rs. 25,000</h1>
+   <p className='text-gray-200 font-bold'>{selectedUser?.commHolderName}</p>
+   <h1 className='text-yellow-600 font-bold text-[30px]' >Rs.{selectedUser?.totalPrice}</h1>
    <p className='text-gray-200 text-[12px]'>Payments</p>
    </div>
-   <button className='flex justify-center items-center w-[100px] h-[40px] border rounded-[30px] bg-colorinput text-[white]  mb-6 mr-10' ><MdOutlineRestartAlt className='text-[white] text-[20px]'/>Reset</button>
+   <div className='flex justify-start flex-col w-[25%] mr-3'>
+      <select className='w-[100%] outline-none border border-[white] bg-[#373737] text-[#999] text-[14px] h-[40px] rounded-[5px] pl-1 pr-3'
+      onChange={handleUserChange}
+      >
+        <option value="" className="" selected="selected">Select Kameti...</option>
+        {userData && userData.map((user, index) => (
+          <option key={index} value={user.id}>
+            {user.commHolderName}{'\u00A0'}{'\u00A0'}{'\u00A0'}({user?.totalPrice})
+          </option>
+        ))}
+      </select>
+    </div>
    </div>
    <div className='w-[96%] h-[290px] overflow-y-scroll mt-2 rounded-[20px] items-center  flex flex-col  bg-sidebar'>
    <div className='w-[95%] flex'>
@@ -50,7 +93,7 @@ export default function Payment() {
    </div>
    <div className='w-[95%] pt-2 pb-2 mt-2 flex items-center justify-around rounded-[30px] h-[50px] text-paytxt border-colorinput border-[2px]'>
    <div className='w-[40px] h-[30px]  bg-payform text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   No1.
+   No.
    </div>
    <div className='w-[60px] h-[30px] bg-payform text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
    Price
@@ -66,144 +109,36 @@ export default function Payment() {
    </div>
    </div>
  
-   <div className='w-[95%] mt-2 flex items-center justify-around rounded-[30px] h-[40px] text-paytxt bg-colorinput border-colorinput border-[2px]'>
-   <div className='w-[25px] ml-1 h-[25px] bg-payform text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
-   1
+{/* Assuming totalMonth is the variable containing the total number of months */}
+
+{/* Generate divs based on the length of totalMonth */}
+{Array.from({ length: selectedUser?.totalMonths}).map((_, index) => (
+   <div key={index} className='w-[95%] mt-2 flex items-center justify-around rounded-[30px] h-[40px] text-paytxt bg-colorinput border-colorinput border-[2px]'>
+     <div className='w-[25px] ml-3 h-[25px] bg-payform text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
+       {index + 1}
+     </div>
+     <div className='w-[60px] h-[25px] ml-[-10px] text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
+       <img className='w-[15px] mr-2' src={money} alt="money" /> {selectedUser?.pricePerComm}
+     </div>
+     <div className='w-[105px] h-[40px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
+      <input type='date' className='bg-[#373737] w-[100%] text-white' />
+     </div>
+     <div className='w-[60px] h-[25px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
+       <img className='w-[15px] mr-2' src={check} alt="check" /> Paid
+     </div>
+     <div className='h-[25px] text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
+       <div className='w-[70px] h-[26px] rounded-[30px] text-[12px] text-black flex items-center justify-center cursor-pointer bg-uploaded'>
+         Uploaded
+       </div>
+       {'\u00A0'}
+       <div className='w-[70px] whitespace-nowrap mr-[-10px] text-[12px] h-[26px] rounded-[30px] text-black flex items-center justify-center cursor-pointer bg-paytxt'>
+         See Photo
+       </div>
+     </div>
    </div>
-   <div className='w-[60px] h-[25px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2 ' src={money}/> 4000
-   </div>
-   <div className='w-[60px] h-[40px]   text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2 ' src={calander}/> 01/06/23
-   </div>
-   <div className='w-[60px] h-[25px] mr-[-10px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2' src={check}/> Paid
-   </div>
-   <div className=' h-[25px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-  <div className='w-[70px] h-[26px] rounded-[30px] text-[12px] text-black flex items-center justify-center cursor-pointer bg-uploaded'>
-  Uploaded
-  </div>
-  {'\u00A0'}
-  <div className='w-[70px] whitespace-nowrap mr-[-10px] text-[12px] h-[26px] rounded-[30px] text-black flex items-center justify-center cursor-pointer bg-paytxt'>
-  See Photo
-  </div>
-   </div>
-   </div>
-   <div className='w-[95%] mt-2 flex items-center justify-around rounded-[30px] h-[40px] text-paytxt bg-colorinput border-colorinput border-[2px]'>
-   <div className='w-[25px] ml-1 h-[25px] bg-payform text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
-   2
-   </div>
-   <div className='w-[60px] h-[40px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2 ' src={money}/> 4000
-   </div>
-   <div className='w-[60px] h-[25px]   text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2 ' src={calander}/> 01/06/23
-   </div>
-   <div className='w-[60px] h-[25px] mr-[-10px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2' src={check}/> Paid
-   </div>
-   <div className=' h-[25px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-  <div className='w-[70px] h-[26px] rounded-[30px] text-[12px] text-black flex items-center justify-center cursor-pointer bg-uploaded'>
-  Uploaded
-  </div>
-  {'\u00A0'}
-  <div className='w-[70px] whitespace-nowrap mr-[-10px] text-[12px] h-[26px] rounded-[30px] text-black flex items-center justify-center cursor-pointer bg-paytxt'>
-  See Photo
-  </div>
-   </div>
-   </div>
-   <div className='w-[95%] mt-2 flex items-center justify-around rounded-[30px] h-[40px] text-paytxt bg-colorinput border-colorinput border-[2px]'>
-   <div className='w-[25px] ml-1 h-[25px] bg-payform text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
-   3
-   </div>
-   <div className='w-[60px] h-[40px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2 ' src={money}/> 4000
-   </div>
-   <div className='w-[60px] h-[25px]   text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2 ' src={calander}/> 01/06/23
-   </div>
-   <div className='w-[60px] h-[25px] mr-[-10px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2' src={check}/> Paid
-   </div>
-   <div className=' h-[25px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-  <div className='w-[70px] h-[26px] rounded-[30px] text-[12px] text-black flex items-center justify-center cursor-pointer bg-uploaded'>
-  Uploaded
-  </div>
-  {'\u00A0'}
-  <div className='w-[70px] whitespace-nowrap mr-[-10px] text-[12px] h-[26px] rounded-[30px] text-black flex items-center justify-center cursor-pointer bg-paytxt'>
-  See Photo
-  </div>
-   </div>
-   </div>
-   <div className='w-[95%] mt-2 flex items-center justify-around rounded-[30px] h-[40px] text-paytxt bg-colorinput border-colorinput border-[2px]'>
-   <div className='w-[25px] ml-1 h-[25px] bg-payform text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
-   4
-   </div>
-   <div className='w-[60px] h-[25px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2 ' src={money}/> 4000
-   </div>
-   <div className='w-[60px] h-[40px]   text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2 ' src={calander}/> 01/06/23
-   </div>
-   <div className='w-[60px] h-[25px] mr-[-10px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2' src={check}/> Paid
-   </div>
-   <div className=' h-[25px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-  <div className='w-[70px] h-[26px] rounded-[30px] text-[12px] text-black flex items-center justify-center cursor-pointer bg-uploaded'>
-  Uploaded
-  </div>
-  {'\u00A0'}
-  <div className='w-[70px] whitespace-nowrap mr-[-10px] text-[12px] h-[26px] rounded-[30px] text-black flex items-center justify-center cursor-pointer bg-paytxt'>
-  See Photo
-  </div>
-   </div>
-   </div>
-   <div className='w-[95%] mt-2 flex items-center justify-around rounded-[30px] h-[40px] text-paytxt bg-colorinput border-colorinput border-[2px]'>
-   <div className='w-[25px] ml-1 h-[25px] bg-payform text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
-   5
-   </div>
-   <div className='w-[60px] h-[25px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2 ' src={money}/> 4000
-   </div>
-   <div className='w-[60px] h-[40px]   text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2 ' src={calander}/> 01/06/23
-   </div>
-   <div className='w-[60px] h-[25px] mr-[-10px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2' src={check}/> Paid
-   </div>
-   <div className=' h-[25px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-  <div className='w-[70px] h-[26px] rounded-[30px] text-[10px] text-uploaded flex items-center justify-center border-[1px] cursor-pointer border-uploaded'>
-  Upload
-  </div>
-  {'\u00A0'}
-  <div className='w-[70px] whitespace-nowrap mr-[-10px] text-[8px] h-[26px] rounded-[30px] text-uploaded flex items-center justify-center cursor-pointer border-[1px] border-uploaded'>
-   Upload to See 
-  </div>
-   </div>
-   </div>
-   <div className='w-[95%] mt-2 flex items-center justify-around rounded-[30px] h-[40px] text-paytxt bg-colorinput border-colorinput border-[2px]'>
-   <div className='w-[25px] ml-1 h-[25px] bg-payform text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
-   6
-   </div>
-   <div className='w-[60px] h-[25px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2 ' src={money}/> 4000
-   </div>
-   <div className='w-[60px] h-[40px]   text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2 ' src={calander}/> 01/06/23
-   </div>
-   <div className='w-[60px] h-[25px] mr-[-10px]  text-[#8A8A8A] text-[13px] rounded-[30px] flex justify-center items-center'>
-   <img className='w-[15px] mr-2' src={unpay}/> Pay
-   </div>
-   <div className=' h-[25px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-  <div className='w-[70px] h-[26px] rounded-[30px] text-[12px] text-[#8A8A8A] flex items-center justify-center border-[1px] border-[#8A8A8A]'>
-  Uploaded
-  </div>
-  {'\u00A0'}
-  <div className='w-[70px] whitespace-nowrap mr-[-10px] text-[12px] h-[26px] rounded-[30px] text-[#8A8A8A] flex items-center justify-center border-[1px] border-[#8A8A8A]'>
-  See Photo
-  </div>
-   </div>
-   </div>
+ ))}
+ 
+  
 <br></br>
 
    </div>

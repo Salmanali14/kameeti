@@ -1,11 +1,12 @@
 import React,{useState} from 'react'
 import signup from '../../images/signup.png'
 import logo from '../../images/Kameti (1).png'
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { FaRegEyeSlash } from "react-icons/fa";
 import { MdOutlineRemoveRedEye } from 'react-icons/md';
 import axios from 'axios';
-
+import { Slide, ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(true);
   // const [emailSelected, setEmailSelected] = useState(false);
@@ -13,10 +14,42 @@ export default function Signup() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [responseMessage, setresponseMessage] = useState('');
+ 
+let nevigate =useNavigate()
 
   const apiBaseUrl = import.meta.env.VITE_APP_API_URL;
 
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  const validatePhone = (phone) => {
+    const re = /^\d+$/; // Check for digits only
+    return re.test(phone);
+  };
   const handleSignup = async () => {
+    if (!email) {
+      toast.error("Email is required.");
+      return;
+    }
+    if (!validateEmail(email)) {
+      toast.error("Invalid email format.");
+      return;
+    }
+    if (!phone) {
+      toast.error("Phone number is required.");
+      return;
+    }
+    if (!validatePhone(phone)) {
+      toast.error("Invalid phone number format.");
+      return;
+    }
+    if (!password) {
+      toast.error("Password is required.");
+      return;
+    }
+
     try {
       const response = await axios.post(`${apiBaseUrl}register`, {
         email: email, 
@@ -27,14 +60,16 @@ export default function Signup() {
         platform : 'web',
         userType : 'user'
       });
-      setresponseMessage('Sign-up successful! Redirecting...');
+      toast.success("Account create successfuly!")
       // console.error('Sign-up success:', response?.data?.data?.id);
       localStorage.setItem('id',response?.data?.data?.id);
       localStorage.setItem('token',response?.data?.data?.token);
-      window.location.href = '/create';
+      setTimeout(function() {
+        nevigate("/create");
+      }, 2000);
     } catch (error) {
       // Handle sign-in error (e.g., display error message to the user)
-      setresponseMessage(error?.response?.data?.message);
+      toast.error(error?.response?.data?.message);
       // console.error('Sign-up error:', error);
     }
   };
@@ -65,11 +100,22 @@ export default function Signup() {
   ) : (
     <MdOutlineRemoveRedEye className='text-white ml-2 text-[22px]' onClick={() => setShowPassword(true)} />
   )}</div>
-  <button className='bg-[#A87F0B] rounded-[30px] h-[50px] text-[20px] w-[60%] flex justify-center' onClick={handleSignup}>Sign Up</button>
+  <button className='bg-[#A87F0B] rounded-[30px] h-[50px] text-[20px] w-[60%] flex justify-center items-center' onClick={handleSignup}>Sign Up</button>
    <p className='text-[white] mt-10'>Already have an account?<Link to='/signin' className='text-[#A87F0B] ml-1'>Sign in</Link></p>
    </div>
    </div>
-   
+   <ToastContainer
+    position="top-center"
+    autoClose={2000} // Auto close after 3 seconds
+    hideProgressBar={false}
+    newestOnTop={false}
+    closeOnClick
+    rtl={false}
+    pauseOnFocusLoss
+    draggable
+    pauseOnHover
+    transition={Slide} // Optional transition effect
+  />
    </>
   )
 }

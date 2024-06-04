@@ -1,10 +1,12 @@
 import React,{useState} from 'react'
 import sigin from '../../images/login.png'
 import logo from '../../images/Kameti (1).png'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaRegEyeSlash } from "react-icons/fa";
 import { MdOutlineRemoveRedEye } from 'react-icons/md';
 import axios from 'axios';
+import { Slide, ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(true);
@@ -12,11 +14,35 @@ export default function SignIn() {
   const [identity, setIdentity] = useState('');
   const [password, setPassword] = useState('');
   const [responseMessage, setresponseMessage] = useState('');
-
+  let nevigate =useNavigate()
   const apiBaseUrl = import.meta.env.VITE_APP_API_URL;
   // console.log(apiBaseUrl);
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+  };
 
+  const validatePhone = (phone) => {
+    const re = /^\d+$/; // Check for digits only
+    return re.test(phone);
+  };
   const handleSignIn = async () => {
+    if (!identity) {
+      toast.error(emailSelected ? "Email is required." : "Phone number is required.");
+      return;
+    }
+    if (emailSelected && !validateEmail(identity)) {
+      toast.error("Invalid email format.");
+      return;
+    }
+    if (!emailSelected && !validatePhone(identity)) {
+      toast.error("Invalid phone number format.");
+      return;
+    }
+    if (!password) {
+      toast.error("Password is required.");
+      return;
+    }
     try {
       const response = await axios.post(`${apiBaseUrl}login`, {
         identity: identity, // Send the user's input (email or phone number) as the "identity" key
@@ -24,15 +50,17 @@ export default function SignIn() {
         loginWith: "signup"
         
       });
-      setresponseMessage('Sign-in successful! Redirecting...');
+      toast.success("Sign in  successfuly!");
       // console.error('Sign-in success:', response);
       // console.error('Sign-in token:', response?.data?.data?.token);
       localStorage.setItem('id',response?.data?.data?.id ? response?.data?.data?.id : 0);
       localStorage.setItem('token',response?.data?.data?.token);
-      window.location.href = '/create';
+      setTimeout(function() {
+        nevigate("/create");
+      }, 2000);
     } catch (error) {
       // Handle sign-in error (e.g., display error message to the user)
-      setresponseMessage(error?.response?.data?.message);
+      toast.error(error?.response?.data?.message);
       // console.error('Sign-in error:', error);
     }
   };
@@ -67,11 +95,22 @@ export default function SignIn() {
   <div className='w-[55%]'>
   <Link to='/forgot' className='text-[#A87F0B] text-[15px] flex justify-end mb-3 '>Forgot Password?</Link>
   </div>
-   <button className='bg-[#A87F0B] rounded-[30px] h-[50px] text-[20px] w-[60%] flex justify-center' onClick={handleSignIn}>Sign In</button>
+   <button className='bg-[#A87F0B] rounded-[30px] h-[50px] text-[20px] w-[60%] flex justify-center items-center' onClick={handleSignIn}>Sign In</button>
    <p className='text-[white] mt-10'>Don’t have an account?<Link to='/signup' className='text-[#A87F0B] ml-1'>Sign Up</Link></p>
    </div>
    </div>
-   
+   <ToastContainer
+    position="top-center"
+    autoClose={2000} // Auto close after 3 seconds
+    hideProgressBar={false}
+    newestOnTop={false}
+    closeOnClick
+    rtl={false}
+    pauseOnFocusLoss
+    draggable
+    pauseOnHover
+    transition={Slide} // Optional transition effect
+  />
    </>
   )
 }

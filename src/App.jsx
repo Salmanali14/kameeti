@@ -9,9 +9,14 @@ import Create from "./pages/CreatePage/Create";
 import Payment from "./pages/PaymentPage/Payment";
 import History from "./pages/HistoryPage/History";
 import More from "./pages/More/More";
+import DeleteKameti from "./pages/Delete kameti/DeleteKameti";
+import AllRecords from "./pages/AllRecords/AllRecords";
 
 function App() {
-
+  const RequireAuth = ({ children }) => {
+    const currentUser = localStorage.getItem("id");
+    return currentUser?.length>0 && currentUser !=undefined  ? children : <Navigate to="/signin" />;
+  };
 
   return (
     <>
@@ -22,12 +27,14 @@ function App() {
     <Route path="/signin" element={<SignIn/>}/>
     <Route path="/forgot" element={<ForgotPassword/>}/>
     <Route path="/create">
-    <Route path="" element={<Create/>}/>
-    <Route path=":id" element={<Create/>}/>
+    <Route path="" element={<RequireAuth><Create/></RequireAuth>}/>
+    <Route path=":id" element={<RequireAuth><Create/></RequireAuth>}/>
     </Route>
-    <Route path="/payment" element={<Payment/>}/>
-    <Route path="/history" element={<History/>}/>
-    <Route path="/more" element={<More/>}/>
+    <Route path="/delete" element={<RequireAuth><DeleteKameti/></RequireAuth>}/>
+    <Route path="/payment" element={<RequireAuth><Payment/></RequireAuth>}/>
+    <Route path="/history" element={<RequireAuth><History/></RequireAuth>}/>
+    <Route path="/more" element={<RequireAuth><More/></RequireAuth>}/>
+    <Route path="/allrecords" element={<RequireAuth><AllRecords/></RequireAuth>}/>
     </Routes>
     </BrowserRouter>
     </>
