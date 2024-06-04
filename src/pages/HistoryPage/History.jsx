@@ -235,64 +235,6 @@ export default function History() {
                   No results found
                 </p>
               )}
-       
-             
-{/* 
-  <div className='w-[40%] h-[370px] mt-1 rounded-[20px] bg-sidebar  '>
-  <div className='w-100% h-[60px] rounded-t-[20px] bg-colorinput flex justify-between items-center'>
- <div className='flex items-center ml-5'> <div className='w-[25px] ml-1 h-[25px] bg-customBlack text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
-  2
-  </div>
-  <p className='text-white text-[20px]'>Hilton</p></div>
-  <div className='flex items-center'>
-  <button className='flex justify-center items-center w-[80px] h-[29px] rounded-[30px] mr-2 text-white text-[12px] bg-paytxt1'>Edit {'\u00A0'}<img className='w-[15px]' src={editimg}/></button>
-  <button className='flex justify-center items-center w-[80px] h-[29px] rounded-[30px] mr-5 text-white text-[12px] bg-paytxt1'>Remove {'\u00A0'}<img className='w-[15px]' src={remove}/></button>
-  </div>
-  </div>
-  <div className='flex justify-center items-center w-[100%] flex-wrap mt-3'>
-  <div className='w-[30%] h-[90px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={bank}/>
-  <h2 className='text-paytxt text-[10px] mt-1'>Price(Each)</h2>
-  <h1 className='text-paytxt text-[12px] font-bold'>2000</h1>
-  </div>
-  <div className='w-[30%] ml-2 mr-2 h-[90px] rounded-[20px]  bg-colorinput flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={money2}/>
-  <h2 className='text-paytxt text-[10px] mt-1'>Total Price(All)</h2>
-  <h1 className='text-paytxt text-[12px] font-bold'>48000</h1>
-  </div>
-  <div className='w-[30%] h-[90px]  rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={box}/>
-  <h2 className='text-paytxt text-[10px] mt-1'>Your Committees</h2>
-  <h1 className='text-paytxt text-[12px] font-bold'>2</h1>
-  </div>
-  <div className='w-[30%] h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={lastdate}/>
-  <h2 className='text-paytxt text-[10px] mt-1'>Total Month</h2>
-  <h1 className='text-paytxt text-[12px] font-bold'>12</h1>
-  </div>
-    <div className='w-[30%] h-[90px] rounded-[20px] mt-2 ml-2 mr-2 bg-colorinput flex justify-center items-center flex-col'>
-    <img className='w-[30px]' src={payday1}/>
-    <h2 className='text-paytxt text-[10px] mt-1'>Payable per Month</h2>
-    <h1 className='text-paytxt text-[12px] font-bold'>2000</h1>
-    </div>
-  <div className='w-[30%] h-[90px]  rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={money1}/>
-  <h2 className='text-paytxt text-[10px] mt-1'>Paid Amount</h2>
-  <h1 className='text-paytxt text-[12px] font-bold'>2000</h1>
-  </div>
-
-  <div className='w-[30%] h-[90px] rounded-[20px] mt-2  bg-colorinput flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={startdate}/>
-  <h2 className='text-paytxt text-[10px] mt-1'>Starting Date</h2>
-  <h1 className='text-paytxt text-[12px] font-bold'>01/22/24</h1>
-  </div>
-  <div className='w-[60%] ml-4 h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
-  <div className='flex items-center ml-[-20px]'><img className='w-[30px]' src={calander}/>{'\u00A0'}
-  <h2 className='text-paytxt text-[12px]  mt-[-15px]'>Withdraw Date </h2></div>
-  <h1 className='text-white '>12/2/2023</h1>
-  </div>
-  </div>
-  </div> */} 
   </div>
   {/* 
 <div className='flex justify-center mb-3 items-center w-[100%]'>

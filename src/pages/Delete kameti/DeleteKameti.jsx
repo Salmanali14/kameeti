@@ -28,8 +28,6 @@ import { useNavigate } from 'react-router-dom'
 import { FadeLoader, HashLoader } from 'react-spinners';
 
 export default function DeleteKameti() {
-  const [payments, setPayments] = useState([]);
-  const [errorMessage, setErrorMessage] = useState('');
   const [showConfirmAlert, setShowConfirmAlert] = useState(false);
   const [CommId, setCommId] = useState('');
   const [confirmMessage, setConfirmMessage] = useState('');
@@ -49,11 +47,11 @@ export default function DeleteKameti() {
 
 
 
-  const handleRemoveConfirm = async () => {
+  const handleRestoreConfirm = async () => {
     // console.log(CommId);
     try {
       const response = await axios.post(
-        `${apiBaseUrl}committee/delete`,
+        `${apiBaseUrl}committee/restore`,
         { id: CommId },
         {
           headers: {
@@ -61,19 +59,15 @@ export default function DeleteKameti() {
           }
         }
       );
-      setPayments(payments.filter(payment => payment.id !== CommId));
+      setDeletedKametees(deletedKametees.filter(payment => payment.id !== CommId));
       setShowConfirmAlert(false); 
-      toast.success("Record deleted successfuly!")
+      toast.success("Record restored successfuly!")
     } catch (error) {
-      console.error('Error removing record:', error);
+      console.error('Error restoring record:', error);
     }
   };
   const navigate = useNavigate();
-  const handleEditConfirm = () => {
-    console.log('Edit confirmed');
-    navigate(`/Create/${CommId}`); 
-    setShowConfirmAlert(false);
-  };
+  
   const handleAlertCancel = () => {
     setShowConfirmAlert(false); // Hide the confirm alert
   };
@@ -85,9 +79,8 @@ export default function DeleteKameti() {
 
 
 
-  const [userData, setUserData] = useState(null);
-  console.log(userData)
-  const fetchUserData = async () => {
+  const [deletedKametees, setDeletedKametees] = useState(null);
+  const fetchKametees = async () => {
      setLoading(true)
     try {
       const response = await axios.get(`${apiBaseUrl}deletedRecords`, {
@@ -95,7 +88,7 @@ export default function DeleteKameti() {
           Authorization: `Bearer ${token}`
         }
       });
-      setUserData(response?.data?.data);
+      setDeletedKametees(response?.data?.data);
       setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -103,9 +96,9 @@ export default function DeleteKameti() {
   };
 
   useEffect(() => {
-    fetchUserData();
+    fetchKametees();
   }, []);
-console.log(payments)
+
   
   return (
   <>
@@ -127,82 +120,89 @@ console.log(payments)
   </div>
   <div className='flex justify-evenly    flex-wrap  h-[400px] overflow-y-auto w-[100%]'>
     
-  {userData
-    ?.filter(payment => {
-      // Filter payments based on search query
-      return payment.commHolderName.toLowerCase().includes(searchQuery.toLowerCase());
+  {deletedKametees
+    ?.filter(kameti => {
+      // Filter kametis based on search query
+      return kameti.commHolderName.toLowerCase().includes(searchQuery.toLowerCase());
     })
-    .map((payment, index) => (
+    .map((kameti, index) => (
                 <div key={index} className='w-[40%] h-[370px] mt-1 rounded-[20px] bg-sidebar m-2'>
                   <div className='w-100% h-[60px] rounded-t-[20px] bg-colorinput flex justify-between items-center'>
                     <div className='flex items-center ml-5'>
                       <div className='w-[25px] ml-1 h-[25px] bg-customBlack text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
                         {index + 1}
                       </div>
-                      <p className='text-white text-[20px] overflow-hidden text-ellipsis whitespace-nowrap max-w-[125px] ml-2'>{payment.commHolderName}</p>
+                      <p className='text-white text-[20px] overflow-hidden text-ellipsis whitespace-nowrap max-w-[125px] ml-2'>{kameti.commHolderName}</p>
 
                     </div>
                     <div className='flex items-center'>
-                    <button className='flex justify-center items-center w-[80px] h-[29px] rounded-[30px] mr-5 text-white text-[12px] bg-paytxt1'>Restore {'\u00A0'}<img className='w-[15px]' src={remove}/></button>
+                    <button className='flex justify-center items-center w-[80px] h-[29px] rounded-[30px] mr-5 text-white text-[12px] bg-paytxt1' onClick={() => {
+                        setConfirmMessage("Are you sure you want to restore?");
+                        setConfirmAction('restore');
+                        setShowConfirmAlert(true);
+                        setCommId(kameti.id);
+                        
+                      }}>Restore {'\u00A0'}<img className='w-[15px]' src={remove}/></button>
                     </div>
                   </div>
                   <div className='flex justify-center items-center w-[100%] flex-wrap mt-3'>
                     <div className='w-[30%] h-[90px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={bank} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Price(Each)</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{payment.pricePerComm}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{kameti.pricePerComm}</h1>
                     </div>
                     <div className='w-[30%] ml-2 mr-2 h-[90px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={money2} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Total Price(All)</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{payment.totalPrice}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{kameti.totalPrice}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={box} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Your Committees</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{payment.totalUserComms}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{kameti.totalUserComms}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={lastdate} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Total Month</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{payment.totalMonths}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{kameti.totalMonths}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] rounded-[20px] mt-2 ml-2 mr-2 bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={payday1} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Payable per Month</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{payment.pricePerComm * payment.totalUserComms}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{kameti.pricePerComm * kameti.totalUserComms}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={money1} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Paid Amount</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{payment.paidAmount}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{kameti.paidAmount}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={startdate} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Starting Date</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{formatDate(payment.startingMonth)}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{formatDate(kameti.startingMonth)}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] ml-2 mr-2 rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
                     <img className='w-[30px]' src={startdate} />
                     <h2 className='text-paytxt text-[10px] mt-1'>Ending Date</h2>
-                    <h1 className='text-paytxt text-[12px] font-bold'>{formatDate(payment.endingMonth)}</h1>
+                    <h1 className='text-paytxt text-[12px] font-bold'>{formatDate(kameti.endingMonth)}</h1>
                   </div>
                     <div className='w-[30%]  h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
-                      <div className='flex items-center justify-center flex-col ' onClick={() => {
+                      <div className='flex items-center justify-center flex-col '>
+                      {/* onClick={() => {
                         
-                        openWithdrawModal(payment?.totalUserComms, payment?.withdraw);
-                        setCommId(payment.id);
-                        }}>
+                        openWithdrawModal(kameti?.totalUserComms, kameti?.withdraw);
+                        setCommId(kameti.id);
+                        }} */}
                         <img className='w-[30px] ' src={calander} />
                         <h2 className='text-paytxt text-[12px] mt-1 '>Withdraw Date </h2>
                       </div>
-                     {payment.withdraw.filter(date => date !== null).length > 0 &&
-                      <h1 className='text-paytxt text-[12px] font-bold'>{new Date(payment.withdraw.find(date => date !== null)).toLocaleDateString()}</h1>}
+                     {kameti.withdraw.filter(date => date !== null).length > 0 &&
+                      <h1 className='text-paytxt text-[12px] font-bold'>{new Date(kameti.withdraw.find(date => date !== null)).toLocaleDateString()}</h1>}
                     </div>
                   </div>
                 </div>
               ))}
-              {payments.filter(payment => payment.commHolderName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && searchQuery.trim() !== '' && (
+              {deletedKametees?.filter(kameti => kameti.commHolderName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && searchQuery.trim() !== '' && (
                 <p className='flex justify-center items-center text-[white] w-[80%]'>
                   No results found
                 </p>
@@ -231,10 +231,8 @@ console.log(payments)
         <Alert
           message={confirmMessage}
           onConfirm={() => {
-            if (confirmAction === 'edit') {
-              handleEditConfirm();
-            } else if (confirmAction === 'remove') {
-              handleRemoveConfirm();
+          if (confirmAction === 'restore') {
+              handleRestoreConfirm();
             }
           }}
           onCancel={handleAlertCancel}
