@@ -5,8 +5,8 @@ import 'react-toastify/dist/ReactToastify.css';
 
 // Styled component for the custom switch
 const IOSSwitch = styled(Switch)(({ theme }) => ({
-  width: 38,
-  height: 22,
+  width: 30,
+  height: 14,
   padding: 0,
   "& .MuiSwitch-switchBase": {
     padding: 0,
@@ -15,7 +15,7 @@ const IOSSwitch = styled(Switch)(({ theme }) => ({
     transitionDuration: "300ms",
     "&.Mui-checked": {
       transform: "translateX(16px)",
-      color: "#731DD8 !important",
+      color: "#A87F0B !important",
       background:"#F1E5FF",
       "& + .MuiSwitch-track": {
         backgroundColor: theme?.palette?.mode === "dark" ? "#F1E5FF" : "#F1E5FF",
@@ -39,8 +39,8 @@ const IOSSwitch = styled(Switch)(({ theme }) => ({
   },
   "& .MuiSwitch-thumb": {
     boxSizing: "border-box",
-    width: 18,
-    height: 18,
+    width: 10,
+    height:10,
   },
   "& .MuiSwitch-track": {
     borderRadius: 26 / 2,

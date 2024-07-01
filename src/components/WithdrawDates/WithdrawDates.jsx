@@ -48,7 +48,7 @@ useEffect(() => {
   return (
  
       <div className="fixed inset-0 flex items-center  justify-center bg-black bg-opacity-50">
-        <div className="bg-[#373737] m-h-[90vh] overflow-y-auto rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-1/3 p-6">
+        <div className="bg-[#373737] max-h-[80vh] overflow-y-auto rounded-lg shadow-lg w-11/12 md:w-1/2 lg:w-1/3 p-6">
           <h2 className="text-xl text-[white] font-semibold mb-4">Select Dates</h2>
           {inputDates.map((date, index) => (
             <div key={index} className="mb-4">

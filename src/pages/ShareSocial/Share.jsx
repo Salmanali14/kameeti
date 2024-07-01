@@ -89,60 +89,11 @@ export default function Share() {
    </ContentCopyRoundedIcon>
    </div>
  </div>
-   <div className="Demo__some-network">
-     <FacebookShareButton url={shareUrl} className="Demo__some-network__share-button">
-       <FacebookIcon
-        size={50} round />
-     </FacebookShareButton>
+  
+  
 
-     <div>
-     
-     </div>
-   </div>
-
-   <div className="Demo__some-network">
-     <FacebookMessengerShareButton
-       url={shareUrl}
-       appId="521270401588372"
-       className="Demo__some-network__share-button"
-     >
-       <FacebookMessengerIcon size={50} round />
-     </FacebookMessengerShareButton>
-   </div>
-   <div className="Demo__some-network">
-     <PinterestShareButton
-       url={String(window.location)}
-      
-       className="Demo__some-network__share-button"
-     >
-       <PinterestIcon size={50} round />
-     </PinterestShareButton>
-
-     <div>
-    
-     </div>
-   </div>
-
-   <div className="Demo__some-network">
-     <TwitterShareButton
-       url={shareUrl}
-       
-       className="Demo__some-network__share-button"
-     >
-       <XIcon size={50} round />
-     </TwitterShareButton>
-   </div>
-
-   <div className="Demo__some-network">
-     <TelegramShareButton
-       url={shareUrl}
-       
-       className="Demo__some-network__share-button"
-     >
-       <TelegramIcon size={50} round />
-     </TelegramShareButton>
-   </div>
-
+   
+   
    <div className="Demo__some-network">
      <WhatsappShareButton
        url={shareUrl}
@@ -153,58 +104,6 @@ export default function Share() {
        <WhatsappIcon size={50} round />
      </WhatsappShareButton>
    </div>
-
-   <div className="Demo__some-network">
-     <LinkedinShareButton url={shareUrl} className="Demo__some-network__share-button">
-       <LinkedinIcon size={50} round />
-     </LinkedinShareButton>
-   </div>
-
-
-    
-    
-   
-
-
-   <div className="Demo__some-network">
-     <RedditShareButton
-       url={shareUrl}
-       
-       windowWidth={660}
-       windowHeight={460}
-       className="Demo__some-network__share-button"
-     >
-       <RedditIcon size={50} round />
-     </RedditShareButton>
-
-     <div>
-     
-     </div>
-   </div>
-
-   
-   
-  
-
-   <div className="Demo__some-network">
-     <EmailShareButton
-       url={shareUrl}
-     
-       body="body"
-       className="Demo__some-network__share-button"
-     >
-       <EmailIcon size={50} round />
-     </EmailShareButton>
-   </div>
-  
-
-  
-  
-
-
-
-  
-
  </div>
    </>
   )

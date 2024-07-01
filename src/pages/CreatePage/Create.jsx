@@ -11,6 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { MdOutlineRestartAlt } from "react-icons/md";
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { useNavigate, useParams } from 'react-router-dom';
+import { ClipLoader } from 'react-spinners';
 
 export default function Create() {
   const [btnloader,setBTnloader]=useState(false)
@@ -82,6 +83,7 @@ export default function Create() {
     setBTnloader(true)
     if (parseInt(myTotalKameties) > parseInt(totalMonths)) {
       toast.error('Total kameties cannot exceed total months.');
+      setBTnloader(false)
       return; // Prevent further execution
     }
     try {
@@ -130,6 +132,7 @@ export default function Create() {
       }, 2000);
     } catch (error) {
       toast.error(error?.response?.data?.message);
+      
     }
   };
 
@@ -151,6 +154,12 @@ export default function Create() {
   useEffect(() => {
     getSingleCommittee();
   }, [id]);
+  const [kametiType, setKametiType] = useState('daily');
+
+  const handleKametiTypeChange = (event) => {
+    setKametiType(event.target.value);
+  };
+
   return (
     <>
       <div className='w-[100%] h-[100vh] flex justify-center items-center bg-black'>
@@ -159,6 +168,13 @@ export default function Create() {
           <div className='w-[75%] bg-maincolor ml-[2px] rounded-r-[20px]'>
             <div className='w-[100%] flex justify-between items-center mt-6 border-b-[2px] border-[black]'>
               <h1 className='text-[#A87F0B] text-[25px] font-bold ml-10 mb-6'>{id ? "Update Kameti" : "Create Kameti"}</h1>
+              <div className="mb-6 ml-[130px]">
+          <label className='text-[#A87F0B] text-[19px] font-bold mr-2  '>Select Kameti Type :</label>
+          <select value={kametiType} className='bg-colorinput text-[white] text-[15px] h-[40px] w-[200px] pl-2 outline-none  rounded-3xl' onChange={handleKametiTypeChange}>
+            <option value="daily">Daily Basis Kameti</option>
+            <option value="monthly">Monthly Basis Kameti</option>
+          </select>
+        </div>
               <button className='flex justify-center items-center w-[100px] h-[40px] rounded-[30px] bg-colorinput text-[white] mb-6 mr-10' onClick={handleReset}>
                 <MdOutlineRestartAlt className='text-[white] text-[20px]' />Reset
               </button>
@@ -173,19 +189,19 @@ export default function Create() {
                   <div className='bg-colorinput rounded-[30px] h-[50px] w-[100%] mb-5 flex items-center'>
                     <div className='w-[90%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
                       <img className='h-[25px]' src={profile} />
-                      <input type='text' placeholder='Sanjay Singhania' value={kametiHolderName} onChange={(e) => setKametiHolderName(e.target.value)} className='outline-none border-none text-[white] placeholder-[#CACACA] bg-colorinput w-[100%] h-[40px] pl-3' />
+                      <input type='text' placeholder='John Kameti 12 months' value={kametiHolderName} onChange={(e) => setKametiHolderName(e.target.value)} className='outline-none border-none text-[white] placeholder-[#CACACA] bg-colorinput w-[100%] h-[40px] pl-3' />
                     </div>
                   </div>
                 </div>
                 {'\u00A0'}{'\u00A0'}
                 <div className='w-[90%] flex items-center flex-col'>
-                  <div className='w-[84%] mt-1 mb-2'>
+                  <div className='w-[90%] mt-1 mb-2'>
                     <label className='text-[white]'>Price Per Kameti</label>
                   </div>
                   <div className='bg-colorinput rounded-[30px] h-[50px] w-[100%] mb-5 flex items-center'>
-                    <div className='w-[80%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
+                    <div className='w-[90%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
                       <img className='h-[25px]' src={money} />
-                      <input type='text' placeholder='e.g 24000' value={pricePerKameti} onChange={(e) => setPricePerKameti(e.target.value)} className='outline-none border-none text-[white] bg-colorinput w-[90%] h-[40px] pl-3 placeholder-[#CACACA]' />
+                      <input type='text' placeholder='e.g 24000' value={pricePerKameti} onChange={(e) => setPricePerKameti(e.target.value)} className='outline-none border-none text-[white] bg-colorinput w-[100%] h-[40px] pl-3 placeholder-[#CACACA]' />
                     </div>
                   </div>
                 </div>
@@ -208,7 +224,7 @@ export default function Create() {
       <label className='text-[white]'> Total Price </label>
     </div>
     <div className='bg-colorinput rounded-[30px] h-[50px] w-[100%] mb-5 flex items-center'>
-      <div className='w-[90%] ml-[10px] h-[45px] outline-none border-none justify-center flex items-center'>
+      <div className='w-[80%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
         <img className='h-[25px]' src={total} />
         <input readOnly type='text' placeholder='e.g 24000' value={totalPrice} onChange={(e) => setTotalPrice(e.target.value)} className='outline-none border-none text-[white] bg-colorinput w-[90%] h-[40px] placeholder-[#CACACA] pl-3' />
       </div>
@@ -235,7 +251,8 @@ export default function Create() {
                   <div className='bg-colorinput rounded-[30px] h-[50px] w-[100%] mb-5 flex items-center'>
                     <div className='w-[80%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
                       <img className='h-[25px]' src={date} />
-                      <input type='date' value={startingDate} onChange={(e) => setStartingDate(e.target.value)} className='outline-none border-none text-[white] bg-colorinput w-[90%] h-[40px] pl-2' />
+                      <input     onFocus={(e) => e.target.type = 'date'}
+                      onBlur={(e) => e.target.type = 'text'} placeholder='Starting Date' value={startingDate} onChange={(e) => setStartingDate(e.target.value)} className='outline-none border-none text-[white] bg-colorinput w-[100%] h-[40px] pl-2' />
                     </div>
                   </div>
                 </div>
@@ -247,14 +264,15 @@ export default function Create() {
                   <div className='bg-colorinput rounded-[30px] h-[50px] w-[100%] mb-5 flex items-center'>
                     <div className='w-[80%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
                       <img className='h-[25px]' src={date} />
-                      <input type='date' value={endingDate} onChange={(e) => setEndingDate(e.target.value)} className='outline-none border-none text-[white] bg-colorinput w-[90%] h-[40px] pl-2' />
+                      <input     onFocus={(e) => e.target.type = 'date'}
+                      onBlur={(e) => e.target.type = 'text'} placeholder='Ending Date' value={endingDate} onChange={(e) => setEndingDate(e.target.value)} className='outline-none border-none text-[white] bg-colorinput w-[100%] h-[40px] pl-2' />
                     </div>
                   </div>
                 </div>
               </div>
-              <div className='w-[90%] mt-1 flex justify-end'>
-                <button className='w-[200px] h-[50px] rounded-[30px] bg-colorinput font-bold text-[white]'>Cancel</button>
-                <button className='w-[200px] h-[50px] rounded-[30px] bg-[#A87F0B] font-bold text-[black] ml-2' onClick={id ? handleUpdateCommittee : handleCreateCommittee}> {id ? "Update Kameti" : "Create Kameti"}</button>
+              <div className='w-[90%] mt-5 flex justify-end'>
+                <button className='w-[180px] h-[50px] rounded-[30px] bg-colorinput font-bold text-[white]'>Cancel</button>
+                <button className='w-[180px] h-[50px] rounded-[30px] bg-[#A87F0B] font-bold text-[black] ml-5' onClick={id ? handleUpdateCommittee : handleCreateCommittee}> {id ? (btnloader ? <ClipLoader size={20} color="#ffffff" className='mt-2' /> : "Update Kameti") :  (btnloader ? <ClipLoader size={20} color="#ffffff" className='mt-2' /> : "Create Kameti")}</button>
               </div>
             </div>
           </div>

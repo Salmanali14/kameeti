@@ -33,6 +33,7 @@ export default function DeleteKameti() {
   const [confirmMessage, setConfirmMessage] = useState('');
   const [confirmAction, setConfirmAction] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [btnloader,setBTnloader]=useState(false)
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [withdrawModalProps, setWithdrawModalProps] = useState({ counts: 0, dates: []});
   const [searchQuery, setSearchQuery] = useState('');
@@ -49,6 +50,7 @@ export default function DeleteKameti() {
 
   const handleRestoreConfirm = async () => {
     // console.log(CommId);
+    setBTnloader(true)
     try {
       const response = await axios.post(
         `${apiBaseUrl}committee/restore`,
@@ -61,9 +63,11 @@ export default function DeleteKameti() {
       );
       setDeletedKametees(deletedKametees.filter(payment => payment.id !== CommId));
       setShowConfirmAlert(false); 
+      setBTnloader(false)
       toast.success("Record restored successfuly!")
     } catch (error) {
       console.error('Error restoring record:', error);
+      setBTnloader(false)
     }
   };
   const navigate = useNavigate();
@@ -98,7 +102,8 @@ export default function DeleteKameti() {
   useEffect(() => {
     fetchKametees();
   }, []);
-
+console.log(deletedKametees)
+   
   
   return (
   <>
@@ -118,7 +123,11 @@ export default function DeleteKameti() {
   onChange={(e) => setSearchQuery(e.target.value)} placeholder='Search' className='outline-none bg-transparent border-none w-[350px] pr-4 placeholder-white'/></button>
  </div>
   </div>
-  <div className='flex justify-evenly    flex-wrap  h-[400px] overflow-y-auto w-[100%]'>
+  {deletedKametees && deletedKametees.length === 0 ? 
+    (<div className='flex justify-center items-center w-[100%] h-[100%] text-white'>
+      The Deleted Kametis page is currently empty.
+      </div>):(
+  <div className='flex justify-between pl-[40px] pr-[40px]    flex-wrap  h-[430px] overflow-y-auto w-[100%]'>
     
   {deletedKametees
     ?.filter(kameti => {
@@ -126,7 +135,7 @@ export default function DeleteKameti() {
       return kameti.commHolderName.toLowerCase().includes(searchQuery.toLowerCase());
     })
     .map((kameti, index) => (
-                <div key={index} className='w-[40%] h-[370px] mt-1 rounded-[20px] bg-sidebar m-2'>
+                <div key={index} className='w-[40%] h-[370px] mt-2 rounded-[20px] bg-sidebar m-2'>
                   <div className='w-100% h-[60px] rounded-t-[20px] bg-colorinput flex justify-between items-center'>
                     <div className='flex items-center ml-5'>
                       <div className='w-[25px] ml-1 h-[25px] bg-customBlack text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
@@ -149,16 +158,16 @@ export default function DeleteKameti() {
                     <div className='w-[30%] h-[90px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={bank} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Price(Each)</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{kameti.pricePerComm}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{Number(kameti.pricePerComm).toLocaleString()}</h1>
                     </div>
                     <div className='w-[30%] ml-2 mr-2 h-[90px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={money2} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Total Price(All)</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{kameti.totalPrice}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{Number(kameti.totalPrice).toLocaleString()}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={box} />
-                      <h2 className='text-paytxt text-[10px] mt-1'>Your Committees</h2>
+                      <h2 className='text-paytxt text-[10px] mt-1'>Your kameti</h2>
                       <h1 className='text-paytxt text-[12px] font-bold'>{kameti.totalUserComms}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
@@ -169,12 +178,12 @@ export default function DeleteKameti() {
                     <div className='w-[30%] h-[90px] rounded-[20px] mt-2 ml-2 mr-2 bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={payday1} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Payable per Month</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{kameti.pricePerComm * kameti.totalUserComms}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{Number(kameti.pricePerComm * kameti.totalUserComms).toLocaleString()}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={money1} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Paid Amount</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{kameti.paidAmount}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{Number(kameti.paidAmount).toLocaleString()}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={startdate} />
@@ -196,8 +205,7 @@ export default function DeleteKameti() {
                         <img className='w-[30px] ' src={calander} />
                         <h2 className='text-paytxt text-[12px] mt-1 '>Withdraw Date </h2>
                       </div>
-                     {kameti.withdraw.filter(date => date !== null).length > 0 &&
-                      <h1 className='text-paytxt text-[12px] font-bold'>{new Date(kameti.withdraw.find(date => date !== null)).toLocaleDateString()}</h1>}
+                      <button  className='w-[70px] h-[22px] rounded-[20px] text-paytxt text-[11px]  bg-maincolor ' >View Date</button>
                     </div>
                   </div>
                 </div>
@@ -211,6 +219,7 @@ export default function DeleteKameti() {
              
 
   </div>
+            )}
   {/* 
   <div className='flex justify-center mb-3 items-center w-[100%]'>
 <button className='flex justify-center items-center w-[90px] h-[30px] mb-1 bg-[#323232] text-[#999] text-[13px] rounded-3xl '>Previous</button>
@@ -230,6 +239,7 @@ export default function DeleteKameti() {
    {showConfirmAlert && (
         <Alert
           message={confirmMessage}
+          btnloader={btnloader}
           onConfirm={() => {
           if (confirmAction === 'restore') {
               handleRestoreConfirm();

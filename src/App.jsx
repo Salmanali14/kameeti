@@ -17,15 +17,26 @@ function App() {
     const currentUser = localStorage.getItem("id");
     return currentUser?.length>0 && currentUser !=undefined  ? children : <Navigate to="/signin" />;
   };
+  const RequireAuthhome = ({ children }) => {
+    const currentUser = localStorage.getItem("id");
+  
+    // If currentUser is found, redirect to "/create"
+    if (currentUser) {
+      return <Navigate to="/create" />;
+    }
+  
+    // If no currentUser, render the children components
+    return children;
+  };
 
   return (
     <>
     <BrowserRouter>
     <Routes>
-    <Route path="/" element={<Splash/>}/>
-    <Route path="/signup" element={<Signup/>}/>
-    <Route path="/signin" element={<SignIn/>}/>
-    <Route path="/forgot" element={<ForgotPassword/>}/>
+    <Route path="/" element={<RequireAuthhome><Splash/></RequireAuthhome>}/>
+    <Route path="/signup" element={<RequireAuthhome><Signup/></RequireAuthhome>}/>
+    <Route path="/signin" element={<RequireAuthhome><SignIn/></RequireAuthhome>}/>
+    <Route path="/forgot" element={<RequireAuthhome><ForgotPassword/></RequireAuthhome>}/>
     <Route path="/create">
     <Route path="" element={<RequireAuth><Create/></RequireAuth>}/>
     <Route path=":id" element={<RequireAuth><Create/></RequireAuth>}/>

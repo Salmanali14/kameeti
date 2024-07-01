@@ -23,6 +23,8 @@ import { ClipLoader, FadeLoader } from 'react-spinners'
 import Share from '../ShareSocial/Share'
 import { Slide, ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { IoIosInformationCircleOutline } from 'react-icons/io'
+import InfoModal from '../../components/InfoModal/InfoModal'
 
 
 
@@ -33,6 +35,7 @@ export default function More() {
   const [profile, setProfile] = useState('');
   const [profileImage, setProfileImage] = useState('');
   let [myprflimg, setmyprflimg] = useState(null);
+  const [payments, setPayments] = useState([]);
   const [key, setKey] = useState('');
   let [cropPrfl, setCropPrfl] = useState({
     unit: "%",
@@ -48,6 +51,26 @@ export default function More() {
 
   let [tempimg, settempimg] = useState(null)
   const [loading, setLoading] = useState(false);
+
+  const getPayments = async () => {
+    try {
+      const response = await axios.get(`${apiBaseUrl}payment`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+      });
+      console.log(response);
+      setPayments(response?.data?.data ? response?.data?.data : []);
+    } catch (error) {
+      // console.error('Error fetching payments:', error);
+
+
+    }
+  };
+  useEffect(() => {
+    getPayments(); // Fetch payments when the component mounts
+  }, []);
+ 
   let handleImageChange = (event) => {
       // profileImage
       setProfile("");
@@ -185,12 +208,55 @@ const handleProfileUpdate = async () => {
   }, []);
  
   let [isModalOpen,setisModalOpen] =useState(false)
+  let [info,setInfo] =useState(false)
+  let [shareinfo,setShare] =useState(false)
+  let [recordinfo,setRecordinfo] =useState(false)
+  let [deleteinfo,setDeleteInfo] =useState(false)
+
+
+  let handleinfoRecord =()=>{
+    setRecordinfo(true)
+  }
+  let handleinfoDelete =()=>{
+    setDeleteInfo(true)
+  }
+  let handleinfoShare =()=>{
+    setShare(true)
+  }
+
   let handleopenshare =()=>{
     setisModalOpen(true)
  }
+ let handleopenInfo =()=>{
+  setInfo(true)
+}
+
  let handleCloseshare =()=>{
     setisModalOpen(false)
+    setInfo(false)
+    setShare(false)
+    setDeleteInfo(false)
+    setRecordinfo(false)
  }
+ const [deletedKametees, setDeletedKametees] = useState(null);
+ const fetchKametees = async () => {
+    setLoading(true)
+   try {
+     const response = await axios.get(`${apiBaseUrl}deletedRecords`, {
+       headers: {
+         Authorization: `Bearer ${token}`
+       }
+     });
+     setDeletedKametees(response?.data?.data);
+     setLoading(false)
+   } catch (error) {
+     console.error('Error fetching data:', error);
+   }
+ };
+
+ useEffect(() => {
+   fetchKametees();
+ }, []);
 
   return (
  <>
@@ -219,35 +285,44 @@ const handleProfileUpdate = async () => {
  <h1 className='text-[#A87F0B] text-[25px] font-bold ml-10 mb-6'>More</h1>
  </div>
  <div className='w-[100%] flex justify-center items-center flex-col'>
- <div className='w-[90%] rounded-[20px] h-[120px] bg-[#343434] mt-1 flex justify-between items-center'>
+ <div className='w-[98%] rounded-[20px] h-[120px] bg-[#343434] mt-2 flex justify-between items-center'>
  <div className='flex justify-center items-center ml-5'>
  <img className='w-[100px] h-[100px] rounded-full' src={userData?.profileUrl?userData?.profileUrl:avatar} />
  <div className='flex justify-center items-start flex-col ml-5'>
  <h1 className='text-white font-bold text-[16px]'>{userData?.fullName}</h1>
  <p className='text-[white] mt-1 mb-1 text-[12px]'>{userData?.phoneNum}</p>
  <p className='text-[white] text-[12px]'>{userData?.location}</p>
+ {userData?.email &&
+  <p className='text-[white] text-[12px]'>{userData?.email}</p>}
  </div>
  </div>
  <button onClick={handleedit} className='flex mr-5 justify-center items-center w-[120px] h-[29px] rounded-[30px]  text-white text-[12px] bg-paytxt1'>Edit Profile {'\u00A0'}<img className='w-[15px]' src={editimg}/></button>
  </div>
- <div className='w-[90%] rounded-[20px] h-[270px] bg-[#343434] mt-2'>
+ <div className='w-[98%] rounded-[20px] h-[300px] flex justify-center items-center bg-[#343434] mt-2'>
  <div className='flex  justify-center items-center w-[100%] flex-wrap '>
- <div onClick={handleallrecords} className='w-[20%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={folder}/>
-  <h2 className='text-white text-[13px] mt-1'>All Records</h2>
+ <div  className='w-[20%] m-3 relative h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+ <IoIosInformationCircleOutline onClick={handleinfoRecord} className='text-[white] absolute right-2 top-2 text-[25px]' />
+  <img className='w-[30px]' onClick={handleallrecords} src={folder}/>
+  <h2 className='text-white text-[13px] mt-1' onClick={handleallrecords}>All Records ({payments?.length})</h2>
   </div>
-  <div onClick={handleHistorydelete} className='w-[20%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={delete1}/>
-  <h2 className='text-white text-[13px] mt-1'>Delete Records</h2>
+  <div  className='w-[20%] m-3 relative  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+  <IoIosInformationCircleOutline onClick={handleinfoDelete} className='text-[white] absolute right-2 top-2 text-[25px]' />
+  <img className='w-[30px]' onClick={handleHistorydelete} src={delete1}/>
+  <h2 className='text-white text-[13px] mt-1' onClick={handleHistorydelete}>Delete Records ({deletedKametees?.length})</h2>
   </div>
-  <div className='w-[20%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+  <div className='w-[20%] m-3  h-[110px] relative cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+  <IoIosInformationCircleOutline onClick={handleopenInfo} className='text-[white] absolute right-2 top-2 text-[25px]' />
+
   <img className='w-[30px]' src={noti}/>
-  <h2 className='text-white text-[13px] mt-1'>Notification</h2>
-  <Toggle/>
+  <div className='flex justify-center items-center'>
+  <h2 className='text-white text-[13px] mt-1 mr-2'>Notification</h2>
+  <Toggle />
   </div>
-  <div onClick={handleopenshare} className='w-[20%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
-  <img className='w-[30px]' src={share}/>
-  <h2 className='text-white text-[13px] mt-1'>Share</h2>
+  </div>
+  <div className='w-[20%] m-3 relative h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+  <IoIosInformationCircleOutline onClick={handleinfoShare} className='text-[white] absolute right-2 top-2 text-[25px]' />
+  <img className='w-[30px]' onClick={handleopenshare}  src={share}/>
+  <h2 className='text-white text-[13px] mt-1' onClick={handleopenshare} >Share</h2>
   </div>
   <div className='w-[20%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
   <img className='w-[30px]' src={protection}/>
@@ -411,6 +486,13 @@ draggable
 pauseOnHover
 transition={Slide} // Optional transition effect
 />
+
+
+<InfoModal info={info} handleCloseshare={handleCloseshare} message="Trigger a reminder when it's your scheduled date to pay the kameti."/>
+<InfoModal info={shareinfo} handleCloseshare={handleCloseshare} message="Share this kameti app with your friends to benefit from its features."/>
+<InfoModal info={deleteinfo} handleCloseshare={handleCloseshare} message="Delete all historical kameti records."/>
+<InfoModal info={recordinfo} handleCloseshare={handleCloseshare} message="Complete records of your kameti."/>
+
  </>
   )
 }

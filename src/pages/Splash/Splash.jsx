@@ -27,7 +27,7 @@ export default function Splash() {
     <img className="w-40" src={logo}/>
     <h2 className='text-[#A87F0B] text-[20px] mt-2'>Welcome to kameti!</h2>
     <p className='text-[#847F7F] text-center	'>Kameti is an online application that allows you to maintain your kameties online.With the help of this app, you can get kameties records from anywhere in the wold.</p>
-    <Link to="/signup"><button className='w-[150px] h-[40px] rounded-[20px] mt-[20px] bg-[#A87F0B]'>Go</button></Link>
+    <Link to="/signin"><button className='w-[150px] h-[40px] rounded-[20px] mt-[20px] bg-[#A87F0B]'>Go</button></Link>
 
     </div>
     <div className='w-[60%] flex '>

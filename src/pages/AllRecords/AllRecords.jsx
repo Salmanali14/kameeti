@@ -41,6 +41,7 @@ export default function AllRecords() {
   const apiBaseUrl = import.meta.env.VITE_APP_API_URL;
   const token = localStorage.getItem('token');
   const [currentPage, setCurrentPage] = useState(1);
+  const [btnloader,setBTnloader]=useState(false)
   const [paymentsPerPage] = useState(2);
   const getPayments = async () => {
     setLoading(true)
@@ -70,6 +71,7 @@ export default function AllRecords() {
 
   const handleRemoveConfirm = async () => {
     // console.log(CommId);
+    setBTnloader(true)
     try {
       const response = await axios.post(
         `${apiBaseUrl}committee/delete`,
@@ -82,9 +84,11 @@ export default function AllRecords() {
       );
       setPayments(payments.filter(payment => payment.id !== CommId));
       setShowConfirmAlert(false); 
+      setBTnloader(false)
       toast.success("Record deleted successfuly!")
     } catch (error) {
       console.error('Error removing record:', error);
+      setBTnloader(false)
     }
   };
   const navigate = useNavigate();
@@ -114,7 +118,7 @@ export default function AllRecords() {
   }
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-  
+ 
   return (
   <>
   <div className='w-[100%] h-[100vh] flex justify-center items-center bg-black'>
@@ -133,7 +137,11 @@ export default function AllRecords() {
   onChange={(e) => setSearchQuery(e.target.value)} placeholder='Search' className='outline-none bg-transparent border-none w-[130px] placeholder-white'/></button>
   <button className='flex justify-center items-center w-[100px] h-[40px]  rounded-[30px] bg-colorinput text-[white]  mb-6 mr-10' ><MdOutlineRestartAlt className='text-[white] text-[20px]'/>Reset</button></div>
   </div>
-  <div className='flex justify-evenly    flex-wrap  h-[400px] overflow-y-auto w-[100%]'>
+  {payments.length === 0 ? 
+    (<div className='flex justify-center items-center w-[100%] h-[100%] text-white'>
+      First, create a kameti, then you can view its all records page.....
+      </div>):
+  <div className='flex justify-between pl-[40px] pr-[40px]    flex-wrap  h-[431px] overflow-y-auto w-[100%]'>
     
   {payments
     .filter(payment => {
@@ -141,7 +149,7 @@ export default function AllRecords() {
       return payment.commHolderName.toLowerCase().includes(searchQuery.toLowerCase());
     })
     .map((payment, index) => (
-                <div key={index} className='w-[40%] h-[370px] mt-1 rounded-[20px] bg-sidebar m-2'>
+                <div key={index} className='w-[40%] h-[370px] mt-2 rounded-[20px] bg-sidebar m-2'>
                   <div className='w-100% h-[60px] rounded-t-[20px] bg-colorinput flex justify-between items-center'>
                     <div className='flex items-center ml-5'>
                       <div className='w-[25px] ml-1 h-[25px] bg-customBlack text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
@@ -178,16 +186,16 @@ export default function AllRecords() {
                     <div className='w-[30%] h-[90px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={bank} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Price(Each)</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{payment.pricePerComm}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{Number(payment.pricePerComm).toLocaleString()}</h1>
                     </div>
                     <div className='w-[30%] ml-2 mr-2 h-[90px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={money2} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Total Price(All)</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{payment.totalPrice}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{Number(payment.totalPrice).toLocaleString()}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={box} />
-                      <h2 className='text-paytxt text-[10px] mt-1'>Your Committees</h2>
+                      <h2 className='text-paytxt text-[10px] mt-1'>Your Kameti</h2>
                       <h1 className='text-paytxt text-[12px] font-bold'>{payment.totalUserComms}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
@@ -198,12 +206,12 @@ export default function AllRecords() {
                     <div className='w-[30%] h-[90px] rounded-[20px] mt-2 ml-2 mr-2 bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={payday1} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Payable per Month</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{payment.pricePerComm * payment.totalUserComms}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{Number(payment.pricePerComm * payment.totalUserComms).toLocaleString()}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={money1} />
                       <h2 className='text-paytxt text-[10px] mt-1'>Paid Amount</h2>
-                      <h1 className='text-paytxt text-[12px] font-bold'>{payment.paidAmount}</h1>
+                      <h1 className='text-paytxt text-[12px] font-bold'>{Number(payment.paidAmount).toLocaleString()}</h1>
                     </div>
                     <div className='w-[30%] h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={startdate} />
@@ -216,7 +224,7 @@ export default function AllRecords() {
                     <h1 className='text-paytxt text-[12px] font-bold'>{formatDate(payment.endingMonth)}</h1>
                   </div>
                     <div className='w-[30%]  h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
-                      <div className='flex items-center justify-center flex-col ' onClick={() => {
+                      <div className='flex cursor-pointer items-center justify-center flex-col ' onClick={() => {
                         
                         openWithdrawModal(payment?.totalUserComms, payment?.withdraw);
                         setCommId(payment.id);
@@ -224,8 +232,11 @@ export default function AllRecords() {
                         <img className='w-[30px] ' src={calander} />
                         <h2 className='text-paytxt text-[12px] mt-1 '>Withdraw Date </h2>
                       </div>
-                     {payment.withdraw.filter(date => date !== null).length > 0 &&
-                      <h1 className='text-paytxt text-[12px] font-bold'>{new Date(payment.withdraw.find(date => date !== null)).toLocaleDateString()}</h1>}
+                     <button  onClick={() => {
+                        
+                        openWithdrawModal(payment?.totalUserComms, payment?.withdraw);
+                        setCommId(payment.id);
+                        }} className='w-[70px] h-[22px] rounded-[20px] text-paytxt text-[11px]  bg-maincolor ' >View Date</button>
                     </div>
                   </div>
                 </div>
@@ -262,7 +273,7 @@ export default function AllRecords() {
   </div>
   <div className='w-[30%] h-[90px]  rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
   <img className='w-[30px]' src={box}/>
-  <h2 className='text-paytxt text-[10px] mt-1'>Your Committees</h2>
+  <h2 className='text-paytxt text-[10px] mt-1'>Your Kameti</h2>
   <h1 className='text-paytxt text-[12px] font-bold'>2</h1>
   </div>
   <div className='w-[30%] h-[90px] rounded-[20px] mt-2 bg-colorinput flex justify-center items-center flex-col'>
@@ -294,6 +305,7 @@ export default function AllRecords() {
   </div>
   </div> */} 
   </div>
+}
   {/* 
 <div className='flex justify-center mb-3 items-center w-[100%]'>
 <button className='flex justify-center items-center w-[90px] h-[30px] mb-1 bg-[#323232] text-[#999] text-[13px] rounded-3xl '>Previous</button>
@@ -312,6 +324,7 @@ export default function AllRecords() {
    {/* Confirm alert component */}
    {showConfirmAlert && (
         <Alert
+        btnloader={btnloader}
           message={confirmMessage}
           onConfirm={() => {
             if (confirmAction === 'edit') {
