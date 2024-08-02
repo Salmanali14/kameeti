@@ -11,7 +11,7 @@ import 'react-toastify/dist/ReactToastify.css';
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(true);
   const [emailSelected, setEmailSelected] = useState(false);
-  const [identity, setIdentity] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [responseMessage, setresponseMessage] = useState('');
   let nevigate =useNavigate()
@@ -27,15 +27,15 @@ export default function SignIn() {
     return re.test(phone);
   };
   const handleSignIn = async () => {
-    if (!identity) {
+    if (!phoneNumber) {
       toast.error(emailSelected ? "Email is required." : "Phone number is required.");
       return;
     }
-    if (emailSelected && !validateEmail(identity)) {
+    if (emailSelected && !validateEmail(phoneNumber)) {
       toast.error("Invalid email format.");
       return;
     }
-    if (!emailSelected && !validatePhone(identity)) {
+    if (!emailSelected && !validatePhone(phoneNumber)) {
       toast.error("Invalid phone number format.");
       return;
     }
@@ -45,9 +45,10 @@ export default function SignIn() {
     }
     try {
       const response = await axios.post(`${apiBaseUrl}login`, {
-        identity: identity, // Send the user's input (email or phone number) as the "identity" key
+        phoneNumber: phoneNumber, // Send the user's input (email or phone number) as the "phoneNumber" key
         password: password, // Make sure to capture the password as well
-        loginWith: "signup"
+        loginWith: "signup",
+        fcmtoken: "empty"
         
       });
       toast.success("Sign in  successfuly!");
@@ -72,18 +73,18 @@ export default function SignIn() {
    </div>
    <div className='w-[45%]  h-[90vh] rounded-[20px] flex justify-center flex-col items-center'>
    <img className='w-[30%] mb-10' src={logo}/>
-   <div className='flex w-2/5 items-center relative'>
+   {/* <div className='flex w-2/5 items-center relative'>
     <div className='bg-black border text-white outline-none border-[#A87F0B] rounded-[30px] h-[45px] w-[100%] pl-[165px]'>
       <button className=' absolute left-0 rounded-[30px] h-[45px] text-[20px] w-[53%]' onClick={()=>setEmailSelected(false)} style={!emailSelected?{backgroundColor:"#A87F0B",color:'black'}:null}>Phone</button>
       <button className=' text-white absolute right-0 rounded-[30px] h-[45px] text-[20px] w-[53%]' onClick={()=>setEmailSelected(true)} style={emailSelected?{backgroundColor:"#A87F0B",color:'black'}:null}>Email</button>
     </div>
-  </div>
+  </div> */}
   {responseMessage && <p className="text-white mt-3 w-[58%]">{responseMessage}</p>}
 
 {emailSelected ?(
-  <input className='bg-black border text-white outline-none	 border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 ' type='email' placeholder='Email' onChange={(e) => setIdentity(e.target.value)} />
+  <input className='bg-black border text-white outline-none	 border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 ' type='email' placeholder='Email' onChange={(e) => setPhoneNumber(e.target.value)} />
 ):(
-   <input className='bg-black border text-white outline-none	 border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 ' type='text' placeholder='Phone Number' onChange={(e) => setIdentity(e.target.value)} />
+   <input className='bg-black border text-white outline-none	 border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 ' type='text' placeholder='PhoneNumber/AnyNumber' onChange={(e) => setPhoneNumber(e.target.value)} />
   )}
    <div className='bg-black flex items-center border border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 mb-3'>
    <input  className=' bg-black w-[100%] h-[20px] outline-none	 text-white' type={showPassword ? 'password' : 'text'} placeholder='Password' onChange={(e) => setPassword(e.target.value)} />

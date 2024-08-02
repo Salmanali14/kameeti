@@ -12,18 +12,23 @@ import { MdOutlineRestartAlt } from "react-icons/md";
 import Sidebar from '../../components/Sidebar/Sidebar';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ClipLoader } from 'react-spinners';
+import WithdrawDates from '../../components/WithdrawDates/WithdrawDates';
 
 export default function Create() {
   const [btnloader,setBTnloader]=useState(false)
   const [kametiHolderName, setKametiHolderName] = useState('');
   const [totalPrice, setTotalPrice] = useState('');
   const [pricePerKameti, setPricePerKameti] = useState('');
+  const [pricePerDayKameti, setPricePerDayKameti] = useState('');
   const [totalMonths, setTotalMonths] = useState('');
   const [myTotalKameties, setMyTotalKameties] = useState('');
   const [payablePerMonth, setPayablePerMonth] = useState('');
   const [startingDate, setStartingDate] = useState('');
   const [endingDate, setEndingDate] = useState('');
   const [responseMessage, setResponseMessage] = useState('');
+  const [kametiType, setKametiType] = useState('monthly');
+  const [withdrawDates, setWithdrawDates] = useState([]);
+  const [showWithdrawDates, setShowWithdrawDates] = useState(false);
 
   let navigate = useNavigate();
 
@@ -31,6 +36,7 @@ export default function Create() {
     setKametiHolderName('');
     setTotalPrice('');
     setPricePerKameti('');
+    setPricePerDayKameti('');
     setTotalMonths('');
     setMyTotalKameties('');
     setPayablePerMonth('');
@@ -39,13 +45,18 @@ export default function Create() {
   };
 
   const fillValues = (data) => {
-    setKametiHolderName(data.commHolderName);
-    setTotalPrice(data.totalPrice);
-    setPricePerKameti(data.pricePerComm);
+    console.log(data)
+    setKametiHolderName(data.kametiName);
+    setTotalPrice(data.totalPrice / data.myTotalKametis);
+    setPricePerKameti(data.pricePerMonthKameti);
+    setPricePerDayKameti(data.pricePerDayKameti);
     setTotalMonths(data.totalMonths);
-    setMyTotalKameties(data.totalUserComms);
+    setMyTotalKameties(data.myTotalKametis);
     setStartingDate(formatDate(data.startingMonth));
     setEndingDate(formatDate(data.endingMonth));
+    setKametiType(data.kametiType);
+    setWithdrawDates(data.withdraw);
+
   };
 
   const formatDate = (timestamp) => {
@@ -54,6 +65,11 @@ export default function Create() {
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  };
+
+  const dateToTimestamp = (date) => {
+    const timestamp = new Date(date).getTime();
+    return timestamp;
   };
 
   const apiBaseUrl = import.meta.env.VITE_APP_API_URL;
@@ -72,12 +88,12 @@ export default function Create() {
 
   useEffect(() => {
     // Calculate total price when price per kameti or total months changes
-    if (pricePerKameti && totalMonths) {
-      setTotalPrice(pricePerKameti * totalMonths);
+    if (totalPrice && totalMonths) {
+      setPricePerKameti(totalPrice / totalMonths);
     } else {
-      setTotalPrice('');
+      setPricePerKameti('');
     }
-  }, [pricePerKameti, totalMonths]);
+  }, [totalPrice, totalMonths]);
 
   const handleCreateCommittee = async () => {
     setBTnloader(true)
@@ -88,18 +104,22 @@ export default function Create() {
     }
     try {
       const response = await axios.post(`${apiBaseUrl}committee`, {
-        commHolderName: kametiHolderName,
-        pricePerComm: pricePerKameti,
+        kametiName: kametiHolderName,
+        pricePerMonthKameti: pricePerKameti,
+        pricePerDayKameti: pricePerDayKameti,
         totalPrice: totalPrice,
-        totalUserComms: myTotalKameties,
+        myTotalKametis: myTotalKameties,
         totalMonths: totalMonths,
-        startingMonth: startingDate,
-        endingMonth: endingDate
+        startingMonth: dateToTimestamp(startingDate),
+        endingMonth: dateToTimestamp(endingDate),
+        kametiType: kametiType,
+        myKametiWithdrawDate: withdrawDates
       }, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
+      // console.log(response?.data);
       toast.success(response?.data?.message);
       handleReset();
       setBTnloader(false)
@@ -114,18 +134,22 @@ export default function Create() {
     try {
       const response = await axios.post(`${apiBaseUrl}committee/update`, {
         id: id,
-        commHolderName: kametiHolderName,
-        pricePerComm: pricePerKameti,
+        kametiName: kametiHolderName,
+        pricePerMonthKameti: pricePerKameti,
+        pricePerDayKameti: pricePerDayKameti,
         totalPrice: totalPrice,
-        totalUserComms: myTotalKameties,
+        myTotalKametis: myTotalKameties,
         totalMonths: totalMonths,
-        startingMonth: startingDate,
-        endingMonth: endingDate
+        startingMonth: dateToTimestamp(startingDate),
+        endingMonth: dateToTimestamp(endingDate),
+        kametiType: kametiType,
+        myKametiWithdrawDate: withdrawDates
       }, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
+      console.log(response?.data)
       toast.success(response?.data?.message);
       setTimeout(() => {
         navigate("/history");
@@ -136,6 +160,11 @@ export default function Create() {
     }
   };
 
+  const handleSaveWithdrawDates = (dates) => {
+    console.log(dates);
+    setWithdrawDates(dates);
+    setShowWithdrawDates(false);
+  };
   const getSingleCommittee = async () => {
     try {
       if (id) {
@@ -150,31 +179,42 @@ export default function Create() {
       console.error('Error fetching committee:', error);
     }
   };
+  const openWithdrawDatesModal = () => {
+    if (myTotalKameties) {
+      setShowWithdrawDates(true);
+    } else {
+      toast.error('Select total kameties first.');
+    }
+  };
 
   useEffect(() => {
     getSingleCommittee();
   }, [id]);
-  const [kametiType, setKametiType] = useState('daily');
-
   const handleKametiTypeChange = (event) => {
     setKametiType(event.target.value);
   };
+  const handlePricePerMonth = (event) => {
+    var perMonthPrice = event.target.value;
+    var totalMonthEntered = totalMonths!="" ? totalMonths : 0;
+    setPricePerKameti(perMonthPrice / totalMonthEntered);
+  };
+  
 
   return (
     <>
       <div className='w-[100%] h-[100vh] flex justify-center items-center bg-black'>
         <div className='w-[97%] rounded-[40px] h-[95vh] flex'>
           <Sidebar />
-          <div className='w-[75%] bg-maincolor ml-[2px] rounded-r-[20px]'>
+          <div className='w-[75%] h-max pb-3 bg-maincolor ml-[2px] rounded-r-[20px]'>
             <div className='w-[100%] flex justify-between items-center mt-6 border-b-[2px] border-[black]'>
               <h1 className='text-[#A87F0B] text-[25px] font-bold ml-10 mb-6'>{id ? "Update Kameti" : "Create Kameti"}</h1>
-              <div className="mb-6 ml-[130px]">
-          <label className='text-[#A87F0B] text-[19px] font-bold mr-2  '>Select Kameti Type :</label>
-          <select value={kametiType} className='bg-colorinput text-[white] text-[15px] h-[40px] w-[200px] pl-2 outline-none  rounded-3xl' onChange={handleKametiTypeChange}>
-            <option value="daily">Daily Basis Kameti</option>
-            <option value="monthly">Monthly Basis Kameti</option>
-          </select>
-        </div>
+              {/* <div className="mb-6 ml-[130px]">
+                <label className='text-[#A87F0B] text-[19px] font-bold mr-2  '>Select Kameti Type :</label>
+                <select value={kametiType} className='bg-colorinput text-[white] text-[15px] h-[40px] w-[200px] pl-2 outline-none  rounded-3xl' onChange={handleKametiTypeChange}>
+                  <option value="daily">Daily Basis Kameti</option>
+                  <option value="monthly">Monthly Basis Kameti</option>
+                </select>
+              </div> */}
               <button className='flex justify-center items-center w-[100px] h-[40px] rounded-[30px] bg-colorinput text-[white] mb-6 mr-10' onClick={handleReset}>
                 <MdOutlineRestartAlt className='text-[white] text-[20px]' />Reset
               </button>
@@ -184,27 +224,29 @@ export default function Create() {
               <div className='flex w-[91%] justify-center items-center'>
                 <div className='w-[90%] flex items-center flex-col'>
                   <div className='w-[90%] mt-2 mb-2'>
-                    <label className='text-[white]'>Kameti Holder Name</label>
+                    <label className='text-[white]'>Kameti Name</label>
                   </div>
                   <div className='bg-colorinput rounded-[30px] h-[50px] w-[100%] mb-5 flex items-center'>
                     <div className='w-[90%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
                       <img className='h-[25px]' src={profile} />
-                      <input type='text' placeholder='John Kameti 12 months' value={kametiHolderName} onChange={(e) => setKametiHolderName(e.target.value)} className='outline-none border-none text-[white] placeholder-[#CACACA] bg-colorinput w-[100%] h-[40px] pl-3' />
+                      <input type='text' placeholder='e.g. John (must be unique)' value={kametiHolderName} onChange={(e) => setKametiHolderName(e.target.value)} className='outline-none border-none text-[white] placeholder-[#CACACA] bg-colorinput w-[100%] h-[40px] pl-3' />
                     </div>
                   </div>
                 </div>
                 {'\u00A0'}{'\u00A0'}
                 <div className='w-[90%] flex items-center flex-col'>
                   <div className='w-[90%] mt-1 mb-2'>
-                    <label className='text-[white]'>Price Per Kameti</label>
+               
+                    <label className='text-[white]'> Total Price of Kameti </label>
                   </div>
                   <div className='bg-colorinput rounded-[30px] h-[50px] w-[100%] mb-5 flex items-center'>
-                    <div className='w-[90%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
-                      <img className='h-[25px]' src={money} />
-                      <input type='text' placeholder='e.g 24000' value={pricePerKameti} onChange={(e) => setPricePerKameti(e.target.value)} className='outline-none border-none text-[white] bg-colorinput w-[100%] h-[40px] pl-3 placeholder-[#CACACA]' />
+                    <div className='w-[80%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
+                      <img className='h-[25px]' src={total} />
+                      <input type='text' placeholder='e.g 24000' value={totalPrice} onChange={(e) => setTotalPrice(e.target.value)} className='outline-none border-none text-[white] bg-colorinput w-[90%] h-[40px] placeholder-[#CACACA] pl-3' />
                     </div>
                   </div>
                 </div>
+                
               </div>
               <div className='flex w-[100%] justify-center items-center'>
               <div className='w-[30%] flex items-center flex-col'>
@@ -218,18 +260,26 @@ export default function Create() {
                 </div>
               </div>
             </div>
-    {'\u00A0'}{'\u00A0'}
-    <div className='w-[30%] flex items-center flex-col'>
-    <div className='w-[84%] mt-2 mb-2'>
-      <label className='text-[white]'> Total Price </label>
-    </div>
-    <div className='bg-colorinput rounded-[30px] h-[50px] w-[100%] mb-5 flex items-center'>
-      <div className='w-[80%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
-        <img className='h-[25px]' src={total} />
-        <input readOnly type='text' placeholder='e.g 24000' value={totalPrice} onChange={(e) => setTotalPrice(e.target.value)} className='outline-none border-none text-[white] bg-colorinput w-[90%] h-[40px] placeholder-[#CACACA] pl-3' />
-      </div>
-    </div>
-  </div>
+            
+          {'\u00A0'}{'\u00A0'}
+            <div className='w-[30%] flex items-center flex-col'>
+              <div className='w-[84%] mt-2 mb-2'>
+                <label className='text-[white]'>Price Per Month of Kameti</label>
+              </div>
+              <div className='bg-colorinput rounded-[30px] h-[50px] w-[100%] mb-5 flex items-center'>
+                <div className='w-[90%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
+                  <img className='h-[25px]' src={money} />
+                  <input type='text'
+                   readOnly 
+                   placeholder='e.g 24000' 
+                   value={pricePerKameti} 
+                  //  onChange={(e) => setPricePerKameti(e.target.value)} 
+                   className='outline-none border-none text-[white] bg-colorinput w-[100%] h-[40px] pl-3 placeholder-[#CACACA]' 
+                   />
+                </div>
+              </div>
+            </div>
+           
                 {'\u00A0'}{'\u00A0'}
                 <div className='w-[30%] flex items-center flex-col'>
                   <div className='w-[84%] mt-1 mb-2'>
@@ -243,8 +293,77 @@ export default function Create() {
                   </div>
                 </div>
               </div>
+              <div className='flex w-[91%] justify-center items-center'>
+                <div className='w-[90%] flex items-center flex-col'>
+                  <div className='w-[90%] mt-2 mb-2'>
+                    <label className='text-[white]'>Kameti Type</label>
+                  </div>
+                  <div className='rounded-[30px] h-[50px] w-[100%] mb-5 flex items-center justify-around'>
+                    <div className='flex items-center'>
+                      <input type='radio' value='monthly' 
+                        checked={kametiType === 'monthly'}
+                        onChange={handleKametiTypeChange}
+                        className='outline-none border-none text-[white] placeholder-[#CACACA] bg-colorinput h-[20px] w-[20px]' 
+                      />
+                      <label htmlFor='monthly' className='ml-2 text-[white]'>Monthly</label>
+                    </div>
+                    
+                    <div className='flex items-center'>
+                      <input type='radio' value='daily' 
+                        checked={kametiType === 'daily'}
+                        onChange={handleKametiTypeChange}
+                        className='outline-none border-none text-[white] placeholder-[#CACACA] bg-colorinput h-[20px] w-[20px]' 
+                      />
+                      <label htmlFor='daily' className='ml-2 text-[white]'>Daily</label>
+                    </div>
+                    
+                  </div>
+                </div>
+                {'\u00A0'}{'\u00A0'}
+                <div className={`w-[90%] flex items-center flex-col  ${kametiType === 'daily' ? 'opacity-1' : 'opacity-0'}`}>
+                  <div className='w-[90%] mt-1 mb-2'>
+                    <label className='text-[white]'>Price Per Day of Kameti</label>
+                  </div>
+                  <div className='bg-colorinput rounded-[30px] h-[50px] w-[100%] mb-5 flex items-center'>
+                    <div className='w-[90%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
+                      <img className='h-[25px]' src={money} alt='Money Icon' />
+                      <input 
+                      type='text' 
+                      placeholder='e.g 200' 
+                      value={pricePerDayKameti} 
+                      onChange={(e) => setPricePerDayKameti(e.target.value)}
+                      className='outline-none border-none text-[white] bg-colorinput w-[100%] h-[40px] pl-3 placeholder-[#CACACA]' />
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+              
               <div className='flex w-[100%] justify-center items-center'>
-                <div className='w-[46%] flex items-center flex-col'>
+                <div className='w-[31%] flex items-center flex-col'>
+                  <div className='w-[84%] mt-1 mb-2'>
+                    <label className='text-[white]'> Withdraw Dates</label>
+                  </div>
+                <div className='bg-colorinput rounded-[30px] h-[50px] w-[100%] mb-5 flex items-center'>
+                    <div className='w-[80%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
+                      <img className='h-[25px]' src={date} />
+                <button className='text-[white] outline-none border-none text-left bg-colorinput w-[100%] h-[40px] pl-2' onClick={openWithdrawDatesModal}>Set Withdraw Dates</button>
+                  
+                  {showWithdrawDates && (
+                   
+                    <WithdrawDates
+                      counts={myTotalKameties} // Example value, replace with actual data
+                      dates={withdrawDates} // Initial empty dates array
+                      isCreating = {true}
+                      onClose={() => setShowWithdrawDates(false)}
+                      onCreate={handleSaveWithdrawDates}
+                    /> 
+                  )}
+                  </div>
+                  </div>
+                </div>
+                {'\u00A0'}{'\u00A0'}
+                <div className='w-[31%] flex items-center flex-col'>
                   <div className='w-[84%] mt-1 mb-2'>
                     <label className='text-[white]'> Starting Date</label>
                   </div>
@@ -257,7 +376,7 @@ export default function Create() {
                   </div>
                 </div>
                 {'\u00A0'}{'\u00A0'}
-                <div className='w-[46%] flex items-center flex-col'>
+                <div className='w-[31%] flex items-center flex-col'>
                   <div className='w-[84%] mt-1 mb-2'>
                     <label className='text-[white]'>Ending Date</label>
                   </div>

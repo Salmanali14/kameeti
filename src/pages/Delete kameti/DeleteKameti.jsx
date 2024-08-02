@@ -92,7 +92,7 @@ export default function DeleteKameti() {
           Authorization: `Bearer ${token}`
         }
       });
-      setDeletedKametees(response?.data?.data);
+      setDeletedKametees(response?.data?.data?.monthly_committees);
       setLoading(false)
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -132,7 +132,7 @@ console.log(deletedKametees)
   {deletedKametees
     ?.filter(kameti => {
       // Filter kametis based on search query
-      return kameti.commHolderName.toLowerCase().includes(searchQuery.toLowerCase());
+      return kameti.kametiName.toLowerCase().includes(searchQuery.toLowerCase());
     })
     .map((kameti, index) => (
                 <div key={index} className='w-[40%] h-[370px] mt-2 rounded-[20px] bg-sidebar m-2'>
@@ -141,7 +141,7 @@ console.log(deletedKametees)
                       <div className='w-[25px] ml-1 h-[25px] bg-customBlack text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
                         {index + 1}
                       </div>
-                      <p className='text-white text-[20px] overflow-hidden text-ellipsis whitespace-nowrap max-w-[125px] ml-2'>{kameti.commHolderName}</p>
+                      <p className='text-white text-[20px] overflow-hidden text-ellipsis whitespace-nowrap max-w-[125px] ml-2'>{kameti.kametiName}</p>
 
                     </div>
                     <div className='flex items-center'>
@@ -210,7 +210,7 @@ console.log(deletedKametees)
                   </div>
                 </div>
               ))}
-              {deletedKametees?.filter(kameti => kameti.commHolderName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && searchQuery.trim() !== '' && (
+              {deletedKametees?.filter(kameti => kameti.kametiName.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && searchQuery.trim() !== '' && (
                 <p className='flex justify-center items-center text-[white] w-[80%]'>
                   No results found
                 </p>

@@ -41,11 +41,12 @@ function App() {
     <Route path="" element={<RequireAuth><Create/></RequireAuth>}/>
     <Route path=":id" element={<RequireAuth><Create/></RequireAuth>}/>
     </Route>
-    <Route path="/delete" element={<RequireAuth><DeleteKameti/></RequireAuth>}/>
+    <Route path="/delete" element={<RequireAuth><History recordType="deleted" /></RequireAuth>}/>
+    {/* <Route path="/delete" element={<RequireAuth><DeleteKameti/></RequireAuth>}/> */}
     <Route path="/payment" element={<RequireAuth><Payment/></RequireAuth>}/>
-    <Route path="/history" element={<RequireAuth><History/></RequireAuth>}/>
+    <Route path="/history" element={<RequireAuth><History recordType="all" /></RequireAuth>}/>
     <Route path="/more" element={<RequireAuth><More/></RequireAuth>}/>
-    <Route path="/allrecords" element={<RequireAuth><AllRecords/></RequireAuth>}/>
+    <Route path="/allrecords" element={<RequireAuth><History recordType="all" /></RequireAuth>}/>
     </Routes>
     </BrowserRouter>
     </>

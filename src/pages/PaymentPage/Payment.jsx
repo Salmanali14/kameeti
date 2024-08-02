@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Sidebar from '../../components/Sidebar/Sidebar'
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { IoIosSearch } from "react-icons/io";
 import { FaSort } from "react-icons/fa";
 import money from '../../images/Moneypay.png'
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import './Payment.css';
 import calander from '../../images/appointment 1.png'
 import check from '../../images/Checkmark.png'
 import bank from '../../images/paymentImage/banknotes 2.png'
@@ -21,6 +24,7 @@ import { MdOutlineRestartAlt } from "react-icons/md";
 import unpay from '../../images/paymentImage/unpay.png'
 import axios from 'axios';
 import { Slide, ToastContainer, toast } from 'react-toastify';
+import { FadeLoader, HashLoader } from 'react-spinners';
 export default function Payment() {
   const apiBaseUrl = import.meta.env.VITE_APP_API_URL;
   const token = localStorage.getItem('token');
@@ -33,35 +37,122 @@ export default function Payment() {
   const [confirmMessage, setConfirmMessage] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredPayments, setFilteredPayments] = useState([]);
-  const fetchKametiWithPayments = async () => {
+  const [kametiType, setKametiType] = useState('daily');
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [loading, setLoading] = useState(true);
+  // const [rows, setRows] = useState([]);
+  const [selectedMonth, setSelectedMonth] = useState('');
+  // console.log(filteredPayments)
+  const fetchKametis = async (type) => {
     try {
       const response = await axios.get(`${apiBaseUrl}payment`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
-      var kametees = response?.data?.data;
-      setCommitteeData(response?.data?.data);
-      if (kametees.length > 0) {
-        setSelectedCommittee(kametees[0]);
+      console.log(response);
+
+      let kametees;
+      if (type === 'daily') {
+        setCommitteeData(response?.data?.data?.daily_committees);
+        kametees = response?.data?.data?.daily_committees;
+      } else {
+        setCommitteeData(response?.data?.data?.monthly_committees);
+        kametees = response?.data?.data?.monthly_committees;
       }
+
+      if (kametees.length > 0) {
+        const currentCommittee = kametees.find(committee => committee.id === selectedCommittee?.id);
+        if (!currentCommittee) {
+          setSelectedCommittee(kametees[0]);
+          fetchPayments(kametees[0]?.id, kametees[0]?.kametiType);
+        }
+        else {
+          fetchPayments(currentCommittee?.id, currentCommittee?.kametiType);
+          // console.log(currentCommittee);
+        }
+      }
+
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
+  // const fetchKametis = async (type) => {
+  //   try {
+  //     const response = await axios.get(`${apiBaseUrl}payment`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`
+  //       }
+  //     });
+  //     console.log(response);
+  //     if (type === 'daily') {
+  //       setCommitteeData(response?.data?.data?.daily_committees);
+  //       var kametees = response?.data?.data?.daily_committees;
+  //       if (kametees.length > 0) {
+  //         setSelectedCommittee(kametees[0]);
+  //         fetchPayments(kametees[0]?.id, kametees[0]?.kametiType);
+  //       }
+  //       console.log("daily" + selectedCommittee);
+
+  //     }
+  //     else {
+  //       setCommitteeData(response?.data?.data?.monthly_committees);
+  //       var kametees = response?.data?.data?.monthly_committees;
+  //       if (kametees.length > 0) {
+  //         setSelectedCommittee(kametees[0]);
+  //         fetchPayments(kametees[0]?.id, kametees[0]?.kametiType);
+  //         console.log("monthly");
+  //         // console.log(selectedCommittee);
+  //       }
+
+  //     }
+  //     setLoading(false);
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error);
+  //   }
+  // };
+
+  const fetchPayments = async (kametiId, type) => {
+    try {
+      const response = await axios.get(`${apiBaseUrl}paymentsByKametiId/${kametiId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      console.log(type);
+      if (type === 'daily') {
+        // console.log(response?.data?.data?.paidKametiResponse);
+        const allPaidKametis = response?.data?.data?.paidKametiResponse?.flatMap(item => item.paidkametis) ?? [];
+        // console.log(allPaidKametis);
+        // Update the filteredPayments state
+        setFilteredPayments(allPaidKametis);
+
+
+      }
+      else {
+        console.log(response?.data?.data?.paidKametiResponse[0]?.paidkametis ?? []);
+        setFilteredPayments(response?.data?.data?.paidKametiResponse[0]?.paidkametis ?? []);
+      }
+
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
   const handlePayCommittee = async (status) => {
-    if (status === "pay" && paymentData.date == null) {
+    if (status === "pay" && selectedRow.date == null) {
       toast.error("date not selected");
     }
     else {
       try {
+        console.log(selectedRow);
         const response = await axios.post(`${apiBaseUrl}payCommittee`, {
-          committee_id: selectedCommittee?.id,
+          committeeID: selectedCommittee?.id,
           status: status === "pay" ? "paid" : "Unpaid",
-          price: paymentData.price,
-          date: paymentData.date,
-          payment_id: status === "unpay" ? paymentId : null
+          price: selectedRow.amount,
+          date: dateToTimestamp(selectedRow.date),
+          payment_id: status === "unpay" ? selectedRow.paymentId : null
 
         }, {
           headers: {
@@ -69,7 +160,7 @@ export default function Payment() {
           }
         }).then((response) => {
           console.log(response);
-          fetchKametiWithPayments();
+          fetchKametis(selectedCommittee?.kametiType);
         });
       } catch (error) {
         toast.error(error?.response?.data?.message);
@@ -81,17 +172,22 @@ export default function Payment() {
     const date = new Date(timestamp);
     return date.toLocaleDateString();
   };
+  const dateToTimestamp = (date) => {
+    const timestamp = new Date(date).getTime();
+    return timestamp;
+  };
 
   const handleAlertCancel = () => {
     setShowConfirmAlert(false); // Hide the confirm alert
   };
   useEffect(() => {
-    fetchKametiWithPayments();
-  }, []);
+    fetchKametis(kametiType);
+  }, [kametiType]);
 
   useEffect(() => {
     if (selectedCommittee) {
-      const filtered = selectedCommittee.payments.filter(payment => {
+
+      const filtered = selectedCommittee?.payments?.filter(payment => {
         // Convert all properties to lowercase for case-insensitive search
         const paymentValues = Object.values(payment).map(value => value.toString().toLowerCase());
         // Check if any property includes the search query
@@ -100,17 +196,7 @@ export default function Payment() {
       setFilteredPayments(filtered);
     }
   }, [searchQuery, selectedCommittee]);
-  
-  
 
-  const handleCommitteeChange = (event) => {
-    const commId = parseInt(event.target.value, 10); // Convert the value to an integer
-    const user = committeeData?.find(user => user?.id === commId);
-    // console.log(user);
-    setSelectedCommittee(user);
-  };
-
-  const remainingUnpaidMonths = selectedCommittee?.totalMonths - selectedCommittee?.payments.length;
   const handleSortBy = (sortBy, sortOrder) => {
     // Sort the filtered payments based on the chosen property
     const sorted = [...filteredPayments].sort((a, b) => {
@@ -133,330 +219,360 @@ export default function Payment() {
     });
     setFilteredPayments(sorted);
   };
-  
-  
-  const [kametiType, setKametiType] = useState('daily');
 
-  const handleKametiTypeChange = (event) => {
-    setKametiType(event.target.value);
+
+
+
+  const handleKametiTypeChange = (selectedType) => {
+
+    // const selectedType = event.target.value;
+    // console.log(selectedType)
+    setKametiType(selectedType);
+    fetchKametis(selectedType);
+
   };
 
-  const [rows, setRows] = useState([{ id: 1, amount: 200, date: '', photoStatus: 'No Photo' }]);
+  const handleCommitteeChange = (event) => {
+    const commId = parseInt(event.target.value, 10); // Convert the value to an integer
+    console.log(commId);
+    console.log(committeeData);
+    const selectedComm = committeeData?.find(comm => comm?.id === commId);
+    console.log(selectedComm);
+    setSelectedCommittee(selectedComm);
+    fetchPayments(commId, selectedComm?.kametiType);
 
-  const addNewRow = () => {
-    if (rows.length < 31) {
-      const newRow = { id: rows.length + 1, amount: 200, date: '', photoStatus: 'No Photo' };
-      setRows([...rows, newRow]);
-    } else {
-      alert('Cannot add more than 31 rows');
+    // Update the date to the starting month of the selected committee
+    if (selectedComm?.startingMonth) {
+      const newStartDate = new Date(selectedComm.startingMonth);
+      setDate(newStartDate); // Reset calendar to start month
     }
   };
 
-  const removeRow = (id) => {
-    setRows(rows.filter(row => row.id !== id));
+  const [date, setDate] = useState(new Date());
+  const [highlightedDatesMap, setHighlightedDatesMap] = useState({});
+  const [highlightedDates, setHighlightedDates] = useState({ dates: [], committeeId: null });
+  const [modalVisible, setModalVisible] = useState(false);
+  const [months, setMonths] = useState([]);
+  const [paymentDetails, setPaymentDetails] = useState(null);
+  const [calendarKey, setCalendarKey] = useState(0); // Key to force re-render of the calendar
+  const calendarRef = useRef(null);
+
+  const getMonthsInRange = (start, end) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const months = [];
+    let currentDate = startDate;
+
+    while (currentDate <= endDate) {
+      months.push(currentDate.getTime());
+      currentDate = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
+    }
+    return months;
   };
+
+  useEffect(() => {
+    if (selectedCommittee) {
+      // Set the months to be displayed on the calendar
+      const newMonths = getMonthsInRange(selectedCommittee?.startingMonth, selectedCommittee?.endingMonth);
+      setMonths(newMonths);
+
+      // Reset calendar to the starting month of the selected committee
+      setDate(new Date(selectedCommittee?.startingMonth));
+
+      // Force calendar to re-render by changing key
+      setCalendarKey(prevKey => prevKey + 1);
+    }
+  }, [selectedCommittee]);
+
+  useEffect(() => {
+    if (selectedCommittee?.id) {
+      if (filteredPayments?.length > 0) {
+        const paymentDates = filteredPayments.map(payment => new Date(payment.date));
+
+        setHighlightedDatesMap(prevMap => ({
+          ...prevMap,
+          [selectedCommittee.id]: paymentDates,
+        }));
+
+        setHighlightedDates({
+          dates: paymentDates,
+          committeeId: selectedCommittee.id
+        });
+      } else {
+        setHighlightedDatesMap(prevMap => ({
+          ...prevMap,
+          [selectedCommittee.id]: [],
+        }));
+
+        setHighlightedDates({
+          dates: [],
+          committeeId: selectedCommittee.id
+        });
+      }
+    }
+  }, [filteredPayments, selectedCommittee]);
+
+  useEffect(() => {
+    if (calendarRef.current) {
+      // Force calendar to update view if necessary
+      calendarRef.current.viewDate = new Date(selectedCommittee?.startingMonth);
+    }
+  }, [calendarKey]);
+
+
+  useEffect(() => {
+    if (selectedCommittee?.id && highlightedDatesMap[selectedCommittee?.id]) {
+      setHighlightedDates({
+        dates: highlightedDatesMap[selectedCommittee?.id],
+        committeeId: selectedCommittee?.id
+      });
+    } else {
+      setHighlightedDates({ dates: [], committeeId: selectedCommittee?.id });
+    }
+  }, [selectedCommittee, highlightedDatesMap]);
+
+  const minDate = new Date(Math.min(...months));
+  const maxDate = new Date(Math.max(...months));
+
+  const handleDateClick = (value) => {
+    const clickedDate = value.toDateString();
+    const clickedMonth = value.getMonth();
+    const clickedYear = value.getFullYear();
+
+    const payment = filteredPayments.find(p => {
+      const paymentDate = new Date(p.date);
+      return paymentDate.toDateString() === clickedDate;
+    });
+
+    if (payment) {
+      // Show payment details
+      if (selectedCommittee?.kametiType == "daily") {
+        var price = selectedCommittee?.pricePerDayKameti * selectedCommittee?.myTotalKametis;
+      }
+      else {
+        var price = selectedCommittee?.pricePerMonthKameti * selectedCommittee?.myTotalKametis;
+      }
+      setPaymentDetails({
+        date: payment.date,
+        price: price,
+      });
+      setModalVisible(true);
+    } else {
+      let alreadyPaid = false;
+
+      if (selectedCommittee?.kametiType === 'monthly') {
+        alreadyPaid = filteredPayments.some(p => {
+          const paymentDate = new Date(p.date);
+          return paymentDate.getMonth() === clickedMonth && paymentDate.getFullYear() === clickedYear;
+        });
+      }
+
+      if (!alreadyPaid) {
+        // Perform payment functionality
+        setSelectedRow({
+          date: clickedDate,
+          amount: selectedCommittee?.pricePerMonthKameti * selectedCommittee?.myTotalKametis,
+        });
+        setConfirmMessage("Do you want to make a payment for this date?");
+        setConfirmAction('payCommitee');
+        setShowConfirmAlert(true);
+      } else {
+        toast.error("This month kameti has already been paid.")
+      }
+    }
+  };
+
+
+  const [rows, setRows] = useState([]);
+
+  const handleMonthSelect = (month) => {
+    setSelectedMonth(month);
+    console.log(month);
+    // Filter payments for the selected month from selectedCommittee object
+    const selectedPayments = filteredPayments.filter(payment => {
+      const paymentDate = new Date(payment.date);
+      console.log(paymentDate.getMonth());
+      const selectedMonthDate = new Date(Number(month));
+      console.log(new Date(selectedMonthDate).getMonth());
+      return paymentDate.getMonth() + 1 === selectedMonthDate.getMonth() + 1 && paymentDate.getFullYear() === selectedMonthDate.getFullYear();
+    });
+
+    // Map payments to rows format and setRows
+    const formattedRows = selectedPayments.map((payment, index) => ({
+      id: index + 1,
+      status: payment.status,
+      amount: payment.price,
+      paymentId: payment.id,
+      date: new Date(payment.date).toISOString().split('T')[0], // Format date as YYYY-MM-DD
+      photoStatus: payment.photoStatus || 'No Photo',
+    }));
+
+    setRows(formattedRows);
+  };
+
   return (
     <>
       <div className='w-[100%] h-[100vh] flex justify-center items-center bg-black'>
         <div className='w-[97%] rounded-[40px] h-[95vh] flex  '>
           <Sidebar />
-          <div className='w-[75%] bg-maincolor ml-[2px] rounded-r-[20px] h-[100%]'>
-            <div className='w-[100%] flex justify-between items-center mt-6 border-b-[2px] border-[black] '>
-              <h1 className='text-[#A87F0B] text-[25px] font-bold ml-10 mb-6'>Payments</h1>
-              <div className="mb-6 ml-[130px] flex items-center mr-6">
-              <label className='text-[#A87F0B] text-[15px] font-bold mr-2 whitespace-nowrap  '>Select Kameti Type :</label>
-              <select value={kametiType} className='bg-colorinput text-[white] text-[15px] h-[40px] w-[100px] pl-2 outline-none  rounded-3xl' onChange={handleKametiTypeChange}>
-                <option value="daily">Daily</option>
-                <option value="monthly">Monthly</option>
-              </select>
+          {loading ? (
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "75%", height: "100vh", background: "black" }} className="loading-screen">
+              <FadeLoader color="#A87F0B" />
             </div>
-            {kametiType === "daily" &&
-              <div className="mb-6 ml-[130px] flex items-center mr-6">
-              <label className='text-[#A87F0B] text-[15px] font-bold mr-2  whitespace-nowrap '>Select Month :</label>
-              <select  className='bg-colorinput text-[white] text-[15px] h-[40px] w-[100px] pl-2 outline-none  rounded-3xl' >
-                <option value="daily">january</option>
-                <option value="monthly">february</option>
-              </select>
-            </div>
-            }
-            </div>
-            <div className='w-[100%] flex'>
-              <div className='w-[75%] flex justify-center items-center flex-col'>
-                <div className='w-[98%]  mt-2  rounded-[20px] items-center  flex justify-between  h-[100px] bg-sidebar '>
-                  <div className='w-[50%] ml-5 flex justify-start  flex-col'>
-                    <p className='text-gray-200 font-bold'>{selectedCommittee?.commHolderName}</p>
-                    <h1 className='text-yellow-600 font-bold text-[30px]' >Rs.  {Number(selectedCommittee?.totalPrice).toLocaleString()}</h1>
-                    <p className='text-gray-200 text-[12px]'></p>
+          ) : (
+            <div className='w-[75%] h-max pb-3 bg-maincolor ml-[2px] rounded-r-[20px] h-[100%]'>
+              <div className='w-[100%] flex justify-between items-center mt-6 border-b-[2px] border-[black] '>
+                <h1 className='text-[#A87F0B] text-[25px] font-bold ml-10 mb-6'>Payments</h1>
+
+              </div>
+
+
+              <div className='flex w-[50%] ml-[25%] mt-3 mb-2 items-center relative'>
+                <div className='bg-[#181818] border text-white outline-none border-[#A87F0B] rounded-[30px] h-[45px] w-[100%] pl-[165px]'>
+                  <button className=' text-white absolute left-0 rounded-[30px] h-[44px] text-[20px] w-[53%]' onClick={() => handleKametiTypeChange("daily")} style={kametiType == "daily" ? { backgroundColor: "#A87F0B", color: 'black' } : null}>Daily</button>
+                  <button className=' absolute right-0 rounded-[30px] h-[44px] text-[20px] w-[53%]' onClick={() => handleKametiTypeChange('monthly')} style={kametiType == "monthly" ? { backgroundColor: "#A87F0B", color: 'black' } : null}>Monthly</button>
+                </div>
+              </div>
+
+
+
+              <div className='w-[100%] flex'>
+                <div className='w-[75%] flex justify-center items-center flex-col'>
+                  <div className='w-[98%]  mt-2  rounded-[20px] items-center  flex justify-between  h-[100px] bg-sidebar '>
+                    <div className='w-[50%] ml-5 flex justify-start  flex-col'>
+                      <p className='text-gray-200 font-bold'>{selectedCommittee?.kametiName}</p>
+                      <h1 className='text-yellow-600 font-bold text-[30px]' >Rs.  {Number(selectedCommittee?.totalPrice).toLocaleString()}</h1>
+                      <p className='text-gray-200 text-[12px]'></p>
+                    </div>
+                    <div className='flex justify-start flex-col w-[35%] mr-3'>
+                      <select className='w-[100%] outline-none border border-[white] bg-[#373737] text-[#999] text-[14px] h-[40px] rounded-[5px] pl-1 pr-3'
+                        onChange={handleCommitteeChange}
+                      >
+                        {committeeData?.length === 0 ? (
+                          <option value="" selected="selected" disabled>No kameti</option>
+                        ) : (
+                          committeeData && committeeData.map((comm, index) => (
+                            <option key={index} value={comm.id}>
+                              {comm.kametiName}({comm?.totalPrice})
+                            </option>))
+                        )}
+
+                      </select>
+                    </div>
                   </div>
-                  <div className='flex justify-start flex-col w-[35%] mr-3'>
-                    <select className='w-[100%] outline-none border border-[white] bg-[#373737] text-[#999] text-[14px] h-[40px] rounded-[5px] pl-1 pr-3'
-                      onChange={handleCommitteeChange}
-                    >
-                      {committeeData?.length === 0 ? (
-                        <option value="" selected="selected" disabled>No kameti</option>
-                      ) : (
-                        committeeData && committeeData.map((user, index) => (
-                          <option key={index} value={user.id}>
-                            {user.commHolderName}({user?.totalPrice})
-                          </option>))
+
+                  <div className='w-[98%] h-[350px] overflow-y-scroll mt-2 rounded-[20px] items-center  flex flex-col  bg-sidebar'>
+
+
+                    <div className='w-[100%] flex flex-col items-center'>
+                      <div className='w-[98%] h-[350px] overflow-y-scroll mt-2 rounded-[20px] bg-sidebar'>
+                        <Calendar
+                          key={calendarKey}
+                          ref={calendarRef}
+                          onChange={setDate}
+                          value={date}
+                          tileClassName={({ date }) => {
+                            if (highlightedDates.committeeId === selectedCommittee?.id && highlightedDates.dates.some(d => d.toDateString() === date.toDateString())) {
+                              return 'highlighted'; // Return a custom class name
+                            }
+                            return null;
+                          }}
+
+                          onClickDay={handleDateClick}
+                          minDate={minDate}
+                          maxDate={maxDate}
+                          view='month'
+                        />
+                      </div>
+                    </div>
+
+                    {modalVisible && paymentDetails && (
+                      <div className="fixed inset-0 bg-[#373737] bg-opacity-50  flex justify-center items-center text-white">
+                        <div className="bg-[#373737] p-6 rounded-lg shadow-lg w-[90%] max-w-md text-center">
+
+                          <h2 className="text-xl font-bold mb-4">Payment Details</h2>
+                          <p className="mb-2">Kameti Date: {new Date(paymentDetails.date).toLocaleDateString()}</p>
+                          <p className="mb-4">Kameti Price: {paymentDetails.price}</p>
+                          <p className="mb-4">Kameti Status: Paid</p>
+                          <button
+                            onClick={() => setModalVisible(false)}
+                            className=" right-4 bg-[#a87f0b] text-black py-1 px-5 rounded-[30px]"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+
+
+                    <br></br>
+
+                  </div>
+
+                </div>
+
+
+                <div className='w-[30%] mr-2 h-[457px] flex justify-center m-0 mt-2 bg-sidebar rounded-[20px]'>
+                  <div className='w-[95%] flex justify-evenly overflow-y-auto  mt-2  flex-wrap '>
+                    <div className='w-[43%] h-[100px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
+                      <img className='w-[50px]' src={bank} />
+                      <h2 className='text-paytxt text-[10px] mt-1'>Price Per Month</h2>
+                      <h1 className='text-paytxt text-[16px] font-bold'>{Number(selectedCommittee?.pricePerMonthKameti).toLocaleString()}</h1>
+                    </div>
+                    {
+                      selectedCommittee?.kametiType == "daily" && (
+                        <div className='w-[43%] h-[100px] rounded-[20px] mb-2 bg-colorinput flex justify-center items-center flex-col'>
+                          <img className='w-[50px]' src={bank} />
+                          <h2 className='text-paytxt text-[10px] mt-1'>Price Per Day</h2>
+                          <h1 className='text-paytxt text-[16px] font-bold'>{Number(selectedCommittee?.pricePerDayKameti).toLocaleString()}</h1>
+                        </div>
                       )}
-
-                    </select>
+                    <div className='w-[43%] h-[100px] rounded-[20px] mb-2 bg-colorinput flex justify-center items-center flex-col'>
+                      <img className='w-[50px]' src={money2} />
+                      <h2 className='text-paytxt text-[10px] mt-1'>Total Price(All)</h2>
+                      <h1 className='text-paytxt text-[16px] font-bold'>{Number(selectedCommittee?.totalPrice).toLocaleString()}</h1>
+                    </div>
+                    <div className='w-[43%] h-[100px]  rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
+                      <img className='w-[50px]' src={box} />
+                      <h2 className='text-paytxt text-[10px] mt-1'>Your kameti</h2>
+                      <h1 className='text-paytxt text-[16px] font-bold'>{selectedCommittee?.myTotalKametis}</h1>
+                    </div>
+                    <div className='w-[43%] h-[100px] rounded-[20px] mb-2 bg-colorinput flex justify-center items-center flex-col'>
+                      <img className='w-[40px]' src={lastdate} />
+                      <h2 className='text-paytxt text-[10px] mt-1'>Total Month</h2>
+                      <h1 className='text-paytxt text-[16px] font-bold'>{selectedCommittee?.totalMonths}</h1>
+                    </div>
+                    <div className='w-[43%] h-[100px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
+                      <img className='w-[40px]' src={payday1} />
+                      <h2 className='text-paytxt text-[10px] mt-1'>Payable per Month</h2>
+                      <h1 className='text-paytxt text-[16px] font-bold'>{Number(selectedCommittee?.pricePerMonthKameti * selectedCommittee?.myTotalKametis).toLocaleString()}</h1>
+                    </div>
+                    <div className='w-[43%] h-[100px]  rounded-[20px] mb-2 bg-colorinput flex justify-center items-center flex-col'>
+                      <img className='w-[40px]' src={money1} />
+                      <h2 className='text-paytxt text-[10px] mt-1'>Paid Amount</h2>
+                      <h1 className='text-paytxt text-[16px] font-bold'>{Number(selectedCommittee?.paidAmount).toLocaleString()}</h1>
+                    </div>
+                    <div className='w-[43%] h-[100px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
+                      <img className='w-[40px]' src={cash} />
+                      <h2 className='text-paytxt text-[10px] mt-1'>Remaining Amount</h2>
+                      <h1 className='text-paytxt text-[16px] font-bold'>{Number(selectedCommittee?.remainingAmount).toLocaleString()}</h1>
+                    </div>
+                    <div className='w-[43%] h-[100px] rounded-[20px] mb-2 bg-colorinput flex justify-center items-center flex-col'>
+                      <img className='w-[40px]' src={startdate} />
+                      <h2 className='text-paytxt text-[10px] mt-1'>Starting Date</h2>
+                      <h1 className='text-paytxt text-[16px] font-bold'>{formatDate(selectedCommittee?.startingMonth)}</h1>
+                    </div>
+                    <div className='w-[43%] h-[100px] rounded-[20px] mb-2 bg-colorinput flex justify-center items-center flex-col'>
+                      <img className='w-[40px]' src={startdate} />
+                      <h2 className='text-paytxt text-[10px] mt-1'>Ending Date</h2>
+                      <h1 className='text-paytxt text-[16px] font-bold'>{formatDate(selectedCommittee?.endingMonth)}</h1>
+                    </div>
                   </div>
                 </div>
 
-                <div className='w-[98%] h-[320px] overflow-y-scroll mt-2 rounded-[20px] items-center  flex flex-col  bg-sidebar'>
-                  <div className='w-[95%] flex'>
-                    <div className='w-[70%] mt-2 flex items-center rounded-[30px] h-[40px] bg-colorinput'>
-                      <IoIosSearch className='text-paytxt text-[25px] ml-5 mr-2' />
-                      <input value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)} type='text' placeholder='Search' className='border-none outline-none bg-transparent text-paytxt w-[85%] placeholder-paytxt' />
-                    </div>
-                    <div className='w-[40%] mt-2 ml-2 flex items-center justify-center rounded-[30px] h-[40px] text-paytxt bg-colorinput'>
-                    Sort By
-                    <select
-                      className='outline-none bg-transparent ml-2 text-[13px]  bg-[#373737] text-[#999]'
-                      onChange={(e) => handleSortBy(e.target.value, "desc")}
-                    >
-                      <option value="id" className='text-[13px] bg-[#373737] '>Ascending order</option>
-                      <option value="date"  className='text-[13px] bg-[#373737]'>Desending order</option>
-                    </select>
-                  </div>                  
-                  </div>
-                  {kametiType === "monthly" &&
-                  <div className='w-[95%] pt-2 pb-2 mt-2 flex items-center justify-around rounded-[30px] h-[50px] text-paytxt border-colorinput border-[2px]'>
-                    <div className='w-[40px] h-[30px]  bg-payform text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                      No.
-                    </div>
-                    <div className='w-[60px] h-[30px] bg-payform text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                      Price
-                    </div>
-                    <div className='w-[60px] h-[30px] bg-payform text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                      Month
-                    </div>
-                    <div className='w-[60px] h-[30px] bg-payform text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                      Status
-                    </div>
-                    <div className='w-[120px] h-[30px] bg-payform text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                      Payment Proof
-                    </div>
-                  </div>
-                  }
-                  {kametiType === "daily" &&
-                    <div className='w-[95%] pt-2 pb-2 mt-2 flex items-center justify-around rounded-[30px] h-[50px] text-paytxt border-colorinput border-[2px]'>
-                      <div className='w-[40px] h-[30px]  bg-payform text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                        No.
-                      </div>
-                      <div className='w-[60px] h-[30px] bg-payform text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                        Price
-                      </div>
-                      <div className='w-[60px] h-[30px] bg-payform text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                        Month
-                      </div>
-                      <div className='w-[60px] h-[30px] bg-payform text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                        Status
-                      </div>
-                      <div className='w-[120px] h-[30px] bg-payform text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                        Payment Proof
-                      </div>
-                      <div className='w-[80px] h-[30px] bg-payform text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                         Action
-                      </div>
-                    </div>
-                    }
-                  {/* Assuming totalMonth is the variable containing the total number of months */}
-
-
-                  {/* showing paid committees */}
-                  {kametiType === "monthly" &&
-                    <>
-                  {filteredPayments.length > 0 ? (
-                    filteredPayments.map((item, index) => (
-                      <div key={index} className='w-[95%] mt-2 flex items-center justify-around rounded-[30px] h-[40px] text-paytxt bg-colorinput border-colorinput border-[2px]'>
-                        <div className='w-[25px] ml-3 h-[25px] bg-payform text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
-                          {index + 1}
-                        </div>
-                        <div className='w-[60px] h-[25px] ml-[5px] text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                          <img className='w-[15px] mr-2' src={money} alt="money" /> {selectedCommittee?.pricePerComm * selectedCommittee?.totalUserComms}
-                        </div>
-                        <div className='w-[65px] h-[40px] ml-2 text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                          <input type='text' className='bg-[#373737] w-[100%] text-white' value={formatDate(item?.date)} disabled
-                            onChange={(event) =>
-                              setPaymentData(
-                                {
-                                  date: event.target.value,
-                                  price: selectedCommittee?.pricePerComm * selectedCommittee?.totalUserComms
-                                }
-                              )} />
-                        </div>
-                        <div className='w-[60px] h-[25px] text-[white] text-[13px] rounded-[30px] flex justify-center items-center cursor-pointer' onClick={() => {
-                          setConfirmMessage("Are you sure to unpay this kameti?");
-                          setConfirmAction('unpayCommitee');
-                          setShowConfirmAlert(true);
-                          setPaymentId(item?.id);
-                        }}>
-                          <img className='w-[15px] mr-2' src={check} alt="check" />
-                          Paid
-                        </div>
-                        <div className='h-[25px] text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                          <div className='w-[70px] h-[26px] rounded-[30px] text-[12px] text-black flex items-center justify-center cursor-pointer bg-uploaded'>
-                            Upload
-                          </div>
-                          {'\u00A0'}
-                          <div className='w-[70px] whitespace-nowrap mr-[-10px] text-[12px] h-[26px] rounded-[30px] text-black flex items-center justify-center cursor-pointer bg-paytxt'>
-                            No Photo
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className='text-center text-[white] text-[14px]'></p>
-                  )}
-                  </>
-                }
-                  {/* showing unpaid committees */}
-                   {kametiType === "monthly" &&
-                    <>
-                  {Array.from({ length: remainingUnpaidMonths })
-                  .filter((_, index) => {
-                    // Filter the unpaid months based on the search query
-                    if (!searchQuery.trim()) return true; // Return true if searchQuery is empty
-                    // Check if the index + 1 (month number) includes the search query
-                    return (index + 1).toString().includes(searchQuery.trim());
-                  })
-                  .map((_, index) => (
-                    <div key={index} className='w-[95%] mt-2 flex items-center justify-around rounded-[30px] h-[40px] text-paytxt bg-colorinput border-colorinput border-[2px]'>
-                      <div className='w-[25px] ml-3 h-[25px] bg-payform text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
-                        {selectedCommittee?.payments.length + index + 1}
-                      </div>
-                      <div className='w-[60px] h-[25px] ml-[15px] text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                        <img className='w-[15px] mr-2' src={money} alt="money" /> {selectedCommittee?.pricePerComm * selectedCommittee?.totalUserComms}
-                      </div>
-                      <div className='w-[100px] h-[40px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                        <input type='date' className='bg-[#373737] w-[100%] text-white'
-                          onChange={(event) =>
-                            setPaymentData(
-                              {
-                                date: event.target.value,
-                                price: selectedCommittee?.pricePerComm * selectedCommittee?.totalUserComms
-                              }
-                            )} />
-                      </div>
-                      <div className='w-[60px] h-[25px]  text-[white] text-[13px] rounded-[30px] flex justify-center items-center cursor-pointer' onClick={() => {
-                
-                        setConfirmMessage("Are you sure to pay this kameti?");
-                        setConfirmAction('payCommitee');
-                        setShowConfirmAlert(true);
-                      }}>
-                        {/* <img className='w-[15px] mr-2' src={check} alt="check" /> */}
-                        Pay
-                      </div>
-                      <div className='h-[25px] text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-                        <div className='w-[70px] h-[26px] rounded-[30px] text-[12px] text-black flex items-center justify-center cursor-pointer bg-uploaded'>
-                          Upload
-                        </div>
-                        {'\u00A0'}
-                        <div className='w-[70px] whitespace-nowrap mr-[-10px] text-[12px] h-[26px] rounded-[30px] text-black flex items-center justify-center cursor-pointer bg-paytxt'>
-                          No Photo
-                        </div>
-                      </div>
-                    </div>
-                ))}
-                </>
-}
-{kametiType === "daily" &&
-<>
-{rows.map((row, index) => (
-  <div key={index} className='w-[95%] mt-2 pl-3 flex items-center justify-around rounded-[30px] h-[40px] text-paytxt bg-colorinput border-colorinput border-[2px]'>
-    <div className='w-[25px]  h-[25px] bg-payform text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>
-      {row.id}
-    </div>
-    <div className='w-[60px] h-[25px] ml-[0px] pl-[30px] text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-      <img className='w-[15px] mr-2' src={money} alt="money" /> {row.amount}
-    </div>
-    <div className='w-[105px] pr-1 h-[40px] ml-[25px] text-[white] text-[13px] rounded-[30px] flex justify-center items-center'>
-      <input type='date' className='bg-[#373737] w-[100%] text-white' value={row.date} onChange={(e) => {
-        const updatedRows = [...rows];
-        updatedRows[index].date = e.target.value;
-        setRows(updatedRows);
-      }} />
-    </div>
-    <div className='w-[60px] pr-[20px] h-[25px] text-[white] text-[13px] rounded-[30px] flex justify-center items-center cursor-pointer'>
-      Pay
-    </div>
-    <div className='h-[25px] text-[white] pr-3 text-[13px] rounded-[30px] flex justify-center items-center'>
-      <div className='w-[70px] h-[26px] rounded-[30px] text-[12px] text-black flex items-center justify-center cursor-pointer bg-uploaded'>
-        Upload
-      </div>
-      {'\u00A0'}
-      <div className='w-[70px] whitespace-nowrap mr-[-10px] text-[12px] h-[26px] rounded-[30px] text-black flex items-center justify-center cursor-pointer bg-paytxt'>
-        {row.photoStatus}
-      </div>
-    </div>
-    <div className='pr-4'>
-  
-    <button onClick={() => removeRow(row.id)} className="ml-2 p-1 bg-red-500 text-white w-[70px] h-[26px] rounded-[30px] text-[12px]  flex items-center justify-center cursor-pointer ">Remove</button>
-    </div>
-  </div>
-))}
-
-  <button onClick={addNewRow} className="mt-4 p-2 w-[140px] h-[40px] rounded-[30px] bg-[#A87F0B] font-bold text-[black]">Add Next Day</button>
-</>
-}
-
-                  <br></br>
-
-                </div>
               </div>
-
-
-              <div className='w-[30%] mr-2 h-[427px] flex justify-center m-0 mt-2 bg-sidebar rounded-[20px]'>
-                <div className='w-[95%] flex justify-evenly overflow-y-auto  mt-2  flex-wrap '>
-                  <div className='w-[43%] h-[100px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
-                    <img className='w-[50px]' src={bank} />
-                    <h2 className='text-paytxt text-[10px] mt-1'>Price(Each)</h2>
-                    <h1 className='text-paytxt text-[16px] font-bold'>{Number(selectedCommittee?.pricePerComm).toLocaleString()}</h1>
-                  </div>
-                  <div className='w-[43%] h-[100px] rounded-[20px] mb-2 bg-colorinput flex justify-center items-center flex-col'>
-                    <img className='w-[50px]' src={money2} />
-                    <h2 className='text-paytxt text-[10px] mt-1'>Total Price(All)</h2>
-                    <h1 className='text-paytxt text-[16px] font-bold'>{Number(selectedCommittee?.totalPrice).toLocaleString()}</h1>
-                  </div>
-                  <div className='w-[43%] h-[100px]  rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
-                    <img className='w-[50px]' src={box} />
-                    <h2 className='text-paytxt text-[10px] mt-1'>Your kameti</h2>
-                    <h1 className='text-paytxt text-[16px] font-bold'>{selectedCommittee?.totalUserComms}</h1>
-                  </div>
-                  <div className='w-[43%] h-[100px] rounded-[20px] mb-2 bg-colorinput flex justify-center items-center flex-col'>
-                    <img className='w-[40px]' src={lastdate} />
-                    <h2 className='text-paytxt text-[10px] mt-1'>Total Month</h2>
-                    <h1 className='text-paytxt text-[16px] font-bold'>{selectedCommittee?.totalMonths}</h1>
-                  </div>
-                  <div className='w-[43%] h-[100px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
-                    <img className='w-[40px]' src={payday1} />
-                    <h2 className='text-paytxt text-[10px] mt-1'>Payable per Month</h2>
-                    <h1 className='text-paytxt text-[16px] font-bold'>{Number(selectedCommittee?.pricePerComm * selectedCommittee?.totalUserComms).toLocaleString()}</h1>
-                  </div>
-                  <div className='w-[43%] h-[100px]  rounded-[20px] mb-2 bg-colorinput flex justify-center items-center flex-col'>
-                    <img className='w-[40px]' src={money1} />
-                    <h2 className='text-paytxt text-[10px] mt-1'>Paid Amount</h2>
-                    <h1 className='text-paytxt text-[16px] font-bold'>{Number(selectedCommittee?.paidAmount).toLocaleString()}</h1>
-                  </div>
-                  <div className='w-[43%] h-[100px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
-                    <img className='w-[40px]' src={cash} />
-                    <h2 className='text-paytxt text-[10px] mt-1'>Remaining Amount</h2>
-                    <h1 className='text-paytxt text-[16px] font-bold'>{Number(selectedCommittee?.remainingAmount).toLocaleString()}</h1>
-                  </div>
-                  <div className='w-[43%] h-[100px] rounded-[20px] mb-2 bg-colorinput flex justify-center items-center flex-col'>
-                    <img className='w-[40px]' src={startdate} />
-                    <h2 className='text-paytxt text-[10px] mt-1'>Starting Date</h2>
-                    <h1 className='text-paytxt text-[16px] font-bold'>{formatDate(selectedCommittee?.startingMonth)}</h1>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
+            </div>)}
         </div>
       </div>
       {showConfirmAlert && (

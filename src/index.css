@@ -6,6 +6,7 @@
 
 body{
     font-family: inter;
+    background-color: black;
 }
 ::-webkit-scrollbar {
     display: none;
