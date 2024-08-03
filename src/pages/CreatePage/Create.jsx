@@ -347,7 +347,12 @@ export default function Create() {
                 <div className='bg-colorinput rounded-[30px] h-[50px] w-[100%] mb-5 flex items-center'>
                     <div className='w-[80%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center'>
                       <img className='h-[25px]' src={date} />
-                <button className='text-[white] outline-none border-none text-left bg-colorinput w-[100%] h-[40px] pl-2' onClick={openWithdrawDatesModal}>Set Withdraw Dates</button>
+                      <button 
+                        className='text-[white] outline-none border-none text-left bg-colorinput w-[100%] h-[50px] pl-2 overflow-scroll' 
+                        onClick={openWithdrawDatesModal}
+                      >
+                        {withdrawDates.length === 0 ? "Set Withdraw Dates" : withdrawDates.filter(date => !isNaN(new Date(date).getTime())).map(date => new Date(date).toLocaleDateString()).join(', ')}
+                      </button>
                   
                   {showWithdrawDates && (
                    

@@ -69,6 +69,7 @@ export default function Payment() {
         }
         else {
           fetchPayments(currentCommittee?.id, currentCommittee?.kametiType);
+          setSelectedCommittee(currentCommittee);
           // console.log(currentCommittee);
         }
       }
@@ -123,7 +124,7 @@ export default function Payment() {
       });
       console.log(type);
       if (type === 'daily') {
-        // console.log(response?.data?.data?.paidKametiResponse);
+        console.log(response?.data?.data?.paidKametiResponse);
         const allPaidKametis = response?.data?.data?.paidKametiResponse?.flatMap(item => item.paidkametis) ?? [];
         // console.log(allPaidKametis);
         // Update the filteredPayments state
@@ -132,8 +133,15 @@ export default function Payment() {
 
       }
       else {
+        console.log(response?.data?.data);
         console.log(response?.data?.data?.paidKametiResponse[0]?.paidkametis ?? []);
+
+        var paidKametiResp = response?.data?.data?.paidKametiResponse;
+        paidKametiResp.length == 0 ? 
+        setFilteredPayments([]) :
         setFilteredPayments(response?.data?.data?.paidKametiResponse[0]?.paidkametis ?? []);
+
+        
       }
 
     } catch (error) {
@@ -147,6 +155,8 @@ export default function Payment() {
     else {
       try {
         console.log(selectedRow);
+        console.log(selectedCommittee?.id);
+        console.log(status);
         const response = await axios.post(`${apiBaseUrl}payCommittee`, {
           committeeID: selectedCommittee?.id,
           status: status === "pay" ? "paid" : "Unpaid",
@@ -160,6 +170,11 @@ export default function Payment() {
           }
         }).then((response) => {
           console.log(response);
+          setSelectedCommittee(prevCommittee => ({
+            ...prevCommittee,
+            paidAmount: prevCommittee.paidAmount + selectedRow.amount,
+            remainingAmount: prevCommittee.remainingAmount - selectedRow.amount
+        }));
           fetchKametis(selectedCommittee?.kametiType);
         });
       } catch (error) {
@@ -282,7 +297,7 @@ export default function Payment() {
       // Force calendar to re-render by changing key
       setCalendarKey(prevKey => prevKey + 1);
     }
-  }, [selectedCommittee]);
+  }, [selectedCommittee?.id]);
 
   useEffect(() => {
     if (selectedCommittee?.id) {
@@ -310,7 +325,7 @@ export default function Payment() {
         });
       }
     }
-  }, [filteredPayments, selectedCommittee]);
+  }, [filteredPayments, selectedCommittee?.id]);
 
   useEffect(() => {
     if (calendarRef.current) {
@@ -329,7 +344,7 @@ export default function Payment() {
     } else {
       setHighlightedDates({ dates: [], committeeId: selectedCommittee?.id });
     }
-  }, [selectedCommittee, highlightedDatesMap]);
+  }, [selectedCommittee?.id, highlightedDatesMap]);
 
   const minDate = new Date(Math.min(...months));
   const maxDate = new Date(Math.max(...months));
@@ -368,11 +383,19 @@ export default function Payment() {
       }
 
       if (!alreadyPaid) {
-        // Perform payment functionality
-        setSelectedRow({
-          date: clickedDate,
-          amount: selectedCommittee?.pricePerMonthKameti * selectedCommittee?.myTotalKametis,
-        });
+        // check daily or monthly payment
+        if (selectedCommittee?.kametiType === 'monthly') {
+          setSelectedRow({
+            date: clickedDate,
+            amount: selectedCommittee?.pricePerMonthKameti * selectedCommittee?.myTotalKametis,
+          });
+        }
+        else{
+          setSelectedRow({
+            date: clickedDate,
+            amount: selectedCommittee?.pricePerDayKameti * selectedCommittee?.myTotalKametis,
+          });
+        }
         setConfirmMessage("Do you want to make a payment for this date?");
         setConfirmAction('payCommitee');
         setShowConfirmAlert(true);
@@ -452,7 +475,7 @@ export default function Payment() {
                           <option value="" selected="selected" disabled>No kameti</option>
                         ) : (
                           committeeData && committeeData.map((comm, index) => (
-                            <option key={index} value={comm.id}>
+                            <option key={index} value={comm.id} selected={selectedCommittee?.id === comm.id}>
                               {comm.kametiName}({comm?.totalPrice})
                             </option>))
                         )}
