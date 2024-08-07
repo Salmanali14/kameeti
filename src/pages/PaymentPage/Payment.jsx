@@ -79,42 +79,6 @@ export default function Payment() {
       console.error('Error fetching data:', error);
     }
   };
-
-  // const fetchKametis = async (type) => {
-  //   try {
-  //     const response = await axios.get(`${apiBaseUrl}payment`, {
-  //       headers: {
-  //         Authorization: `Bearer ${token}`
-  //       }
-  //     });
-  //     console.log(response);
-  //     if (type === 'daily') {
-  //       setCommitteeData(response?.data?.data?.daily_committees);
-  //       var kametees = response?.data?.data?.daily_committees;
-  //       if (kametees.length > 0) {
-  //         setSelectedCommittee(kametees[0]);
-  //         fetchPayments(kametees[0]?.id, kametees[0]?.kametiType);
-  //       }
-  //       console.log("daily" + selectedCommittee);
-
-  //     }
-  //     else {
-  //       setCommitteeData(response?.data?.data?.monthly_committees);
-  //       var kametees = response?.data?.data?.monthly_committees;
-  //       if (kametees.length > 0) {
-  //         setSelectedCommittee(kametees[0]);
-  //         fetchPayments(kametees[0]?.id, kametees[0]?.kametiType);
-  //         console.log("monthly");
-  //         // console.log(selectedCommittee);
-  //       }
-
-  //     }
-  //     setLoading(false);
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //   }
-  // };
-
   const fetchPayments = async (kametiId, type) => {
     try {
       const response = await axios.get(`${apiBaseUrl}paymentsByKametiId/${kametiId}`, {
@@ -137,11 +101,11 @@ export default function Payment() {
         console.log(response?.data?.data?.paidKametiResponse[0]?.paidkametis ?? []);
 
         var paidKametiResp = response?.data?.data?.paidKametiResponse;
-        paidKametiResp.length == 0 ? 
-        setFilteredPayments([]) :
-        setFilteredPayments(response?.data?.data?.paidKametiResponse[0]?.paidkametis ?? []);
+        paidKametiResp.length == 0 ?
+          setFilteredPayments([]) :
+          setFilteredPayments(response?.data?.data?.paidKametiResponse[0]?.paidkametis ?? []);
 
-        
+
       }
 
     } catch (error) {
@@ -174,7 +138,7 @@ export default function Payment() {
             ...prevCommittee,
             paidAmount: prevCommittee.paidAmount + selectedRow.amount,
             remainingAmount: prevCommittee.remainingAmount - selectedRow.amount
-        }));
+          }));
           fetchKametis(selectedCommittee?.kametiType);
         });
       } catch (error) {
@@ -203,7 +167,7 @@ export default function Payment() {
     if (selectedCommittee) {
 
       const filtered = selectedCommittee?.payments?.filter(payment => {
-        // Convert all properties to lowercase for case-insensitive search
+        // Convert ase kall properties to lowercase for case-insensitive search
         const paymentValues = Object.values(payment).map(value => value.toString().toLowerCase());
         // Check if any property includes the search query
         return paymentValues.some(value => value.includes(searchQuery.toLowerCase()));
@@ -226,7 +190,7 @@ export default function Payment() {
         // Sort by status alphabetically
         comparison = a[sortBy].localeCompare(b[sortBy]);
       } else {
-        // Default sorting for other properties
+        // Default sorting for other propertiess
         comparison = a[sortBy] - b[sortBy];
       }
       // Apply sortOrder
@@ -390,7 +354,7 @@ export default function Payment() {
             amount: selectedCommittee?.pricePerMonthKameti * selectedCommittee?.myTotalKametis,
           });
         }
-        else{
+        else {
           setSelectedRow({
             date: clickedDate,
             amount: selectedCommittee?.pricePerDayKameti * selectedCommittee?.myTotalKametis,
@@ -526,16 +490,9 @@ export default function Payment() {
                         </div>
                       </div>
                     )}
-
-
-
                     <br></br>
-
                   </div>
-
                 </div>
-
-
                 <div className='w-[30%] mr-2 h-[457px] flex justify-center m-0 mt-2 bg-sidebar rounded-[20px]'>
                   <div className='w-[95%] flex justify-evenly overflow-y-auto  mt-2  flex-wrap '>
                     <div className='w-[43%] h-[100px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
