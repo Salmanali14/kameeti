@@ -4,7 +4,7 @@ import { ClipLoader } from 'react-spinners';
 const Alert = ({ message, onConfirm, onCancel,btnloader }) => {
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60">
-      <div className="bg-[#373737] rounded-lg shadow-lg p-6 max-w-sm w-full">
+      <div className="bg-[#373737] rounded-lg shadow-lg p-6 max-w-[430px] w-[90%]">
         <p className="text-white text-lg mb-4">{message}</p>
         <div className="flex justify-end">
           <button

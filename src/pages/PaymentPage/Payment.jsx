@@ -25,6 +25,9 @@ import unpay from '../../images/paymentImage/unpay.png'
 import axios from 'axios';
 import { Slide, ToastContainer, toast } from 'react-toastify';
 import { FadeLoader, HashLoader } from 'react-spinners';
+import { IconButton } from '@mui/material';
+import { TbMenu2 } from 'react-icons/tb';
+import MobileSidebar from '../../components/MobileSidebar/MobileSidebar';
 export default function Payment() {
   const apiBaseUrl = import.meta.env.VITE_APP_API_URL;
   const token = localStorage.getItem('token');
@@ -396,35 +399,51 @@ export default function Payment() {
 
     setRows(formattedRows);
   };
-
+  let screenwidth =window.innerWidth
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const toggleDrawer = (open) => () => {
+    setDrawerOpen(open);
+  };
   return (
     <>
       <div className='w-[100%] h-[100vh] flex justify-center items-center bg-black'>
         <div className='w-[97%] rounded-[40px] h-[95vh] flex  '>
-          <Sidebar />
+        {screenwidth> 430 && <Sidebar /> }
           {loading ? (
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "75%", height: "100vh", background: "black" }} className="loading-screen">
+            <div className="loading-screen flex justify-center items-center sm:w-[75%] w-[100%] h-[100vh] bg-[black]">
               <FadeLoader color="#A87F0B" />
             </div>
           ) : (
-            <div className='w-[75%] h-max pb-3 bg-maincolor ml-[2px] rounded-r-[20px] h-[100%]'>
-              <div className='w-[100%] flex justify-between items-center mt-6 border-b-[2px] border-[black] '>
-                <h1 className='text-[#A87F0B] text-[25px] font-bold ml-10 mb-6'>Payments</h1>
+            <div className='sm:w-[75%] w-[100%] h-[95vh] overflow-y-scroll sm:pb-3 bg-maincolor ml-[2px]  sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px] '>
+              <div className='w-[100%] flex justify-between items-center h-[80px] sm:p-0 p-3 sm:mt-6 border-b-[2px] border-[black] '>
+              <span className='flex justify-center items-center'>
+              {screenwidth < 430 && (
+                <IconButton
+                  color="inherit"
+                  aria-label="open drawer"
+                  onClick={toggleDrawer(true)}
+                  edge="start"
+                >
+                  <TbMenu2 className='text-white text-[35px]' />
+                </IconButton>
+              )}
+              <MobileSidebar drawerOpen={drawerOpen} toggleDrawer={toggleDrawer} />
+                <h1 className='text-[#A87F0B] sm:text-[25px] text-[20px] font-bold sm:ml-10 ml-3 sm:mb-6'>Payments</h1> </span>
 
               </div>
 
 
               <div className='flex w-[50%] ml-[25%] mt-3 mb-2 items-center relative'>
-                <div className='bg-[#181818] border text-white outline-none border-[#A87F0B] rounded-[30px] h-[45px] w-[100%] pl-[165px]'>
-                  <button className=' text-white absolute left-0 rounded-[30px] h-[44px] text-[20px] w-[53%]' onClick={() => handleKametiTypeChange("daily")} style={kametiType == "daily" ? { backgroundColor: "#A87F0B", color: 'black' } : null}>Daily</button>
-                  <button className=' absolute right-0 rounded-[30px] h-[44px] text-[20px] w-[53%]' onClick={() => handleKametiTypeChange('monthly')} style={kametiType == "monthly" ? { backgroundColor: "#A87F0B", color: 'black' } : null}>Monthly</button>
+                <div className='bg-[#181818] border text-white outline-none border-[#A87F0B] rounded-[30px] h-[39px] sm:h-[45px] w-[100%] pl-[165px]'>
+                  <button className=' text-white absolute left-0 rounded-[30px] h-[39px] sm:h-[44px] sm:text-[20px] w-[53%]' onClick={() => handleKametiTypeChange("daily")} style={kametiType == "daily" ? { backgroundColor: "#A87F0B", color: 'black' } : null}>Daily</button>
+                  <button className=' absolute right-0 rounded-[30px] h-[39px] sm:h-[44px] sm:text-[20px] w-[53%]' onClick={() => handleKametiTypeChange('monthly')} style={kametiType == "monthly" ? { backgroundColor: "#A87F0B", color: 'black' } : null}>Monthly</button>
                 </div>
               </div>
 
 
 
-              <div className='w-[100%] flex'>
-                <div className='w-[75%] flex justify-center items-center flex-col'>
+              <div className='w-[100%] flex  flex-col sm:flex-row justify-center items-center'>
+                <div className='sm:w-[75%] w-[100%] pl-1 pr-1 flex justify-center items-center flex-col'>
                   <div className='w-[98%]  mt-2  rounded-[20px] items-center  flex justify-between  h-[100px] bg-sidebar '>
                     <div className='w-[50%] ml-5 flex justify-start  flex-col'>
                       <p className='text-gray-200 font-bold'>{selectedCommittee?.kametiName}</p>
@@ -493,7 +512,7 @@ export default function Payment() {
                     <br></br>
                   </div>
                 </div>
-                <div className='w-[30%] mr-2 h-[457px] flex justify-center m-0 mt-2 bg-sidebar rounded-[20px]'>
+                <div className='sm:w-[30%] w-[96%] sm:mr-2 sm:h-[457px] flex justify-center m-0 mt-2 bg-sidebar rounded-[20px]'>
                   <div className='w-[95%] flex justify-evenly overflow-y-auto  mt-2  flex-wrap '>
                     <div className='w-[43%] h-[100px] rounded-[20px] bg-colorinput flex justify-center items-center flex-col'>
                       <img className='w-[50px]' src={bank} />

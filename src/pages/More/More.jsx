@@ -15,7 +15,7 @@ import protection from '../../images/Protection.png'
 import power from '../../images/log.png'
 import noti from '../../images/Notification.png'
 import { useNavigate } from 'react-router-dom'
-import { Box, Modal, Typography } from '@mui/material'
+import { Box, IconButton, Modal, Typography } from '@mui/material'
 import Toggle from '../../components/Toggle.jsx/Toggle'
 import { FaImage } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
@@ -28,7 +28,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import { IoIosInformationCircleOutline } from 'react-icons/io'
 import InfoModal from '../../components/InfoModal/InfoModal'
 import PhoneInput from 'react-phone-input-2';
-
+import { TbMenu2 } from 'react-icons/tb'
+import MobileSidebar from '../../components/MobileSidebar/MobileSidebar';
 
 
 export default function More() {
@@ -298,6 +299,12 @@ export default function More() {
     fetchKametees();
   }, []);
 
+  let screenwidth =window.innerWidth
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const toggleDrawer = (open) => () => {
+    setDrawerOpen(open);
+  };
+
   return (
     <>
       <Cropper
@@ -314,21 +321,33 @@ export default function More() {
       />
       <div className='w-[100%] h-[100vh] flex justify-center items-center bg-black'>
         <div className='w-[97%] rounded-[40px] h-[95vh] flex  '>
-          <Sidebar />
+        {screenwidth> 430 && <Sidebar /> }
           {loading ? (
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "75%", height: "100vh", background: "black" }} className="loading-screen">
+            <div  className="loading-screen flex justify-center items-center sm:w-[75%] w-[100%] h-[100vh] bg-[black]">
               <FadeLoader color="#A87F0B" />
             </div>
           ) : (
-            <div className='w-[75%] h-max pb-3 bg-maincolor ml-[2px] rounded-r-[20px]'>
-              <div className='w-[100%] flex justify-between items-center mt-6 border-b-[2px] border-[black] '>
-                <h1 className='text-[#A87F0B] text-[25px] font-bold ml-10 mb-6'>More</h1>
+            <div className='sm:w-[75%] w-[100%] h-max sm:pb-3  bg-maincolor ml-[2px] sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px]'>
+              <div className='w-[100%] flex justify-between items-center sm:p-0 p-3 sm:h-max h-[80px] sm:mt-6 border-b-[2px] border-[black] '>
+              <span className='flex justify-center items-center'>
+              {screenwidth < 430 && (
+                <IconButton
+                  color="inherit"
+                  aria-label="open drawer"
+                  onClick={toggleDrawer(true)}
+                  edge="start"
+                >
+                  <TbMenu2 className='text-white text-[35px]' />
+                </IconButton>
+              )}
+              <MobileSidebar drawerOpen={drawerOpen} toggleDrawer={toggleDrawer} />
+                <h1 className='text-[#A87F0B] sm:text-[25px] text-[20px] ml-3 font-bold sm:ml-10 sm:mb-6'>More</h1></span>
               </div>
-              <div className='w-[100%] flex justify-center items-center flex-col'>
+              <div className='w-[100%] p-1 flex justify-center items-center flex-col'>
                 <div className='w-[98%] rounded-[20px] h-[120px] bg-[#343434] mt-2 flex justify-between items-center'>
                   <div className='flex justify-center items-center ml-5'>
-                    <img className='w-[100px] h-[100px] rounded-full' src={userData?.profileUrl ? userData?.profileUrl : avatar} />
-                    <div className='flex justify-center items-start flex-col ml-5'>
+                    <img className='sm:w-[100px] sm:h-[100px] w-[80px] h-[80px] rounded-full' src={userData?.profileUrl ? userData?.profileUrl : avatar} />
+                    <div className='flex justify-center items-start flex-col sm:ml-5 ml-3'>
                       <h1 className='text-white font-bold text-[16px]'>{userData?.fullName}</h1>
                       <p className='text-[white] mt-1 mb-1 text-[12px]'>{userData?.phoneNumber}</p>
                       {userData?.email &&
@@ -338,55 +357,55 @@ export default function More() {
                     </div>
                   </div>
                   <div className='flex'>
-                    <button onClick={handleedit} className='flex mr-5 justify-center items-center w-[120px] h-[29px] rounded-[30px]  text-white text-[12px] bg-paytxt1'>Edit Profile {'\u00A0'}<img className='w-[15px]' src={editimg} /></button>
+                    <button onClick={handleedit} className='flex mr-5 justify-center items-center sm:w-[120px] w-[100px] h-[29px] rounded-[30px]  text-white text-[12px] bg-paytxt1'>Edit Profile {'\u00A0'}<img className='w-[15px]' src={editimg} /></button>
                     {/* <button onClick={handleDelAccountAlert} className='flex mr-5 justify-center items-center w-[120px] h-[29px] rounded-[30px]  text-white text-[12px] bg-paytxt1'>Delete Account {'\u00A0'}<img className='w-[15px]' src={remove} /></button> */}
                   </div>
                 </div>
-                <div className='w-[98%] rounded-[20px] h-[400px] flex justify-center items-center bg-[#343434] mt-2'>
+                <div className='w-[98%] rounded-[20px] sm:h-[400px] flex justify-center items-center bg-[#343434] mt-2'>
                   <div className='flex  justify-center items-center w-[100%] flex-wrap '>
-                    <div className='w-[20%] m-3 relative h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+                    <div className='sm:sm:w-[20%]  w-[40%] m-3 relative h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
                       <IoIosInformationCircleOutline onClick={handleinfoRecord} className='text-[white] absolute right-2 top-2 text-[25px]' />
                       <img className='w-[30px]' onClick={handleallrecords} src={folder} />
-                      <h2 className='text-white text-[13px] mt-1' onClick={handleallrecords}>All Records ({allKametiCounts})</h2>
+                      <h2 className='text-white sm:text-[13px] text-[12px] mt-1' onClick={handleallrecords}>All Records ({allKametiCounts})</h2>
                     </div>
-                    <div className='w-[20%] m-3 relative  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+                    <div className='sm:w-[20%] w-[40%] m-3 relative  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
                       <IoIosInformationCircleOutline onClick={handleinfoDelete} className='text-[white] absolute right-2 top-2 text-[25px]' />
                       <img className='w-[30px]' onClick={handleHistorydelete} src={delete1} />
-                      <h2 className='text-white text-[13px] mt-1' onClick={handleHistorydelete}>Deleted Records ({delKametiCounts})</h2>
+                      <h2 className='text-white sm:text-[13px] text-[12px] mt-1' onClick={handleHistorydelete}>Deleted Records ({delKametiCounts})</h2>
                     </div>
-                    <div className='w-[20%] m-3  h-[110px] relative cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+                    <div className='sm:w-[20%] w-[40%] m-3  h-[110px] relative cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
                       <IoIosInformationCircleOutline onClick={handleopenInfo} className='text-[white] absolute right-2 top-2 text-[25px]' />
 
                       <img className='w-[30px]' src={noti} />
                       <div className='flex justify-center items-center'>
-                        <h2 className='text-white text-[13px] mt-1 mr-2'>Notification</h2>
+                        <h2 className='text-white sm:text-[13px] text-[12px] mt-1 mr-2'>Notification</h2>
                         <Toggle />
                       </div>
                     </div>
-                    <div className='w-[20%] m-3 relative h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+                    <div className='sm:w-[20%] w-[40%] m-3 relative h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
                       <IoIosInformationCircleOutline onClick={handleinfoShare} className='text-[white] absolute right-2 top-2 text-[25px]' />
                       <img className='w-[30px]' onClick={handleopenshare} src={share} />
-                      <h2 className='text-white text-[13px] mt-1' onClick={handleopenshare} >Share</h2>
+                      <h2 className='text-white sm:text-[13px] text-[12px] mt-1' onClick={handleopenshare} >Share</h2>
                     </div>
-                    <div className='w-[20%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+                    <div className='sm:w-[20%] w-[40%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={protection} />
-                      <h2 className='text-white text-[13px] mt-1 '>Privacy Police</h2>
+                      <h2 className='text-white sm:text-[13px] text-[12px] mt-1 '>Privacy Police</h2>
                     </div>
-                    <div className='w-[20%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+                    <div className='sm:w-[20%] w-[40%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={support} />
-                      <h2 className='text-white text-[13px] mt-1 '>Support</h2>
+                      <h2 className='text-white sm:text-[13px] text-[12px] mt-1 '>Support</h2>
                     </div>
-                    <div className='w-[20%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+                    <div className='sm:w-[20%] w-[40%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={star} />
-                      <h2 className='text-white text-[13px] mt-1'>Rate us</h2>
+                      <h2 className='text-white sm:text-[13px] text-[12px] mt-1'>Rate us</h2>
                     </div>
-                    <div onClick={handleDelAccountAlert} className='w-[20%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+                    <div onClick={handleDelAccountAlert} className='sm:w-[20%] w-[40%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
                       <img className='w-[40px]' src={delUser} />
-                      <h2 className='text-white text-[13px] mt-1 '>Delete Account</h2>
+                      <h2 className='text-white sm:text-[13px] text-[12px] mt-1 '>Delete Account</h2>
                     </div>
-                    <div onClick={handleLogoutAlert} className='w-[20%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
+                    <div onClick={handleLogoutAlert} className='sm:w-[20%] w-[40%] m-3  h-[110px] cursor-pointer rounded-[20px]  bg-[#444343] flex justify-center items-center flex-col'>
                       <img className='w-[30px]' src={power} />
-                      <h2 className='text-white text-[13px] mt-1 '>Logout</h2>
+                      <h2 className='text-white sm:text-[13px] text-[12px] mt-1 '>Logout</h2>
                     </div>
                   </div>
                 </div>
@@ -402,7 +421,8 @@ export default function More() {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 400,
+           maxWidth:"430px",
+            width: "90%",
             bgcolor: '#373737',
             color: "white",
             outline: "none",
@@ -432,7 +452,8 @@ export default function More() {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 400,
+            maxWidth:"430px",
+            width: "90%",
             bgcolor: '#373737',
             color: "white",
             outline: "none",
@@ -465,8 +486,9 @@ export default function More() {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 600,
-            bgcolor: '#181818',
+            maxWidth:"430px",
+            width: "90%",
+            bgcolor: '#373737',
             color: "white",
             outline: "none",
             borderRadius: "10px",
@@ -494,40 +516,40 @@ export default function More() {
                 <img src={tempimg ? tempimg : avatar} className='rounded-full w-[120px] h-[120px]' />
               </div>
               <div className='flex justify-center flex-col mt-[90px] items-center w-[100%]'>
-                <input type='text' placeholder='Full Name' value={name} onChange={(e) => setName(e.target.value)} className='w-[100%] outline-none rounded-[60px] h-[40px] pl-6 pr-6 mt-5 bg-[#333333] text-[#FFFFFF]' />
-                <input type='text' placeholder='Username' value={username} onChange={(e) => setUsername(e.target.value)} className='w-[100%] outline-none rounded-[60px] h-[40px] pl-6 pr-6 mt-5 bg-[#333333] text-[#FFFFFF]' />
-                <input type='text' placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} className='w-[100%] outline-none rounded-[60px] h-[40px] pl-6 pr-6 mt-5 bg-[#333333] text-[#FFFFFF]' />
+                <input type='text' placeholder='Full Name' value={name} onChange={(e) => setName(e.target.value)} className='w-[100%] outline-none rounded-[60px] h-[40px] pl-6 pr-6 mt-5 bg-[#191717] text-[#FFFFFF]' />
+                <input type='text' placeholder='Username' value={username} onChange={(e) => setUsername(e.target.value)} className='w-[100%] outline-none rounded-[60px] h-[40px] pl-6 pr-6 mt-5 bg-[#191717] text-[#FFFFFF]' />
+                <input type='text' placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} className='w-[100%] outline-none rounded-[60px] h-[40px] pl-6 pr-6 mt-5 bg-[#191717] text-[#FFFFFF]' />
                 
                 {/* <input type='text' placeholder='Phone Number' value={phone} onChange={(e) => setPhone(e.target.value)} className='w-[100%] outline-none rounded-[60px] h-[40px] pl-6 pr-6 mt-5 bg-[#333333] text-[#FFFFFF]' /> */}
                 
-                <div className='w-[100%] outline-none rounded-[60px] h-[40px] pl-6 pr-6 mt-5 bg-[#333333] text-[#FFFFFF] flex items-center'>
+                <div className='w-[100%] outline-none rounded-[60px] h-[40px] pl-6 pr-6 mt-5 bg-[#191717] text-[#FFFFFF] flex items-center'>
   <PhoneInput
     country={'us'}
     value={phone}
     onChange={setPhone}
     inputStyle={{
-      background: '#333333',
+      background: '#191717',
       color: '#FFFFFF',
       border: 'none',
       width: '100%',
       height: '100%'
     }}
     buttonStyle={{
-      background: '#333333',
+      background: '#191717',
       border: 'none'
     }}
     containerStyle={{
       width: '100%'
     }}
     dropdownStyle={{
-      background: '#333333',
+      background: '#191717',
       color: '#FFFFFF'
     }}
   />
 </div>
 
 
-                <input type='text' placeholder='Address' value={address} onChange={(e) => setAddress(e.target.value)} className='w-[100%] outline-none rounded-[60px] h-[40px] pl-6 pr-6 mt-5 bg-[#333333] text-[#FFFFFF]' />
+                <input type='text' placeholder='Address' value={address} onChange={(e) => setAddress(e.target.value)} className='w-[100%] outline-none rounded-[60px] h-[40px] pl-6 pr-6 mt-5 bg-[#191717] text-[#FFFFFF]' />
                 <div className='flex justify-center mt-5 items-center w-[100%]'>
                   <button
                     onClick={handleedit}
@@ -558,10 +580,11 @@ export default function More() {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: 500,
-            bgcolor: '#181818',
+            maxWidth:"430px",
+            width: "90%",
+            bgcolor: '#373737',
             borderRadius: '10px',
-            background: '#181818',
+          
             outline: 'none',
             boxShadow: 24,
             maxHeight: "600px",

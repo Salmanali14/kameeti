@@ -65,13 +65,16 @@ export default function SignIn() {
       // console.error('Sign-in error:', error);
     }
   };
+  let screenwidth =window.innerWidth
   return (
    <>
    <div className='w-[100%] flex bg-black h-[100vh] justify-center items-center'>
+   {screenwidth> 430 &&
    <div className='w-[50%] bg-customBlack h-[90vh] rounded-[20px] flex justify-center items-center'>
    <img className='w-[60%]' src={sigin}/>
    </div>
-   <div className='w-[45%]  h-[90vh] rounded-[20px] flex justify-center flex-col items-center'>
+   }
+   <div className='sm:w-[45%] w-[90%]  h-[90vh] rounded-[20px] flex justify-center flex-col items-center'>
    <img className='w-[30%] mb-10' src={logo}/>
    {/* <div className='flex w-2/5 items-center relative'>
     <div className='bg-black border text-white outline-none border-[#A87F0B] rounded-[30px] h-[45px] w-[100%] pl-[165px]'>
@@ -82,22 +85,22 @@ export default function SignIn() {
   {responseMessage && <p className="text-white mt-3 w-[58%]">{responseMessage}</p>}
 
 {emailSelected ?(
-  <input className='bg-black border text-white outline-none	 border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 ' type='email' placeholder='Email' onChange={(e) => setPhoneNumber(e.target.value)} />
+  <input className=' border text-white outline-none	 bg-transparent border-gray-400 rounded-[30px] h-[50px] sm:w-[60%] w-[100%] p-5 mt-5 ' type='email' placeholder='Email' onChange={(e) => setPhoneNumber(e.target.value)} />
 ):(
-   <input className='bg-black border text-white outline-none	 border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 ' type='text' placeholder='PhoneNumber/AnyNumber' onChange={(e) => setPhoneNumber(e.target.value)} />
+   <input className=' border text-white outline-none	 bg-transparent border-gray-400 rounded-[30px] h-[50px] sm:w-[60%] w-[100%] p-5 mt-5 ' type='text' placeholder='PhoneNumber/AnyNumber' onChange={(e) => setPhoneNumber(e.target.value)} />
   )}
-   <div className='bg-black flex items-center border border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 mb-3'>
-   <input  className=' bg-black w-[100%] h-[20px] outline-none	 text-white' type={showPassword ? 'password' : 'text'} placeholder='Password' onChange={(e) => setPassword(e.target.value)} />
+   <div className='bg-transparent flex items-center border border-gray-400 rounded-[30px] h-[50px] sm:w-[60%] w-[100%] p-5 mt-5 mb-3'>
+   <input  className=' bg-transparent w-[100%] h-[20px] outline-none	 text-white' type={showPassword ? 'password' : 'text'} placeholder='Password' onChange={(e) => setPassword(e.target.value)} />
    {showPassword ? (
     <FaRegEyeSlash className='text-white ml-2 text-[22px]' onClick={() => setShowPassword(false)} />
   ) : (
     <MdOutlineRemoveRedEye className='text-white ml-2 text-[22px]' onClick={() => setShowPassword(true)} />
   )}</div>
-  <div className='w-[55%]'>
+  <div className='sm:w-[55%] w-[85%]'>
   <Link to='/forgot' className='text-[#A87F0B] text-[15px] flex justify-end mb-3 '>Forgot Password?</Link>
   </div>
-   <button className='bg-[#A87F0B] rounded-[30px] h-[50px] text-[20px] w-[60%] flex justify-center items-center' onClick={handleSignIn}>Sign In</button>
-   <p className='text-[white] mt-10'>Don’t have an account?<Link to='/signup' className='text-[#A87F0B] ml-1'>Sign Up</Link></p>
+   <button className='bg-[#A87F0B] rounded-[30px] h-[50px] text-[20px] w-[60%] flex justify-center items-center mt-5 sm:mt-0' onClick={handleSignIn}>Sign In</button>
+   <p className='text-[white] sm:mt-10 mt-5'>Don’t have an account?<Link to='/signup' className='text-[#A87F0B] ml-1'>Sign Up</Link></p>
    </div>
    </div>
    <ToastContainer

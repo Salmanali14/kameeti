@@ -27,6 +27,9 @@ import WithdrawDates from '../../components/WithdrawDates/WithdrawDates';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom'
 import { FadeLoader, HashLoader } from 'react-spinners';
+import { TbMenu2 } from 'react-icons/tb';
+import { IconButton } from '@mui/material';
+import MobileSidebar from '../../components/MobileSidebar/MobileSidebar';
 
 export default function History({ recordType = null }) {  // recordType will be all/deleted
   const [payments, setPayments] = useState([]);
@@ -198,30 +201,47 @@ export default function History({ recordType = null }) {  // recordType will be 
   }
 
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
+  let screenwidth =window.innerWidth
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const toggleDrawer = (open) => () => {
+    setDrawerOpen(open);
+  };
   return (
     <>
       <div className='w-[100%] h-[100vh] flex justify-center items-center bg-black'>
         <div className='w-[97%] rounded-[40px] h-[95vh] flex  '>
-          <Sidebar />
+        {screenwidth> 430 && <Sidebar /> }
           {loading ? (
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", width: "75%", height: "100vh", background: "black" }} className="loading-screen">
+            <div  className="loading-screen flex justify-center items-center sm:w-[75%] w-[100%] h-[100vh] bg-[black]">
               <FadeLoader color="#A87F0B" />
             </div>
           ) : (
-            <div className='w-[75%] h-max pb-3 bg-maincolor ml-[2px] rounded-r-[20px] flex flex-col'>
-              <div className='w-[100%] flex justify-between items-center mt-6 border-b-[2px] border-[black] '>
-                <h1 className='text-[#A87F0B] text-[25px] font-bold ml-10 mb-6'> {recordType == "deleted" ? "Deleted kameties" : "All kameties"}</h1>
+            <div className='sm:w-[75%] w-[100%] h-[95vh] overflow-y-scroll sm:pb-3 bg-maincolor ml-[2px]  sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px] flex flex-col'>
+              <div className='w-[100%] flex justify-between items-center h-[80px] sm:p-0 p-3 sm:mt-6 border-b-[2px] border-[black] '>
+              <span className='flex justify-center items-center'>
+              {screenwidth < 430 && (
+                <IconButton
+                  color="inherit"
+                  aria-label="open drawer"
+                  onClick={toggleDrawer(true)}
+                  edge="start"
+                >
+                  <TbMenu2 className='text-white text-[35px]' />
+                </IconButton>
+              )}
+              <MobileSidebar drawerOpen={drawerOpen} toggleDrawer={toggleDrawer} />
+                <h1 className='text-[#A87F0B] sm:text-[25px] text-[20px] font-bold ml-2 sm:ml-10 sm:mb-6'> {recordType == "deleted" ? "Deleted kameties" : "All kameties"}</h1></span>
+
                 <div className='flex items-center'>
-                  <button className='flex justify-center items-center w-[180px] h-[40px]  rounded-[30px] bg-colorinput text-[white]  mb-6 mr-3' ><IoIosSearch className='text-[white] text-[20px]' /><input type='text' value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)} placeholder='Search' className='outline-none bg-transparent border-none w-[130px] placeholder-white' /></button>
-                  <button className='flex justify-center items-center w-[100px] h-[40px]  rounded-[30px] bg-colorinput text-[white]  mb-6 mr-10' ><MdOutlineRestartAlt className='text-[white] text-[20px]' />Reset</button></div>
+                  <button className='flex justify-center items-center sm:w-[180px] w-[110px]  h-[40px]  rounded-[30px] bg-colorinput text-[white] mr-2  sm:mb-6 sm:mr-3' ><IoIosSearch className='text-[white] sm:text-[20px]' /><input type='text' value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)} placeholder='Search' className='outline-none text-[14px] pr-2 sm:text[16px] bg-transparent border-none w-[90px] sm:w-[130px] placeholder-white' /></button>
+                  <button className='flex justify-center items-center sm:w-[100px] w-[40px] h-[40px]  sm:rounded-[30px] rounded-full bg-colorinput text-[white]  sm:mb-6 sm:mr-10' ><MdOutlineRestartAlt className='text-[white] text-[20px]' />  {screenwidth < 431 ? "" : "Reset"}</button></div>
               </div>
               <br />
               <div className='flex w-[50%] ml-[25%] items-center relative'>
-                <div className='bg-[#181818] border text-white outline-none border-[#A87F0B] rounded-[30px] h-[45px] w-[100%] pl-[165px]'>
-                  <button className=' absolute right-0 rounded-[30px] h-[44px] text-[20px] w-[53%]' onClick={() => handleKametiType('monthly')} style={selectedKametiType == "monthly" ? { backgroundColor: "#A87F0B", color: 'black' } : null}>Monthly</button>
-                  <button className=' text-white absolute left-0 rounded-[30px] h-[44px] text-[20px] w-[53%]' onClick={() => handleKametiType("daily")} style={selectedKametiType == "daily" ? { backgroundColor: "#A87F0B", color: 'black' } : null}>Daily</button>
+                <div className='bg-[#181818] border text-white outline-none border-[#A87F0B] rounded-[30px] h-[39px] sm:h-[45px] w-[100%] pl-[165px]'>
+                  <button className=' absolute right-0 rounded-[30px] h-[39px] sm:h-[44px] sm:text-[20px] w-[53%]' onClick={() => handleKametiType('monthly')} style={selectedKametiType == "monthly" ? { backgroundColor: "#A87F0B", color: 'black' } : null}>Monthly</button>
+                  <button className=' text-white absolute left-0 rounded-[30px] h-[39px] sm:h-[44px] sm:text-[20px] w-[53%]' onClick={() => handleKametiType("daily")} style={selectedKametiType == "daily" ? { backgroundColor: "#A87F0B", color: 'black' } : null}>Daily</button>
                 </div>
               </div>
               <br />
@@ -230,15 +250,15 @@ export default function History({ recordType = null }) {  // recordType will be 
                   No Kameti Record Exists
                 </div>) :
 
-                <div className='flex justify-center items-center pl-[40px] pr-[40px] w-[100%]' >
-                  <div className='flex justify-between    flex-wrap  h-[432px] overflow-y-auto w-[100%]'>
+                <div className='flex justify-center items-center sm:pl-[40px] sm:pr-[40px] w-[100%]' >
+                  <div className='flex justify-between   flex-wrap  sm:h-[432px] overflow-y-auto w-[100%]'>
                     {payments
                       .filter(payment => {
                         // Filter payments based on search query
                         return payment.kametiName.toLowerCase().includes(searchQuery.toLowerCase());
                       })
                       .map((payment, index) => (
-                        <div key={index} className='w-[40%] h-[465px] mt-2 rounded-[20px] bg-sidebar m-2'>
+                        <div key={index} className='sm:w-[45%] w-[100%] sm:h-[465px] mt-2 rounded-[20px] bg-sidebar m-2'>
                           <div className='w-100% h-[60px] rounded-t-[20px] bg-colorinput flex justify-between items-center'>
                             <div className='flex items-center ml-5'>
                               <div className='w-[25px] ml-1 h-[25px] bg-customBlack text-[white] mr-1 text-[12px] rounded-[50px] flex justify-center items-center'>

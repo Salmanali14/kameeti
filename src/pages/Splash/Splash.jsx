@@ -19,20 +19,31 @@ export default function Splash() {
    
   ];
 
- 
+let screenwidth =window.innerWidth
+
   return (
-    <div className='w-[100%] flex bg-black h-[100vh] justify-center items-center'>
-    <div className='w-[100%] flex justify-evenly items-center' >
+    <div className='w-[100%] flex bg-black sm:h-[100vh] justify-center items-center'>
+    <div className='w-[100%]  flex justify-evenly sm:flex-row flex-col items-center' >
+    {screenwidth> 430 &&
     <div className='w-[30%] flex justify-center items-center flex-col  '>
     <img className="w-40" src={logo}/>
     <h2 className='text-[#A87F0B] text-[20px] mt-2'>Welcome to kameti!</h2>
     <p className='text-[#847F7F] text-center	'>Kameti is an online application that allows you to maintain your kameties online.With the help of this app, you can get kameties records from anywhere in the wold.</p>
     <Link to="/signin"><button className='w-[150px] h-[40px] rounded-[20px] mt-[20px] bg-[#A87F0B]'>Go</button></Link>
 
-    </div>
-    <div className='w-[60%] flex '>
+    </div>}
+
+    <div className='sm:w-[60%] w-[90%] flex sm:mt-0 mt-5 '>
     <CustomSlider images={images} />
     </div>
+    {screenwidth< 431 &&
+      <div className='sm:w-[30%] w-[90%] mt-10 sm:mt-0 flex justify-center items-center flex-col  '>
+      <img className="sm:w-40 w-[100px]" src={logo}/>
+      <h2 className='text-[#A87F0B] sm:text-[20px] mt-2'>Welcome to kameti!</h2>
+      <p className='text-[#847F7F] text-center sm:text-[16px] text-[13px] sm:mt-0 mt-2	'>Kameti is an online application that allows you to maintain your kameties online.With the help of this app, you can get kameties records from anywhere in the wold.</p>
+      <Link to="/signin"><button className='w-[150px] h-[40px] rounded-[20px] mt-[20px] bg-[#A87F0B]'>Go</button></Link>
+  
+      </div>}
     </div>
     </div>
   )

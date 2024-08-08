@@ -78,22 +78,24 @@ export default function Signup() {
       toast.error(error?.response?.data?.message);
     }
   };
-
+  let screenwidth =window.innerWidth
   return (
     <>
       <div className='w-[100%] flex bg-black h-[100vh] justify-center items-center'>
+      {screenwidth> 430 &&
         <div className='w-[50%] bg-customBlack h-[90vh] rounded-[20px] flex justify-center items-center'>
           <img className='w-[60%]' src={signup} />
         </div>
-        <div className='w-[45%] h-[90vh] rounded-[20px] flex justify-center flex-col items-center'>
-          <img className='w-[30%] mb-10' src={logo} />
+      }
+        <div className='sm:w-[45%] w-[90%] h-[90vh] rounded-[20px] flex justify-center flex-col items-center'>
+          <img className='w-[30%] ' src={logo} />
           <div className='flex w-2/5 items-center relative'></div>
-          {responseMessage && <p className="text-white mt-3 w-[58%]">{responseMessage}</p>}
-          <input className='bg-black border text-white outline-none border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5' type='text' placeholder='Full Name' onChange={(e) => setFullname(e.target.value)} />
-          <input className='bg-black border text-white outline-none border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5' type='text' placeholder='Username' onChange={(e) => setUsername(e.target.value)} />
-          <input className='bg-black border text-white outline-none border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5' type='email' placeholder='Email' onChange={(e) => setEmail(e.target.value)} />
+          {responseMessage && <p className="text-white sm:mt-3 mt-5 w-[58%]">{responseMessage}</p>}
+          <input className='bg-black border text-white outline-none border-gray-400 rounded-[30px] h-[50px] sm:w-[60%] w-[100%] p-5 sm:mt-3 mt-5' type='text' placeholder='Full Name' onChange={(e) => setFullname(e.target.value)} />
+          <input className='bg-black border text-white outline-none border-gray-400 rounded-[30px] h-[50px] sm:w-[60%] w-[100%] p-5 sm:mt-3 mt-5' type='text' placeholder='Username' onChange={(e) => setUsername(e.target.value)} />
+          <input className='bg-black border text-white outline-none border-gray-400 rounded-[30px] h-[50px] sm:w-[60%] w-[100%] p-5 sm:mt-3 mt-5' type='email' placeholder='Email' onChange={(e) => setEmail(e.target.value)} />
           
-          <div className='bg-black border text-white outline-none border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 flex items-center'>
+          <div className='bg-black border text-white outline-none border-gray-400 rounded-[30px] h-[50px] sm:w-[60%] w-[100%] p-5 sm:mt-3 mt-5 flex items-center'>
   <PhoneInput
     country={'us'}
     value={phone}
@@ -121,7 +123,7 @@ export default function Signup() {
 </div>
 
           
-          <div className='bg-black flex items-center border border-gray-400 rounded-[30px] h-[50px] w-[60%] p-5 mt-5 mb-5'>
+          <div className='bg-black flex items-center border border-gray-400 rounded-[30px] h-[50px] sm:w-[60%] w-[100%] p-5 sm:mt-3 mt-5 mb-2'>
             <input className='bg-black w-[100%] h-[20px] outline-none text-white' type={showPassword ? 'password' : 'text'} placeholder='Password' onChange={(e) => setPassword(e.target.value)} />
             {showPassword ? (
               <FaRegEyeSlash className='text-white ml-2 text-[22px]' onClick={() => setShowPassword(false)} />
@@ -130,7 +132,7 @@ export default function Signup() {
             )}
           </div>
           
-          <div className='flex flex-col w-[60%] mt-1'>
+          <div className='flex flex-col w-[60%] sm:mt-1 mt-5'>
             <div className='flex justify-around'>
               <label className='text-white'>
                 <input type='radio' value='user' checked={userType === 'user'} onChange={(e) => setUserType(e.target.value)} />
@@ -143,8 +145,8 @@ export default function Signup() {
             </div>
           </div>
           
-          <button className='bg-[#A87F0B] rounded-[30px] h-[50px] text-[20px] w-[60%] flex justify-center items-center p-3 mt-5' onClick={handleSignup}>Sign Up</button>
-          <p className='text-[white] mt-10'>Already have an account?<Link to='/signin' className='text-[#A87F0B] ml-1'>Sign in</Link></p>
+          <button className='bg-[#A87F0B] rounded-[30px] h-[50px] text-[20px] w-[60%] flex justify-center items-center p-3 sm:mt-3 mt-5' onClick={handleSignup}>Sign Up</button>
+          <p className='text-[white] sm:mt-2 mt-5'>Already have an account?<Link to='/signin' className='text-[#A87F0B] ml-1'>Sign in</Link></p>
         </div>
       </div>
       <ToastContainer

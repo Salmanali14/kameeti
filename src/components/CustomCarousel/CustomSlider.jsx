@@ -47,16 +47,16 @@ export default function CustomSlider({ images }) {
   };
 
   return (
-    <div className="w-full h-full relative rounded-[20px] overflow-hidden">
+    <div className="w-full sm:h-full relative h-[350px] rounded-[20px] overflow-hidden">
       <VirtualizeSwipeableViews
         index={activeIndex}
         onChangeIndex={handleChangeIndex}
         slideRenderer={({ index, key }) => (
-          <div key={key} className="flex justify-center flex-col items-center rounded-[20px] h-[90vh]  bg-customBlack">
-            <img src={images[index]?.imgURL} alt={images[index]?.imgAlt} className="w-auto h-[130px]" />
-            <div className="w-full p-4 text-center">
-              <h2 className='text-[25px] text-[#A87F0B] font-bold'>{images[index]?.title}</h2>
-              <p className='text-[15px] text-[#847F7F]'>{images[index]?.description}</p>
+          <div key={key} className="flex justify-center flex-col items-center rounded-[20px] sm:h-[90vh] h-[350px]  bg-customBlack">
+            <img src={images[index]?.imgURL} alt={images[index]?.imgAlt} className="w-auto sm:h-[130px] h-[80px]" />
+            <div className="w-full sm:p-4 pl-4 pr-4 mt-2 text-center">
+              <h2 className='sm:text-[25px] text-[#A87F0B] font-bold'>{images[index]?.title}</h2>
+              <p className='sm:text-[15px] text-[13px] text-[#847F7F]'>{images[index]?.description}</p>
             </div>
           </div>
         )}
@@ -64,6 +64,7 @@ export default function CustomSlider({ images }) {
         resistance={true} // Enable resistance for swipe
         loop={true} // Enable looping
       />
+     
       <button className="absolute bottom-[10px] transform -translate-y-1/2 left-5 font-bold text-[#A87F0B]" onClick={handlePrev}>
         Prev
       </button>
