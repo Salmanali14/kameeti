@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const WithdrawDates = ({ counts, dates, committeeId, onClose, getPayments, isCreating, onCreate }) => {
+const WithdrawDates = ({ counts, dates, committeeId, onClose, getPayments, accessFrom, isCreating, onCreate }) => {
   const [inputDates, setInputDates] = useState([]);
   const apiBaseUrl = import.meta.env.VITE_APP_API_URL;
   const token = localStorage.getItem('token');
@@ -68,23 +68,37 @@ const WithdrawDates = ({ counts, dates, committeeId, onClose, getPayments, isCre
               value={date}
               onChange={(e) => handleDateChange(index, e.target.value)}
               className="border bg-[#373737] text-[white] border-gray-300 rounded py-2 px-3 w-full"
+              disabled={accessFrom && accessFrom === "live"}
             />
           </div>
         ))}
         <div className="flex justify-end">
-          <button
-            onClick={onClose}
-            className="bg-[#4B5563] text-white py-2 px-4 rounded mr-2  transition duration-200"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="bg-[#A87F0B] text-white py-2 px-4 w-[90px] rounded  transition duration-200"
-          >
-            Save
-          </button>
+          {accessFrom && accessFrom === "live" ?  (
+            <button
+              onClick={onClose}
+              className="bg-[#4B5563] text-white py-2 px-4 rounded mr-2 transition duration-200"
+            >
+              Close
+            </button>
+          ) :
+          (
+            <>
+              <button
+                onClick={onClose}
+                className="bg-[#4B5563] text-white py-2 px-4 rounded mr-2 transition duration-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="bg-[#A87F0B] text-white py-2 px-4 w-[90px] rounded transition duration-200"
+              >
+                Save
+              </button>
+            </>
+          )}
         </div>
+
       </div>
     </div>
 

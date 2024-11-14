@@ -9,6 +9,7 @@ import Create from "./pages/CreatePage/Create";
 import Payment from "./pages/PaymentPage/Payment";
 import History from "./pages/HistoryPage/History";
 import More from "./pages/More/More";
+import DetailPage from "./pages/DetailPage/DetailPage";
 import DeleteKameti from "./pages/Delete kameti/DeleteKameti";
 import AllRecords from "./pages/AllRecords/AllRecords";
 import MobileScreen from "./components/MobileScreen/MobileScreen";
@@ -48,7 +49,7 @@ function App() {
     <Route path="/history" element={<RequireAuth><History recordType="all" /></RequireAuth>}/>
     <Route path="/more" element={<RequireAuth><More/></RequireAuth>}/>
     <Route path="/allrecords" element={<RequireAuth><History recordType="all" /></RequireAuth>}/>
-   
+    <Route path="/detail/:kametiId" element={<DetailPage/>}/>
 
     </Routes>
     </BrowserRouter>
