@@ -1,13 +1,15 @@
 import React from 'react'
-import logo from '../../images/Kameti (1).png'
-import project from '../../images/project 1.png'
-import transfer from '../../images/transfer.png'
-import notification from '../../images/notification 1.png'
-import folder from '../../images/folder 1.png'
-import close from '../../images/close 1.png'
-import calculter from '../../images/calculator 1.png'
+import logo from '../../images/logo1.png'
+import KametiMobile from '../../images/kametiSplash.png'
+import project from '../../images/PropertyManage.png'
+import transfer from '../../images/PropertySwitchapp.png'
+import notification from '../../images/PropertyNotification.png'
+import folder from '../../images/PropertyRecord.png'
+import close from '../../images/Propertynofee.png'
+import calculter from '../../images/PropertyCalculation.png'
 import CustomSlider from '../../components/CustomCarousel/CustomSlider';
-import { Link } from 'react-router-dom';
+
+
 export default function Splash() {
   const images = [
     { imgURL:project, imgAlt: 'alt_text_1', title: 'Manage Records!', description: 'Creating and maintaining a kameti is very easy.Starting and managing a kameti, a form of savings circle, is straightforward. Members contribute regularly, take turns receiving funds, and maintain clear communication. This collaborative approach fosters financial empowerment, trust, and community support, making it an effective tool for achieving shared financial goals.' },
@@ -22,29 +24,39 @@ export default function Splash() {
 let screenwidth =window.innerWidth
 
   return (
-    <div className='w-[100%] flex bg-black sm:h-[100vh] justify-center items-center'>
-    <div className='w-[100%]  flex justify-evenly sm:flex-row flex-col items-center' >
-    {screenwidth> 430 &&
-    <div className='w-[30%] flex justify-center items-center flex-col  '>
-    <img className="w-40" src={logo}/>
-    <h2 className='text-[#A87F0B] text-[20px] mt-2'>Welcome to kameti!</h2>
-    <p className='text-[#847F7F] text-center	'>Kameti is an online application that allows you to maintain your kameties online.With the help of this app, you can get kameties records from anywhere in the wold.</p>
-    <Link to="/signin"><button className='w-[150px] h-[40px] rounded-[20px] mt-[20px] bg-[#A87F0B]'>Go</button></Link>
-
-    </div>}
-
-    <div className='sm:w-[60%] w-[90%] flex sm:mt-0 mt-5 '>
-    <CustomSlider images={images} />
+<div className="w-full h-screen flex bg-black">
+  {/* Left Section */}
+  <div
+    className="w-full sm:w-1/2 flex justify-center items-center bg-[#121212] "
+  >
+    <div className="sm:w-[100%] w-[90%] flex sm:mt-0 rounded-lg shadow-lg overflow-hidden">
+      <CustomSlider images={images} />
     </div>
-    {screenwidth< 431 &&
-      <div className='sm:w-[30%] w-[90%] mt-10 sm:mt-0 flex justify-center items-center flex-col  '>
-      <img className="sm:w-40 w-[100px]" src={logo}/>
-      <h2 className='text-[#A87F0B] sm:text-[20px] mt-2'>Welcome to kameti!</h2>
-      <p className='text-[#847F7F] text-center sm:text-[16px] text-[13px] sm:mt-0 mt-2	'>Kameti is an online application that allows you to maintain your kameties online.With the help of this app, you can get kameties records from anywhere in the wold.</p>
-      <Link to="/signin"><button className='w-[150px] h-[40px] rounded-[20px] mt-[20px] bg-[#A87F0B]'>Go</button></Link>
+  </div>
+
+  {/* Right Section */}
+  <div
+    className="w-full sm:w-1/2 hidden sm:flex flex-col items-center text-center relative from-[#A87F0B] to-[#000000]"
+    style={{ background: 'linear-gradient(0deg, #A87F0B 18.7%, #000000 117.68%)' }}
+  >
+    <div className="w-full flex flex-col items-center justify-start text-center mt-9">
+      <h1 className="text-white text-7xl font-bold mb-2">Welcome To</h1>
+      <img className="w-40 mb-2" src={logo} alt="Kameti Logo" />
+    </div>
+
+    <div className="flex justify-center items-center">
+      <img
+        className="w-full h-[450px] mx-2 absolute bottom-0"
+        src={KametiMobile}
+        alt="Mobile Screen 1"
+      />
+    </div>
+  </div>
+</div>
+
+
   
-      </div>}
-    </div>
-    </div>
+  
+  
   )
 }

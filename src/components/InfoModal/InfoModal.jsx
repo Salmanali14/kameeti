@@ -24,7 +24,7 @@ export default function InfoModal({info,handleCloseshare,message}) {
 >
   <div className='text-center'>{message}</div>
   <div className='w-[100%] flex justify-center items-center'>
-  <button onClick={handleCloseshare} className='w-[120px] h-[40px] rounded-[30px] bg-[#A87F0B] font-bold text-[black] mt-5 '>Ok</button>
+  <button onClick={handleCloseshare} className='w-[120px] h-[40px] rounded-[30px] bg-[#A87F0B] font-bold text-[white] mt-5 '>Ok</button>
   </div>
 </Box>
 </Modal>

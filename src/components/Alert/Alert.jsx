@@ -9,12 +9,14 @@ const Alert = ({ message, onConfirm, onCancel,btnloader }) => {
         <div className="flex justify-end">
           <button
             onClick={onCancel}
+            disabled={btnloader}
             className="bg-gray-600 text-white w-[100px] h-[35px] rounded mr-2 hover:bg-gray-700 transition duration-200"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
+            disabled={btnloader}
             className="bg-[#a87f0b] text-white w-[100px] h-[35px] rounded hover:bg-[#a87f0b]-10 transition duration-200"
           >
           {btnloader ? <ClipLoader size={20} color="#ffffff" className='mt-2' /> : "Confirm"}

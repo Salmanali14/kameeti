@@ -13,6 +13,9 @@ import DetailPage from "./pages/DetailPage/DetailPage";
 import DeleteKameti from "./pages/Delete kameti/DeleteKameti";
 import AllRecords from "./pages/AllRecords/AllRecords";
 import MobileScreen from "./components/MobileScreen/MobileScreen";
+import EditProfile from "./pages/EditProfile/EditProfile";
+import kametiSetting from "./pages/kametiSetting/KametiSetting";
+import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
 
 function App() {
   const RequireAuth = ({ children }) => {
@@ -48,8 +51,14 @@ function App() {
     <Route path="/payment" element={<RequireAuth><Payment/></RequireAuth>}/>
     <Route path="/history" element={<RequireAuth><History recordType="all" /></RequireAuth>}/>
     <Route path="/more" element={<RequireAuth><More/></RequireAuth>}/>
+    <Route path="/privacyPolicy" element={<RequireAuth><PrivacyPolicy/></RequireAuth>}/>
+
     <Route path="/allrecords" element={<RequireAuth><History recordType="all" /></RequireAuth>}/>
+    {/* <Route path="/kametisetting" element={<RequireAuth><kametiSetting/></RequireAuth>}/> */}
     <Route path="/detail/:kametiId" element={<DetailPage/>}/>
+    <Route path="/editProfile" element={<RequireAuth><EditProfile recordType="edit" /></RequireAuth>}/>
+
+
 
     </Routes>
     </BrowserRouter>
