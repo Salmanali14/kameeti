@@ -204,6 +204,13 @@ export default function History({ recordType = null }) {
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
   };
+  function truncate(str, maxLength) {
+  if (str.length <= maxLength) {
+    return str;
+  }
+  return str.slice(0, maxLength) + '...';
+}
+
   return (
     <>
       <div className="w-[100%] h-[100vh] flex justify-center items-center bg-black">
@@ -224,7 +231,7 @@ export default function History({ recordType = null }) {
         onClick={toggleDrawer(true)}
         edge="start"
       >
-        <TbMenu2 className="text-white text-[35px]" />
+        <TbMenu2 className="text-white bg-[#A87F0B] rounded-lg p-[2px] text-[35px]" />
       </IconButton>
     )}
     <MobileSidebar
@@ -233,7 +240,7 @@ export default function History({ recordType = null }) {
     />
 
     {/* Centering the h1 text */}
-    <h1 className="text-white sm:text-[25px] text-[20px] font-bold flex items-center justify-center sm:ml-5 sm:mb-6 w-full">
+    <h1 className="text-white sm:text-[25px]  sm:mr-0 mr-8 text-[20px] font-bold flex items-center justify-center sm:ml-5 sm:mb-6 w-full">
       {/* Image visible only on larger screens */}
       {recordType === "deleted" ? (
         "Deleted kameties"
@@ -356,7 +363,7 @@ export default function History({ recordType = null }) {
                               </h2>
                               <p className="text-paytxt w-[5%] font-bold">:</p>
                               <h1 className="text-white text-[12px] sm:text-[17px] ">
-                                {payment.kametiName}
+                                {truncate(payment.kametiName,12)}
                               </h1>
                               {recordType == "deleted" ? (
                                 <div className="flex items-center absolute right-0">
@@ -394,7 +401,7 @@ export default function History({ recordType = null }) {
                                   </button>
                                 </div>
                               ) : (
-                                <div className="flex items-center absolute right-0">
+                                <div className="flex items-center absolute right-[-15px]">
                                   <button
                                     className="flex justify-center items-center mr-2 text-white text-[12px] bg-transparent"
                                     onClick={() => {

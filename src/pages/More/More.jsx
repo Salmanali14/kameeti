@@ -366,7 +366,7 @@ export default function More() {
         setReduxState={settempimg}
         isCircle={true}
       />
-      <div className="w-[100%] h-[100vh] flex justify-center items-center bg-black">
+      <div className="w-[100%] h-[100vh] flex justify-center  items-center bg-black">
         <div className="w-[100%] rounded-[40px] h-[100vh] flex  ">
           {screenwidth > 430 && <Sidebar />}
           {loading ? (
@@ -374,7 +374,7 @@ export default function More() {
               <FadeLoader color="#A87F0B" />
             </div>
           ) : (
-            <div className="sm:w-[80%] w-[100%] h-[100vh] sm:pb-3 ml-[2px] sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px]">
+            <div className="sm:w-[80%] w-[100%] h-[100vh]  overflow-y-scroll sm:pb-3 ml-[2px] sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px]">
              <div className="w-[100%] flex justify-between items-center sm:p-0 p-3 sm:h-max h-[80px] sm:mt-6 border-b-[1px] border-[#535353]">
   <span className="flex justify-center items-center w-full">
     {screenwidth < 430 && (
@@ -384,7 +384,7 @@ export default function More() {
         onClick={toggleDrawer(true)}
         edge="start"
       >
-        <TbMenu2 className="text-white text-[35px]" />
+        <TbMenu2 className="text-white text-[35px] bg-[#A87F0B] rounded-lg p-[2px]" />
       </IconButton>
     )}
     <MobileSidebar
@@ -393,13 +393,13 @@ export default function More() {
     />
     
     {/* Centered h1 in small screens */}
-    <h1 className="text-white sm:text-[25px] text-[20px] font-bold flex items-center justify-center sm:ml-5 sm:mb-6 w-full">
+    <h1 className="text-white sm:text-[25px]  sm:mr-0 mr-8 text-[20px] font-bold flex items-center justify-center sm:ml-5 sm:mb-6 w-full">
       <img
         className="hidden sm:block w-[40px] mr-3"
         src={more}
         alt="More Icon"
       />
-      Setting
+      Settings
     </h1>
   </span>
 </div>
@@ -545,7 +545,10 @@ export default function More() {
                       className="sm:sm:w-[17%]  w-[42%] m-3 relative  h-[130px] sm:h-[150px] cursor-pointer rounded-[18px]  bg-[#444343] flex justify-center items-center flex-col"
                     >
                       <IoIosInformationCircleOutline
-                        onClick={handleinfoShare}
+                        onClick={(e)=>{
+                          e.stopPropagation();
+                          handleinfoShare();
+                        }}
                         className="text-[white] absolute right-2 top-2 text-[25px]"
                       />
                       <img className="w-[25px] sm:w-[30px]" src={shareLink} />
@@ -730,28 +733,30 @@ export default function More() {
               </div>
             </div>
             <div className="flex justify-center items-center flex-col mt-5 w-[100%]">
-              <div className="h-[120px] w-[120px] border rounded-full absolute  top-[50px] ">
-                <label
-                  htmlFor="img"
-                  className="w-[0px] h-[0px] absolute top-[93px] left-[86px]"
-                >
-                  <div className=" border rounded-full w-[22px] h-[22px] flex justify-center items-center text-sm font-[1500] text-white bg-[#747474]">
-                    <MdModeEditOutline className="text-md" />
-                  </div>
-                  <input
-                    key={key}
-                    type="file"
-                    name="img"
-                    id="img"
-                    className="opacity-0 w-[0px] h-[0px]"
-                    onChange={handleImageChange}
-                  />
-                </label>
-                <img
-                  src={tempimg ? tempimg : avatar}
-                  className="rounded-full w-[120px] h-[120px]"
-                />
-              </div>
+            <div
+  className="h-[120px] w-[120px] border rounded-full absolute top-[50px]"
+  onClick={() => document.getElementById('img').click()} // Trigger the file input click
+>
+  <div
+    className="w-[0px] h-[0px] absolute top-[93px] left-[86px]"
+  >
+    <div className="border rounded-full w-[22px] h-[22px] flex justify-center items-center text-sm font-[1500] text-white bg-[#747474]">
+      <MdModeEditOutline className="text-md" />
+    </div>
+    <input
+      type="file"
+      name="img"
+      id="img"
+      className="opacity-0 w-[0px] h-[0px]"
+      onChange={handleImageChange}
+    />
+  </div>
+  <img
+    src={tempimg ? tempimg : avatar} // tempimg will be the selected image if available, else fallback to avatar
+    className="rounded-full w-[120px] h-[120px]"
+  />
+</div>
+
               <div className="flex justify-center flex-col mt-[100px] items-center w-[100%]">
                 <div className="bg-[#FFFFFF2B] w-[100%] mt-5 rounded-[10px]">
                   <input

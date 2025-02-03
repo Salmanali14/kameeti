@@ -19,12 +19,14 @@ import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { FaFacebookF } from "react-icons/fa";
 
 import FacebookLogin from "react-facebook-login";
+import { ClipLoader } from "react-spinners";
 
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(true);
   const [emailSelected, setEmailSelected] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [password, setPassword] = useState("");
+  const [btnloader, setBTnloader] = useState(false);
   const [responseMessage, setresponseMessage] = useState("");
 
   const REDIRECT_URI = "http://localhost:3000"; // Replace with your app's redirect URI
@@ -75,7 +77,7 @@ export default function SignIn() {
       }
       return;
     }
-
+    setBTnloader(true)
     try {
       const response = await axios.post(`${apiBaseUrl}login`, {
         phoneNumber: phoneNumber, // Send the user's input (email or phone number) as the "phoneNumber" key
@@ -88,13 +90,15 @@ export default function SignIn() {
 
       localStorage.setItem("id", response?.data?.data?.id || 0);
       localStorage.setItem("token", response?.data?.data?.token);
-
+      setBTnloader(false)
       setTimeout(() => {
         nevigate("/create");
       }, 2000);
+      setBTnloader(false)
     } catch (error) {
       if (!toast.isActive(toastId)) {
         toast.error(error?.response?.data?.message, { toastId });
+        setBTnloader(false)
       }
     }
   };
@@ -183,7 +187,7 @@ export default function SignIn() {
             {/* Header */}
             <div className="text-center mb-5">
               <h1 className="text-5xl font-bold text-white mb-5">Sign In</h1>
-              <p className="text-md text-white">Login to your account</p>
+              <p className="text-md text-white">SigIn to your account</p>
             </div>
 
             {/* Toggle Buttons */}
@@ -315,18 +319,22 @@ export default function SignIn() {
 
             {/* Log In Button */}
             <button
-              className="bg-[#A87F0B] text-white text-bold rounded-[10px] h-[40px] sm:w-[70%] w-[100%] flex justify-center items-center p-3 sm:mt-3 mt-5"
+              className="bg-[#A87F0B] text-white text-bold rounded-[10px] h-[50px] sm:w-[70%] w-[100%] flex justify-center items-center p-3 sm:mt-3 mt-5"
               style={{
                 boxShadow: "-4px -6px 6.8px 0px rgba(0, 0, 0, 0.25) inset",
               }}
               onClick={handleSignIn}
             >
-              Sign In
+            {btnloader ? (
+              <ClipLoader size={25} color="#ffffff" className="" />
+            ):
+            "Sign In"
+            }
             </button>
 
             {/* Sign Up Link */}
             <p className="text-white mt-5">
-              Don't have an account?{" "}
+            New Here ?
               <Link
                 to="/signup"
                 className="text-[#A87F0B] hover:text-[#rgb(211 159 12)] ml-1"
@@ -336,7 +344,7 @@ export default function SignIn() {
             </p>
 
             <div className="text-center mt-5">
-              <p className="text-white text-sm">Or</p>
+              <p className="text-white text-sm">Or Signin with </p>
               <div className="flex justify-center gap-3 mt-3">
                 {/* Google Login Button */}
                 <div className="flex justify-center items-center w-[100%] cursor-pointer  text-[13px]">
@@ -353,7 +361,7 @@ export default function SignIn() {
                   {/* Added text size for icon */}
                   <FacebookLogin
                     appId="1594999661137496"
-                    autoLoad={true}
+                    // autoLoad={true}
                     fields="name,email,picture"
                     callback={responseFacebook}
                     cssClass="facebook-small-button"

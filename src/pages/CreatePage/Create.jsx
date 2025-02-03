@@ -90,12 +90,16 @@ export default function Create() {
   // };
 
   const formatDate = (timestamp) => {
+    if (!timestamp) return ""; // Return an empty string if no date is provided
+  
     const date = new Date(timestamp);
+    if (isNaN(date.getTime())) return ""; // Handle invalid date values
+  
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
     const day = String(date.getDate()).padStart(2, "0");
-    
-    return `${year}-${month}-${day}`;
+  
+    return `${month}-${day}-${year}`;
   };
   
 
@@ -108,15 +112,22 @@ export default function Create() {
   const token = localStorage.getItem("token");
   const { id } = useParams();
 
-  useEffect(() => {
-    // Calculate ending date when starting date or total months change
-    if (startingDate && totalMonths) {
-      const startDate = new Date(startingDate);
-      const endDate = new Date(startDate);
-      endDate.setMonth(endDate.getMonth() + parseInt(totalMonths));
-      setEndingDate(endDate.toISOString().split("T")[0]);
-    }
-  }, [startingDate, totalMonths]);
+useEffect(() => {
+  if (startingDate && totalMonths) {
+    const startDate = new Date(startingDate);
+    const endDate = new Date(startDate);
+
+    // Move to the target month
+    endDate.setMonth(endDate.getMonth() + parseInt(totalMonths));
+
+    // Set the date to the last day of the new month
+    endDate.setDate(0); // This makes it the last day of the updated month
+
+    setEndingDate(endDate.toISOString().split("T")[0]);
+  }
+}, [startingDate, totalMonths]);
+
+
 
   useEffect(() => {
     // Calculate total price when price per kameti or total months changes
@@ -227,7 +238,18 @@ export default function Create() {
         toast.success(response?.data?.message, { toastId });
       }
 
-      handleReset();
+      setKametiHolderName("");
+      setTotalPrice("");
+      setPricePerKameti("");
+      setPricePerDayKameti("");
+      setTotalMonths("");
+      setMyTotalKameties("");
+      setPayablePerMonth("");
+      setStartingDate("");
+      setEndingDate("");
+  
+      // Set the confirmation message
+      setConfirmMessage("Form reset successfully!");
     } catch (error) {
       if (!toast.isActive(toastId)) {
         toast.error(error?.response?.data?.message, { toastId });
@@ -358,59 +380,71 @@ export default function Create() {
     setTotalMonthShare(false);
     setMonthlyAmmountShare(false);
   };
-
+  let windowWidth = window.innerWidth;
+  
   return (
     <>
       <div className="w-[100%] h-[100vh] flex justify-center items-center bg-black">
         <div className="w-[100%] h-[100vh] flex">
           {screenwidth > 430 && <Sidebar />}
           <div className="sm:w-[80%] w-[100%] h-[100vh] overflow-y-scroll  pb-3 sm:ml-[2px] sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px]">
-          <div className="w-[100%] flex justify-between items-center sm:h-max h-[80px] sm:p-0 p-3 sm:mt-6 border-b-[1px] border-[#535353]">
-  <span className="flex justify-center items-center w-full sm:w-auto sm:flex-row">
-    {screenwidth < 430 && (
-      <IconButton
-        color="inherit"
-        aria-label="open drawer"
-        onClick={toggleDrawer(true)}
-        edge="start"
-      >
-        <TbMenu2 className="text-white text-[35px]" />
-      </IconButton>
-    )}
-    <MobileSidebar
-      drawerOpen={drawerOpen}
-      toggleDrawer={toggleDrawer}
-    />
+            <div className="w-[100%] flex justify-between items-center sm:h-max h-[80px] sm:p-0 p-3 sm:mt-6 border-b-[1px] border-[#535353]">
+              <span className="flex justify-center items-center w-full sm:w-auto sm:flex-row">
+                {screenwidth < 430 && (
+                  <IconButton
+                    color="inherit"
+                    aria-label="open drawer"
+                    onClick={toggleDrawer(true)}
+                    edge="start"
+                  >
+                    <TbMenu2 className="text-white text-[35px] bg-[#A87F0B] rounded-lg p-[2px]" />
+                  </IconButton>
+                )}
+                <MobileSidebar
+                  drawerOpen={drawerOpen}
+                  toggleDrawer={toggleDrawer}
+                />
 
-    <h1 className="text-[white] sm:text-[25px] text-[20px] font-bold sm:ml-10 sm:mb-6 flex items-center sm:ml-5 justify-center sm:justify-start w-full">
-      {/* Image visible only on larger screens */}
-      <img
-        className="hidden sm:block w-[40px] mr-3"
-        src={create}
-        alt="Icon"
-      />
-      {id ? "Update Kameti" : "Create Kameti"}
-    </h1>
-  </span>
-</div>
+                <h1 className="text-[white] sm:text-[25px] text-[20px] font-bold  sm:mb-6 flex items-center sm:ml-5 sm:mr-0 mr-6  justify-center sm:justify-start w-full">
+                  {/* Image visible only on larger screens */}
+                  <img
+                    className="hidden sm:block w-[40px] mr-3"
+                    src={create}
+                    alt="Icon"
+                  />
+                  {id ? "Update Kameti" : "Create Kameti"}
+                </h1>
+              </span>
+            </div>
 
             {responseMessage && (
               <p className="text-white mt-3 w-[90%] ml-10">{responseMessage}</p>
             )}
             <div className="w-[100%] flex items-center justify-center flex-col">
-              <div className="w-[88%] flex justify-end">
-                <p
-                  onClick={handleReset}
-                  className="text-white sm:mt-6 text-md cursor-pointer hover:text-gray-300"
-                >
-                  Reset
-                </p>
-              </div>
-
-              <div className="w-[95%] sm:w-[90%] bg-[#64646469] flex items-center justify-center flex-col p-[12px] sm:p-[25px] mt-[10px] rounded-[15px]">
+              {windowWidth > 500 && (
+                <div className="w-[88%] flex justify-end">
+                  <p
+                    onClick={handleReset}
+                    className="text-white sm:mt-3  text-md cursor-pointer hover:text-gray-300"
+                  >
+                    Reset
+                  </p>
+                </div>
+              )}
+              <div className="w-[100%] sm:w-[90%] bg-[#64646469] flex items-center justify-center flex-col p-[25px] sm:p-[25px] mt-[10px] rounded-[15px]">
+                {windowWidth < 500 && (
+                  <div className="w-[100%] flex justify-end">
+                    <p
+                      onClick={handleReset}
+                      className="text-white   text-md cursor-pointer hover:text-gray-300"
+                    >
+                      Reset
+                    </p>
+                  </div>
+                )}
                 <div className="flex w-[100%] justify-center sm:flex-row flex-col items-center">
                   <div className="sm:w-[90%] w-[100%] flex items-center flex-col">
-                    <div className="w-[100%] sm:mt-2 mt-5 mb-2">
+                    <div className="w-[100%] sm:mt-2 mt-2 mb-2">
                       <label className="text-[white]">Kameti Holder Name</label>
                     </div>
                     <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] sm:mb-5 flex items-center">
@@ -444,7 +478,7 @@ export default function Create() {
                         />
                       </div>
                       <IoIosInformationCircleOutline
-                        className="text-[white] text-[25px] absolute right-4"
+                        className="text-[#FFFFFF4D] text-[25px] absolute right-4"
                         onClick={handleinfoTotalAmmount}
                       />
                     </div>
@@ -456,7 +490,7 @@ export default function Create() {
                     <div className="w-[100%] mt-2 mb-2">
                       <label className="text-[white]">Select</label>
                     </div>
-                    <div className="flex items-center justify-between w-[90%] space-x-5">
+                    <div className="flex items-center justify-between sm:w-[90%] w-[100%] space-x-5">
                       {/* Daily Option */}
                       <div
                         className={`flex items-center  w-[50%] h-[50px] rounded-[10px] cursor-pointer mb-5 pl-5 ${
@@ -602,7 +636,13 @@ export default function Create() {
                               <input
                                 type="text"
                                 placeholder="e.g 200"
-                                value={pricePerDayKameti}
+                                value={
+                                  pricePerDayKameti
+                                    ? (Number(pricePerDayKameti) || 0).toFixed(
+                                        2
+                                      )
+                                    : ""
+                                }
                                 onChange={(e) =>
                                   setPricePerDayKameti(e.target.value)
                                 }
@@ -683,7 +723,7 @@ export default function Create() {
                       <IoIosInformationCircleOutline
                         onClick={handleinfoTotalMonth}
                         // Replace with your desired icon, e.g., calendar
-                        className="text-[white] text-[25px] absolute right-4"
+                        className="text-[#FFFFFF4D] text-[25px] absolute right-4"
                       />
                     </div>
                   </div>
@@ -722,7 +762,7 @@ export default function Create() {
                       />
                       <IoIosInformationCircleOutline
                         onClick={handleinfoMyKametie}
-                        className="text-[white] text-[25px] absolute right-4"
+                        className="text-[#FFFFFF4D] text-[25px] absolute right-4"
                       />
                     </div>
                   </div>
@@ -746,8 +786,8 @@ export default function Create() {
                                 )
                                 .map((date) =>
                                   date == null
-                                  ? "N/A" :
-                                  new Date(date).toLocaleDateString()
+                                    ? "N/A"
+                                    : new Date(date).toLocaleDateString()
                                 )
                                 .join(", ")}
                         </button>
@@ -769,7 +809,7 @@ export default function Create() {
                 <div className="flex w-[100%] justify-center sm:flex-row flex-col items-center">
                   <div className="sm:w-[90%] w-[100%] flex items-center flex-col">
                     <div className="w-[100%] sm:mt-2 mt-0 mb-2">
-                      <label className="text-[white]"> Starting Date</label>
+                      <label className="text-[white]"> Start Date</label>
                     </div>
                     <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] sm:mb-5 flex items-center">
                       <div className="w-[90%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center">
@@ -777,8 +817,7 @@ export default function Create() {
                         <input
                           onFocus={(e) => (e.target.type = "date")}
                           // onBlur={(e) => (e.target.type = "text")}
-                          placeholder="DD-MM-YY"
-
+                          placeholder="MM-DD-YY"
                           value={startingDate}
                           onChange={(e) => setStartingDate(e.target.value)}
                           className="outline-none border-none text-[white] bg-colorinput w-[100%] h-[40px] pl-2"
@@ -789,7 +828,7 @@ export default function Create() {
 
                   <div className="sm:w-[90%] w-[100%] sm:ml-10 flex items-center flex-col">
                     <div className="w-[100%] sm:mt-2 mt-5 mb-2">
-                      <label className="text-[white]">Ending Date</label>
+                      <label className="text-[white]">End Date</label>
                     </div>
                     <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] mb-5 flex items-center">
                       <div className="w-[80%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center">
@@ -797,8 +836,9 @@ export default function Create() {
                         <input
                           onFocus={(e) => (e.target.type = "date")}
                           // onBlur={(e) => (e.target.type = "text")}
-                          placeholder="DD-MM-YY"
-                          value={endingDate}
+                          placeholder="MM-DD-YY"
+                          value={formatDate(endingDate)}
+                          disabled
                           onChange={(e) => setEndingDate(e.target.value)}
                           className="outline-none border-none text-[white] bg-colorinput w-[100%] h-[40px] pl-2"
                         />
@@ -807,14 +847,14 @@ export default function Create() {
                   </div>
                 </div>
               </div>
-              <div className="flex w-[95%] sm:w-[90%] justify-center items-center mt-5">
-                <div className="flex flex-row sm:flex-row sm:w-[100%] w-[100%] justify-between items-center gap-7">
+              <div className="flex w-[95%] sm:w-[90%] justify-center items-center mt-5 mb-5">
+                <div className="flex flex-col sm:flex-row sm:w-[100%] w-[100%] justify-between items-center sm:gap-7 gap-5">
                   {/* Cancel Button */}
                   <button
                     style={{
                       boxShadow: "-4px -6px 6.8px 0px #00000040 inset",
                     }}
-                    className="w-[48%] sm:w-[100%] h-[50px] rounded-[10px] bg-colorinput font-bold text-[white]"
+                    className="w-[100%] order-2 sm:order-1 sm:w-[100%] h-[50px] rounded-[10px] bg-colorinput font-bold text-[white]"
                   >
                     Cancel
                   </button>
@@ -824,7 +864,7 @@ export default function Create() {
                     style={{
                       boxShadow: "-4px -6px 6.8px 0px #00000040 inset",
                     }}
-                    className="w-[48%] sm:w-[100%] h-[50px] rounded-[10px] bg-[#A87F0B] font-bold text-[white]"
+                    className="w-[100%] order-1 sm:order-2 sm:w-[100%] h-[50px] rounded-[10px] bg-[#A87F0B] font-bold text-[white]"
                     onClick={id ? handleUpdateCommittee : handleCreateCommittee}
                   >
                     {id ? (
@@ -835,12 +875,12 @@ export default function Create() {
                           className="mt-2"
                         />
                       ) : (
-                        "Update Kameti"
+                        "Update"
                       )
                     ) : btnloader ? (
                       <ClipLoader size={20} color="#ffffff" className="mt-2" />
                     ) : (
-                      "Create Kameti"
+                      "Create"
                     )}
                   </button>
                 </div>

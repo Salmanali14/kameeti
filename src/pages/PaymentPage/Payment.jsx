@@ -43,7 +43,7 @@ import unpay from "../../images/paymentImage/unpay.png";
 import axios from "axios";
 import { Slide, ToastContainer, toast } from "react-toastify";
 import { FadeLoader, HashLoader } from "react-spinners";
-import { Button, IconButton } from "@mui/material";
+import { Button, IconButton, MenuItem, Select } from "@mui/material";
 import kametiLogo2 from "../../images/kametiLogo2.png";
 import { IoShareSocialSharp } from "react-icons/io5";
 import { IoShareSocial } from "react-icons/io5";
@@ -74,7 +74,9 @@ export default function Payment() {
   const [selectedRow, setSelectedRow] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchParams] = useSearchParams();
+  
   const urlId = searchParams.get("id"); // Get the ID from the URL
+ 
   const [btnloader, setBTnloader] = useState(false);
   const [isToggled, setIsToggled] = useState(false);
   const navigate = useNavigate();
@@ -86,6 +88,7 @@ export default function Payment() {
   // console.log(filteredPayments)
 
   const fetchKametis = async (type) => {
+    
     try {
       const response = await axios.get(`${apiBaseUrl}payment`, {
         headers: {
@@ -100,9 +103,11 @@ export default function Payment() {
       if (type === "daily") {
         setCommitteeData(dailyCommTemp);
         kametees = dailyCommTemp;
+        localStorage.setItem("selectedComm", JSON.stringify(dailyCommTemp?.[0]));
       } else {
         setCommitteeData(monthlyCommTemp);
         kametees = monthlyCommTemp;
+        localStorage.setItem("selectedComm", JSON.stringify(monthlyCommTemp?.[0]));
       }
 
       // Check if the URL has a valid id
@@ -114,13 +119,13 @@ export default function Payment() {
           ...monthlyCommTemp,
         ].find((committee) => committee.id === parseInt(urlId, 10));
         console.log(activeCommitteeExist);
-
+        const storedComm = JSON.parse(localStorage.getItem("selectedComm"));
         if (activeCommitteeExist) {
-          setSelectedCommittee(activeCommitteeExist);
+          setSelectedCommittee(storedComm || activeCommitteeExist);
           setKametiType(activeCommitteeExist?.kametiType || type);
           fetchPayments(
-            activeCommitteeExist?.id,
-            activeCommitteeExist?.kametiType
+            storedComm?.id ||  activeCommitteeExist?.id,
+            storedComm?.kametiType || activeCommitteeExist?.kametiType
           );
         } else {
           console.warn("No committee found with the given URL ID");
@@ -128,10 +133,12 @@ export default function Payment() {
       } else {
         // Fallback when no ID is in the URL
         const firstCommittee = kametees[0];
+        const storedComm = JSON.parse(localStorage.getItem("selectedComm"));
         if (firstCommittee) {
-          setSelectedCommittee(firstCommittee);
+
+          setSelectedCommittee(storedComm || firstCommittee);
           setKametiType(firstCommittee?.kametiType || type);
-          fetchPayments(firstCommittee?.id, firstCommittee?.kametiType);
+          fetchPayments(  storedComm?.id || firstCommittee?.id,    storedComm?.kametiType || firstCommittee?.kametiType);
         }
       }
 
@@ -143,6 +150,7 @@ export default function Payment() {
   };
 
   const fetchPayments = async (kametiId, type) => {
+    setBTnloader(true);
     try {
       const response = await axios.get(
         `${apiBaseUrl}paymentsByKametiId/${kametiId}`,
@@ -152,9 +160,9 @@ export default function Payment() {
           },
         }
       );
-      console.log(type);
+   
       if (type === "daily") {
-        console.log(response?.data?.data?.paidKametiResponse);
+
         const allPaidKametis =
           response?.data?.data?.paidKametiResponse?.flatMap(
             (item) => item.paidkametis
@@ -162,6 +170,9 @@ export default function Payment() {
         // console.log(allPaidKametis);
         // Update the filteredPayments state
         setFilteredPayments(allPaidKametis);
+        setBTnloader(false);
+        setShowConfirmAlert(false);
+       
       } else {
         console.log(response?.data?.data);
         console.log(
@@ -174,14 +185,19 @@ export default function Payment() {
           : setFilteredPayments(
               response?.data?.data?.paidKametiResponse[0]?.paidkametis ?? []
             );
+            setBTnloader(false);
+            setShowConfirmAlert(false);
       }
+      
     } catch (error) {
       console.error("Error fetching data:", error);
+      setBTnloader(false);
+      setShowConfirmAlert(false);
     }
   };
 
   const handlePayCommittee = async (status) => {
-    console.log(status);
+
     if (status === "pay" && selectedRow.date == null) {
       toast.error("Date not selected");
       return;
@@ -211,15 +227,15 @@ export default function Payment() {
         // Show success message based on payment status
         if (status === "pay") {
           toast.success("Payment paid successfully.");
-          setBTnloader(false);
+       
         } else if (status === "unpay") {
           toast.success("Payment unpaid successfully.");
-          setBTnloader(false);
+        
         }
       }
-      setBTnloader(false);
+  
       // Close confirmation alert after processing
-      setShowConfirmAlert(false);
+    
     } catch (error) {
       console.error("Error:", error);
       setBTnloader(false);
@@ -247,8 +263,8 @@ export default function Payment() {
       }
     );
 
-    console.log("API Response:", response.data);
-
+    console.log("payment called:", response.data);
+    localStorage.setItem("selectedComm", JSON.stringify(response.data?.data?.kameti));
     setSelectedCommittee((prevCommittee) => ({
       ...prevCommittee,
       paidAmount:
@@ -327,12 +343,14 @@ export default function Payment() {
 
   const handleCommitteeChange = (event) => {
     const commId = parseInt(event.target.value, 10); // Convert the value to an integer
-    console.log(commId);
-    console.log(committeeData);
+    
     const selectedComm = committeeData?.find((comm) => comm?.id === commId);
-    console.log(selectedComm);
+
     setSelectedCommittee(selectedComm);
     fetchPayments(commId, selectedComm?.kametiType);
+    localStorage.setItem("selectedComm", JSON.stringify(selectedComm));
+
+
 
     // Update the date to the starting month of the selected committee
     if (selectedComm?.startingMonth) {
@@ -479,14 +497,14 @@ useEffect(() => {
 
 
 const minDate = new Date(Math.min(...months));
-console.log(minDate);
+
 let maxDate = new Date(selectedCommittee?.endingMonth);
 
 
 
 
   const handleDateClick = (value) => {
-    console.log(value);
+   
     const clickedDate = value.toDateString();
     const clickedMonth = value.getMonth(); // 0-based index (January is 0, February is 1)
     const clickedYear = value.getFullYear();
@@ -663,6 +681,10 @@ let maxDate = new Date(selectedCommittee?.endingMonth);
   const handleBack = () =>{
     navigate(-1);
   }
+const truncateText = (text, maxLength) => {
+  if (!text) return "";
+  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+};
 
   return (
     <>
@@ -676,7 +698,7 @@ let maxDate = new Date(selectedCommittee?.endingMonth);
           ) : (
             <div className="sm:w-[80%] w-[100%] h-[100vh] overflow-y-scroll sm:pb-3  sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px] ">
             <div className="w-[100%] flex justify-between items-center h-[80px] sm:p-0 p-3 sm:mt-6 border-b-[1px] border-[#535353]">
-  <span className="flex justify-center items-center w-full sm:w-auto">
+  <span className="flex  items-center w-full sm:w-auto">
     {screenwidth < 430 && (
       <IconButton
         color="inherit"
@@ -684,7 +706,7 @@ let maxDate = new Date(selectedCommittee?.endingMonth);
         onClick={toggleDrawer(true)}
         edge="start"
       >
-        <TbMenu2 className="text-white text-[35px]" />
+        <TbMenu2 className="text-white text-[35px] bg-[#A87F0B] rounded-lg p-[2px]" />
       </IconButton>
     )}
     <MobileSidebar
@@ -699,7 +721,7 @@ let maxDate = new Date(selectedCommittee?.endingMonth);
       </div>
     ) : (
       <div className="flex justify-center items-center w-full sm:w-auto">
-        <h1 className="text-white sm:text-[25px] text-[20px] font-bold flex items-center justify-center sm:ml-5">
+        <h1 className="text-white sm:text-[25px] text-[20px] font-bold flex sm:mr-0 mr-8  items-center justify-center sm:ml-5">
           {/* Image visible only on larger screens */}
           <img
             className="hidden sm:block w-[40px] mr-3"
@@ -718,7 +740,7 @@ let maxDate = new Date(selectedCommittee?.endingMonth);
                   {/* Left Section */}
                   <div className="w-[50%] ml-5 flex flex-col justify-center">
                     <p className="text-gray-300 font-semibold text-[14px]">
-                      {selectedCommittee?.kametiName || "No Kameti"}
+                      {truncateText(selectedCommittee?.kametiName,15) || "No Kameti"}
                     </p>
                     <h1 className="text-yellow-500 font-bold text-[20px] sm:text-[28px]">
                       Rs.{" "}
@@ -737,38 +759,66 @@ let maxDate = new Date(selectedCommittee?.endingMonth);
                 {urlId ? 
                   ''
                 :      <div className="flex justify-start flex-col mr-3">
-                <select
-                  className="w-[100%] outline-none border border-[white] bg-[#373737] text-[#999] text-[14px] h-[40px] rounded-[5px] pl-1 pr-3"
-                  onChange={handleCommitteeChange}
-                >
-                  {committeeData?.length === 0 ? (
-                    <option value="" selected disabled>
-                      No kameti
-                    </option>
-                  ) : (
-                    committeeData.map((comm, index) => {
-                      // Calculate value dynamically
-                      const calculatedValue =
-                        comm.totalPrice && comm.myTotalKametis
-                          ? "Rs. " +
-                            (
-                              parseInt(comm.totalPrice) /
-                              parseInt(comm.myTotalKametis)
-                            ).toLocaleString()
-                          : "Rs. 0";
+              <Select
+      value={selectedCommittee?.id || ""}
+      onChange={handleCommitteeChange}
+      displayEmpty
+      sx={{
+        width: "200px",
+        outline: "none",
+    
+        backgroundColor: "#373737",
+        color: "#999",
+        fontSize: "14px",
+        height: "40px",
+        borderRadius: "5px",
+        paddingLeft: "8px",
+        paddingRight: "12px",
+        "& .MuiSvgIcon-root": { color: "#999" }, // Dropdown arrow color
+        "&:hover": { borderColor: "#ccc" }, // Border color on hover
+      }}
+      MenuProps={{
+        PaperProps: {
+          sx: {
+            backgroundColor: "#373737", // Background color of dropdown
+            color: "#fff", // Text color
+          },
+        },
+      }}
+    >
+      {committeeData?.length === 0 ? (
+        <MenuItem value="" disabled>
+          No kameti
+        </MenuItem>
+      ) : (
+        committeeData.map((comm, index) => {
+          const calculatedValue =
+            comm.totalPrice && comm.myTotalKametis
+              ? "Rs. " +
+                (parseInt(comm.totalPrice) / parseInt(comm.myTotalKametis)).toLocaleString()
+              : "Rs. 0";
 
-                      return (
-                        <option
-                          key={index}
-                          value={comm.id}
-                          selected={selectedCommittee?.id === comm.id}
-                        >
-                          {comm.kametiName} ({calculatedValue})
-                        </option>
-                      );
-                    })
-                  )}
-                </select>
+          return (
+            <MenuItem
+              key={index}
+              value={comm.id}
+              className="max-w-[250px]"
+              sx={{
+                backgroundColor:
+                  selectedCommittee?.id === comm.id ? "#A87F0B !important" : "transparent",
+                color: selectedCommittee?.id === comm.id ? "white" : "#999",
+                "&:hover": {
+                  backgroundColor: "#A87F0B",
+                  color: "white",
+                },
+              }}
+            >
+              {comm.kametiName} ({calculatedValue}) 
+            </MenuItem>
+          );
+        })
+      )}
+    </Select>
               </div>  }
                 </div>
               ) : (
@@ -780,7 +830,7 @@ let maxDate = new Date(selectedCommittee?.endingMonth);
  <div className="flex w-[45%] sm:w-[23%] mt-9 mb-2 items-center relative">
    <div className="bg-[#181818] border text-white outline-none border-[#A87F0B] rounded-[30px] h-[39px] sm:h-[45px] w-[100%] relative">
      <button
-       className={`text-white absolute left-0 rounded-[30px] h-[39px] sm:h-[44px] sm:text-[16px] w-[53%] ${
+       className={`text-white absolute left-0 rounded-[30px] h-[38px] sm:h-[44px] sm:text-[16px] w-[53%] ${
          kametiType === "daily" ? "bg-[#A87F0B]" : ""
        }`}
        style={
@@ -791,13 +841,17 @@ let maxDate = new Date(selectedCommittee?.endingMonth);
              }
            : {}
        }
-       onClick={() => handleKametiTypeChange("daily")}
+       onClick={(e) =>{
+              e.stopPropagation();
+        handleKametiTypeChange("daily");
+       
+}}
      >
        Daily
      </button>
 
      <button
-       className={`absolute right-0 rounded-[30px] h-[39px] sm:h-[44px] sm:text-[16px] w-[53%] ${
+       className={`absolute right-0 rounded-[30px] h-[38px] sm:h-[44px] sm:text-[16px] w-[53%] ${
          kametiType === "monthly" ? "bg-[#A87F0B]" : ""
        }`}
        style={
@@ -808,7 +862,12 @@ let maxDate = new Date(selectedCommittee?.endingMonth);
              }
            : {}
        }
-       onClick={() => handleKametiTypeChange("monthly")}
+       onClick={(e) =>{ 
+              e.stopPropagation();
+        handleKametiTypeChange("monthly");
+
+       
+}}
      >
        Monthly
      </button>
@@ -1201,7 +1260,7 @@ let maxDate = new Date(selectedCommittee?.endingMonth);
                             ) {
                               return true;
                             }
-                            console.log(date, view);
+                         
                             return (
                               view === "month" &&
                               date.getMonth() !== new Date(date).getMonth()

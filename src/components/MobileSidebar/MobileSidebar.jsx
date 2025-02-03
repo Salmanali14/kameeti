@@ -10,7 +10,7 @@ import logo from '../../images/logo1.png';
 import create from '../../images/create.png';
 import payment from '../../images/payment2.png';
 import logout from '../../images/logout.png'; 
-
+import { IoClose } from "react-icons/io5";
 export default function MobileSidebar({ drawerOpen, toggleDrawer }) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,10 +19,7 @@ export default function MobileSidebar({ drawerOpen, toggleDrawer }) {
     navigate(path);
   };
 
-  const isActive = (paths) => {
-    if (!Array.isArray(paths)) paths = [paths];
-    return paths.includes(location.pathname);
-  };
+  const isActive = window.location.pathname
 
  const [logoutAlert, setLogoutAlert] = useState(false);
   const handleLogoutAlert = () => {
@@ -51,20 +48,24 @@ export default function MobileSidebar({ drawerOpen, toggleDrawer }) {
   onClose={toggleDrawer(false)}
 >
   <div
-    style={{ width: 240 }}
+    style={{ width: 240, }}
     role="presentation"
     onClick={toggleDrawer(false)}
     onKeyDown={toggleDrawer(false)}
   >
-    <img className="w-[45%] mt-5 ml-5 mb-5" src={logo} alt="Logo" />
+  
+  <div className='flex justify-center items-center w-[100%] '>
+  <div className='w-[33%]'></div>
+    <img className="w-[33%] mt-5  mb-5 ml-8 self-center" src={logo} alt="Logo" />
+    <IoClose      onClick={toggleDrawer(false)} className='text-white ml-[50px] mb-5  text-[30px] w-[33%] ' />
+    </div>
     <Divider />
     <List style={{ flexGrow: 1 }}>
-      <ListItem button onClick={() => handleNavigation('/create')}>
+      <ListItem style={{background:isActive =='/create' ? '#A87F0B' : ''}} button onClick={() => handleNavigation('/create')}>
         <ListItemIcon>
           <div
-            className={`bg-[#393939] w-[35px] h-[35px] rounded-[50%] justify-center flex items-center ${
-              isActive('/create') ? 'bg-sidec' : ''
-            }`}
+            className={`bg-[#393939] w-[35px] h-[35px] rounded-[50%] justify-center flex items-center `}
+            
           >
             <img className="w-[100px]" src={create} alt="Create" />
           </div>
@@ -76,11 +77,11 @@ export default function MobileSidebar({ drawerOpen, toggleDrawer }) {
           primary="Create"
         />
       </ListItem>
-      <ListItem button onClick={() => handleNavigation('/payment')}>
+      <ListItem style={{background:isActive =='/payment' ? '#A87F0B' : ''}} button onClick={() => handleNavigation('/payment')}>
         <ListItemIcon>
           <div
             className={`bg-[#393939] w-[35px] h-[35px] rounded-[50%] justify-center flex items-center ${
-              isActive('/payment') ? 'bg-sidec' : ''
+              isActive == '/payment' ? 'bg-sidec' : ''
             }`}
           >
             <img className="w-[100px]" src={payment} alt="Payments" />
@@ -93,11 +94,11 @@ export default function MobileSidebar({ drawerOpen, toggleDrawer }) {
           primary="Payments"
         />
       </ListItem>
-      <ListItem button onClick={() => handleNavigation('/history')}>
+      <ListItem style={{background:isActive =='/history' ? '#A87F0B' : ''}} button onClick={() => handleNavigation('/history')}>
         <ListItemIcon>
           <div
             className={`bg-[#393939] w-[35px] h-[35px] rounded-[50%] justify-center flex items-center ${
-              isActive('/history') ? 'bg-sidec' : ''
+              isActive == '/history' ? 'bg-sidec' : ''
             }`}
           >
             <img className="w-[100px]" src={file} alt="History" />
@@ -111,15 +112,14 @@ export default function MobileSidebar({ drawerOpen, toggleDrawer }) {
         />
       </ListItem>
       <ListItem
+      style={{background:isActive =='/more' ? '#A87F0B' : ''}}
         button
         sx={{ mb: '9px' }}
         onClick={() => handleNavigation('/more')}
       >
         <ListItemIcon>
           <div
-            className={`bg-[#393939]  w-[35px] h-[35px] rounded-[50%] justify-center flex items-center ${
-              isActive(['/more', '/delete', '/allrecords']) ? 'bg-sidec' : ''
-            }`}
+            className={`bg-[#393939]  w-[35px] h-[35px] rounded-[50%] justify-center flex items-center `}
           >
             <img className="w-[100px]" src={more} alt="More" />
           </div>
@@ -128,7 +128,7 @@ export default function MobileSidebar({ drawerOpen, toggleDrawer }) {
           primaryTypographyProps={{
             style: { fontWeight: 'bold', fontSize: '16px', color: 'white' },
           }}
-          primary="Setting"
+          primary="Settings"
         />
       </ListItem>
     </List>
@@ -143,6 +143,7 @@ export default function MobileSidebar({ drawerOpen, toggleDrawer }) {
       <p className="text-white ml-4 text-[16px] font-bold hover:text-gray-300">
         Log Out
       </p>
+    
     </div>
   </div>
 </Drawer>
