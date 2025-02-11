@@ -41,112 +41,86 @@ export default function MobileSidebar({ drawerOpen, toggleDrawer }) {
       backgroundColor: '#444343',
       display: 'flex',
       flexDirection: 'column',
-      height: '100vh', // Full height of the viewport
+      height: '100%', // Full viewport height
+      position:'fixed'
     },
   }}
   open={drawerOpen}
   onClose={toggleDrawer(false)}
 >
-  <div
-    style={{ width: 240, }}
+  <div 
+    style={{ 
+      width: 240, 
+      height: "100vh", 
+      display: "flex", 
+      flexDirection: "column" 
+    }} 
     role="presentation"
-    onClick={toggleDrawer(false)}
-    onKeyDown={toggleDrawer(false)}
   >
-  
-  <div className='flex justify-center items-center w-[100%] '>
-  <div className='w-[33%]'></div>
-    <img className="w-[33%] mt-5  mb-5 ml-8 self-center" src={logo} alt="Logo" />
-    <IoClose      onClick={toggleDrawer(false)} className='text-white ml-[50px] mb-5  text-[30px] w-[33%] ' />
+    {/* Logo and Close Button */}
+    <div className='flex justify-center items-center w-full'>
+      <div className='w-1/3'></div>
+      <img className="w-1/3 mt-5 mb-5 ml-8 self-center" src={logo} alt="Logo" />
+      <IoClose onClick={toggleDrawer(false)} className='text-white ml-12 mb-5 text-2xl w-1/3 cursor-pointer' />
     </div>
     <Divider />
+
+    {/* Sidebar Menu (Non-Scrollable) */}
     <List style={{ flexGrow: 1 }}>
-      <ListItem style={{background:isActive =='/create' ? '#A87F0B' : ''}} button onClick={() => handleNavigation('/create')}>
+      <ListItem style={{ background: isActive === '/create' ? '#A87F0B' : '' }} button onClick={() => handleNavigation('/create')}>
         <ListItemIcon>
-          <div
-            className={`bg-[#393939] w-[35px] h-[35px] rounded-[50%] justify-center flex items-center `}
-            
-          >
-            <img className="w-[100px]" src={create} alt="Create" />
+          <div className="bg-[#393939] w-9 h-9 rounded-full flex justify-center items-center">
+            <img className="w-full" src={create} alt="Create" />
           </div>
         </ListItemIcon>
-        <ListItemText
-          primaryTypographyProps={{
-            style: { fontWeight: 'bold', fontSize: '16px', color: 'white' },
-          }}
-          primary="Create"
-        />
+        <ListItemText primary="Create" primaryTypographyProps={{ style: { fontWeight: 'bold', fontSize: '16px', color: 'white' } }} />
       </ListItem>
-      <ListItem style={{background:isActive =='/payment' ? '#A87F0B' : ''}} button onClick={() => handleNavigation('/payment')}>
+      
+      <ListItem style={{ background: isActive === '/payment' ? '#A87F0B' : '' }} button onClick={() => handleNavigation('/payment')}>
         <ListItemIcon>
-          <div
-            className={`bg-[#393939] w-[35px] h-[35px] rounded-[50%] justify-center flex items-center ${
-              isActive == '/payment' ? 'bg-sidec' : ''
-            }`}
-          >
-            <img className="w-[100px]" src={payment} alt="Payments" />
+          <div className={`bg-[#393939] w-9 h-9 rounded-full flex justify-center items-center ${isActive === '/payment' ? 'bg-sidec' : ''}`}>
+            <img className="w-full" src={payment} alt="Payments" />
           </div>
         </ListItemIcon>
-        <ListItemText
-          primaryTypographyProps={{
-            style: { fontWeight: 'bold', fontSize: '16px', color: 'white' },
-          }}
-          primary="Payments"
-        />
+        <ListItemText primary="Payments" primaryTypographyProps={{ style: { fontWeight: 'bold', fontSize: '16px', color: 'white' } }} />
       </ListItem>
-      <ListItem style={{background:isActive =='/history' ? '#A87F0B' : ''}} button onClick={() => handleNavigation('/history')}>
+
+      <ListItem style={{ background: isActive === '/history' ? '#A87F0B' : '' }} button onClick={() => handleNavigation('/history')}>
         <ListItemIcon>
-          <div
-            className={`bg-[#393939] w-[35px] h-[35px] rounded-[50%] justify-center flex items-center ${
-              isActive == '/history' ? 'bg-sidec' : ''
-            }`}
-          >
-            <img className="w-[100px]" src={file} alt="History" />
+          <div className={`bg-[#393939] w-9 h-9 rounded-full flex justify-center items-center ${isActive === '/history' ? 'bg-sidec' : ''}`}>
+            <img className="w-full" src={file} alt="History" />
           </div>
         </ListItemIcon>
-        <ListItemText
-          primaryTypographyProps={{
-            style: { fontWeight: 'bold', fontSize: '16px', color: 'white' },
-          }}
-          primary="All Kameties"
-        />
+        <ListItemText primary="All Kameties" primaryTypographyProps={{ style: { fontWeight: 'bold', fontSize: '16px', color: 'white' } }} />
       </ListItem>
-      <ListItem
-      style={{background:isActive =='/more' ? '#A87F0B' : ''}}
-        button
-        sx={{ mb: '9px' }}
-        onClick={() => handleNavigation('/more')}
-      >
+
+      <ListItem style={{ background: isActive === '/more' ? '#A87F0B' : '' }} button sx={{ mb: '9px' }} onClick={() => handleNavigation('/more')}>
         <ListItemIcon>
-          <div
-            className={`bg-[#393939]  w-[35px] h-[35px] rounded-[50%] justify-center flex items-center `}
-          >
-            <img className="w-[100px]" src={more} alt="More" />
+          <div className="bg-[#393939] w-9 h-9 rounded-full flex justify-center items-center">
+            <img className="w-full" src={more} alt="More" />
           </div>
         </ListItemIcon>
-        <ListItemText
-          primaryTypographyProps={{
-            style: { fontWeight: 'bold', fontSize: '16px', color: 'white' },
-          }}
-          primary="Settings"
-        />
+        <ListItemText primary="Settings" primaryTypographyProps={{ style: { fontWeight: 'bold', fontSize: '16px', color: 'white' } }} />
       </ListItem>
     </List>
+
     <Divider />
-    <div
+
+    {/* Logout Button (Fixed at Bottom) */}
+    <div 
       onClick={handleLogoutAlert}
-      className={`w-[100%] absolute bottom-0 h-[65px] bg-sidebar pl-7 flex items-center cursor-pointer bg-[#545454] shadow-[inset_-2px_-9px_17.6px_0px_#0000004D] hover:bg-[#6b6b6b] hover:shadow-[inset_-2px_-9px_20px_0px_#00000070]`}
+      className="w-full h-[65px] bg-[#545454] flex items-center pl-7 cursor-pointer shadow-[inset_-2px_-9px_17.6px_0px_#0000004D] hover:bg-[#6b6b6b] hover:shadow-[inset_-2px_-9px_20px_0px_#00000070] mt-auto "
     >
-      <div className={`w-[45px] h-[45px] rounded-[50%] justify-center flex items-center`}>
-        <img className="w-[45px]" src={logout} alt="Logout" />
+      <div className="w-11 h-11 rounded-full flex justify-center items-center">
+        <img className="w-11" src={logout} alt="Logout" />
       </div>
-      <p className="text-white ml-4 text-[16px] font-bold hover:text-gray-300">
-        Log Out
-      </p>
-    
+      <p className="text-white ml-4 text-[16px] font-bold hover:text-gray-300">Log Out</p>
     </div>
   </div>
 </Drawer>
+
+
+
 
 <Modal open={logoutAlert} onClose={handleLogoutAlert}>
         <Box

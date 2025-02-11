@@ -358,10 +358,11 @@ export default function History({ recordType = null }) {
 
                           <div className="w-[100%] relative  bg-colorinput  items-center flex-row px-[12px] py-[14px] sm:p-[30px] rounded-[10px]">
                             <div className="w-[100%] h-[30px] flex items-center flex-row relative">
-                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[18%] w-[43%]">
+                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[17%] w-[40%]">
                                 Kameti Name{" "}
                               </h2>
-                              <p className="text-paytxt w-[5%] font-bold">:</p>
+                              <p className="text-paytxt w-[8%] s:w-[5%] font-bold">:</p>
+                             
                               <h1 className="text-white text-[12px] sm:text-[17px] ">
                                 {truncate(payment.kametiName,12)}
                               </h1>
@@ -439,10 +440,11 @@ export default function History({ recordType = null }) {
                             </div>
 
                             <div className="w-[100%] h-[30px] flex items-center flex-row relative">
-                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[18%] w-[43%]">
+                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[17%] w-[40%]">
                                 Monthly Amount{" "}
                               </h2>
-                              <p className="text-paytxt w-[5%] font-bold">:</p>
+                              <p className="text-paytxt w-[8%] s:w-[5%] font-bold">:</p>
+
                               <h1 className="text-white text-[12px] sm:text-[17px] ">
                                 {Number(
                                   payment.pricePerMonthKameti
@@ -451,12 +453,11 @@ export default function History({ recordType = null }) {
                             </div>
                             {payment.kametiType === "daily" && (
                               <div className="w-[100%] h-[30px] flex items-center flex-row">
-                                <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[18%] w-[43%]">
+                                <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[17%] w-[40%]">
                                   Daily Amount
                                 </h2>
-                                <p className="text-paytxt w-[5%] font-bold">
-                                  :
-                                </p>
+                                <p className="text-paytxt w-[8%] s:w-[5%] font-bold">:</p>
+
                                 <h1 className="text-white text-[12px] sm:text-[17px]">
                                   {Number(
                                     payment.pricePerDayKameti
@@ -465,7 +466,7 @@ export default function History({ recordType = null }) {
                               </div>
                             )}
                             {/* <div className="w-[100%] h-[30px] flex items-center flex-row">
-                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[25%] w-[43%]">
+                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[25%] w-[40%]">
                                
                                   My Kameti (s){" "}
                                 </h2>
@@ -476,10 +477,11 @@ export default function History({ recordType = null }) {
                                 </h1>F
                               </div> */}
                             <div className="w-[100%] h-[30px] flex items-center flex-row">
-                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[18%] w-[43%]">
+                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[17%] w-[40%]">
                                 Monthly Payable{" "}
                               </h2>
-                              <p className="text-paytxt w-[5%] font-bold">:</p>
+                              <p className="text-paytxt w-[8%] s:w-[5%] font-bold">:</p>
+
                               <h1 className="text-white text-[12px] sm:text-[17px]">
                                 {Number(
                                   payment.perMonthPayablePrice
@@ -488,12 +490,11 @@ export default function History({ recordType = null }) {
                             </div>
                             {payment.kametiType === "daily" && (
                               <div className="w-[100%] h-[30px] flex items-center flex-row">
-                                <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[18%] w-[43%]">
-                                  Payable per Day
+                                <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[17%] w-[40%]">
+                                  Daily Payable
                                 </h2>
-                                <p className="text-paytxt w-[5%] font-bold">
-                                  :
-                                </p>
+                                <p className="text-paytxt w-[8%] s:w-[5%] font-bold">:</p>
+
                                 <h1 className="text-white text-[12px] sm:text-[17px]">
                                   {Number(
                                     payment.perDayPayablePrice
@@ -502,7 +503,7 @@ export default function History({ recordType = null }) {
                               </div>
                             )}
                             {/* <div className="w-[100%] h-[30px] flex items-center flex-row ">
-                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[25%] w-[43%]">
+                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[25%] w-[40%]">
 
                                   Total Price(All)
                                 </h2>
@@ -513,10 +514,11 @@ export default function History({ recordType = null }) {
                                 </h1>
                               </div> */}
                             <div className="w-[100%] h-[30px] flex items-center flex-row ">
-                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[18%] w-[43%]">
+                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[17%] w-[40%]">
                                 Total Month
                               </h2>
-                              <p className="text-paytxt w-[5%] font-bold">:</p>
+                              <p className="text-paytxt w-[8%] s:w-[5%] font-bold">:</p>
+
 
                               <h1 className="text-white text-[12px] sm:text-[17px]">
                                 {payment.totalMonths}
@@ -524,20 +526,21 @@ export default function History({ recordType = null }) {
                             </div>
 
                             <div className="w-[100%] h-[30px] flex items-center flex-row ">
-                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[18%] w-[43%]">
+                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[17%] w-[40%]">
                                 Paid Amount
                               </h2>
-                              <p className="text-paytxt w-[5%] font-bold">:</p>
+                              <p className="text-paytxt w-[8%] s:w-[5%] font-bold">:</p>
+
 
                               <h1 className="text-white text-[12px] sm:text-[17px]">
                                 {Number(payment.paidAmount).toLocaleString()}
                               </h1>
                             </div>
                             <div className="w-[100%] h-[30px] flex items-center flex-row ">
-                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[18%] w-[43%]">
+                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[17%] w-[40%]">
                                 Remaining Amount
                               </h2>
-                              <p className="text-paytxt w-[5%] font-bold">:</p>
+                              <p className="text-paytxt w-[8%] s:w-[5%] font-bold">:</p>
 
                               <h1 className="text-white text-[12px] sm:text-[17px]">
                                 {Number(
@@ -556,18 +559,20 @@ style={{
   >
     {payment.kametiType === 'daily' ? 'Daily' : 'Monthly'}
   </button>
+  {recordType === "deleted" && payment.id ? (
+null
+) :   <p
+className="text-[#A87F0B] text-xs sm:text-sm cursor-pointer hover:text-[#7A5C08] mt-2"
+onClick={() => handleShowKameti(payment.id)}
+>
+Show More
+</p>}
 
-  <p
-    className="text-[#A87F0B] text-xs sm:text-sm cursor-pointer hover:text-[#7A5C08] mt-2"
-    onClick={() => handleShowKameti(payment.id)}
-  >
-    Show More
-  </p>
 </div>
 
                             </div>
                             {/* <div className="w-[100%] h-[30px] flex items-center flex-row ">
-                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[25%] w-[43%]">
+                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[25%] w-[40%]">
 
                                   Starting Date
                                 </h2>
@@ -578,7 +583,7 @@ style={{
                                 </h1>
                               </div> */}
                             {/* <div className="w-full h-[30px] flex items-center relative">
-                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[25%] w-[43%]">
+                              <h2 className="text-white text-[12px] sm:text-[17px] sm:w-[25%] w-[40%]">
 
                                   Ending Date
                                 </h2>

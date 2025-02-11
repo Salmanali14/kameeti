@@ -20,6 +20,8 @@ import create from "../../images/create.png";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import InfoModal from "../../components/InfoModal/InfoModal";
 import Alert from "../../components/Alert/Alert";
+import Swal from "sweetalert2";
+
 
 export default function Create() {
   const [btnloader, setBTnloader] = useState(false);
@@ -43,22 +45,34 @@ export default function Create() {
   let navigate = useNavigate();
 
   const handleReset = () => {
-    // Reset form fields
-    setKametiHolderName("");
-    setTotalPrice("");
-    setPricePerKameti("");
-    setPricePerDayKameti("");
-    setTotalMonths("");
-    setMyTotalKameties("");
-    setPayablePerMonth("");
-    setStartingDate("");
-    setEndingDate("");
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This will reset all form fields!",
+      icon: "warning",
+      confirmButtonText: "OK",
+      confirmButtonColor: "#a87f0b", // Change button color (green)
+      showCancelButton: true,
+      cancelButtonText: "Cancel",
+      cancelButtonColor: "#85837d",
+      background: "#373737",
+      color: "#fff"
 
-    // Set the confirmation message
-    setConfirmMessage("Form reset successfully!");
-    setShowConfirmAlert(true);
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Reset form fields
+        setKametiHolderName("");
+        setTotalPrice("");
+        setPricePerKameti("");
+        setPricePerDayKameti("");
+        setTotalMonths("");
+        setMyTotalKameties("");
+        setPayablePerMonth("");
+        setStartingDate("");
+        setEndingDate("");
+
+      }
+    });
   };
-
   const handleAlertConfirm = () => {
     // Close the confirmation alert after user confirms
     setShowConfirmAlert(false);
@@ -89,7 +103,7 @@ export default function Create() {
   //   return `${day}/${month}/${year}`; // Format as DD/MM/YY
   // };
 
-  const formatDate = (timestamp) => {
+  const formatDate = (timestamp, type) => {
     if (!timestamp) return ""; // Return an empty string if no date is provided
   
     const date = new Date(timestamp);
@@ -99,7 +113,8 @@ export default function Create() {
     const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
     const day = String(date.getDate()).padStart(2, "0");
   
-    return `${month}-${day}-${year}`;
+    return type == "endDate" ? `${month}/${day}/${year}` : `${month}-${day}-${year}`;
+
   };
   
 
@@ -129,16 +144,25 @@ useEffect(() => {
 
 
 
-  useEffect(() => {
-    // Calculate total price when price per kameti or total months changes
-    if (totalPrice && totalMonths) {
-      setPricePerKameti(totalPrice / totalMonths);
-      setPricePerDayKameti(totalPrice / totalMonths / 30);
-    } else {
-      setPricePerKameti("");
-      setPricePerDayKameti("");
-    }
-  }, [totalPrice, totalMonths]);
+const formatPrice = (value) => {
+  let formattedValue = value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+  return new Intl.NumberFormat().format(formattedValue); // Format with commas
+};
+
+const handleTotalPriceChange = (e) => {
+  let rawValue = e.target.value.replace(/[^0-9]/g, ""); // Keep only numbers
+  setTotalPrice(rawValue ? parseInt(rawValue, 10) : ""); // Store as a number
+};
+
+useEffect(() => {
+  if (totalPrice && totalMonths) {
+    setPricePerKameti(totalPrice / totalMonths);
+    setPricePerDayKameti(totalPrice / totalMonths / 30);
+  } else {
+    setPricePerKameti("");
+    setPricePerDayKameti("");
+  }
+}, [totalPrice, totalMonths]);
 
   const handleCreateCommittee = async () => {
     const toastId = "createCommitteeToast"; // Unique ID for this toast
@@ -382,12 +406,13 @@ useEffect(() => {
   };
   let windowWidth = window.innerWidth;
   
+
   return (
     <>
       <div className="w-[100%] h-[100vh] flex justify-center items-center bg-black">
         <div className="w-[100%] h-[100vh] flex">
           {screenwidth > 430 && <Sidebar />}
-          <div className="sm:w-[80%] w-[100%] h-[100vh] overflow-y-scroll  pb-3 sm:ml-[2px] sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px]">
+          <div className="sm:w-[80%] w-[100%] h-[100%] sm:overflow-scroll  pb-3 sm:ml-[2px] sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px]">
             <div className="w-[100%] flex justify-between items-center sm:h-max h-[80px] sm:p-0 p-3 sm:mt-6 border-b-[1px] border-[#535353]">
               <span className="flex justify-center items-center w-full sm:w-auto sm:flex-row">
                 {screenwidth < 430 && (
@@ -471,14 +496,14 @@ useEffect(() => {
                         <input
                           type="text"
                           placeholder="e.g 24000"
-                          value={totalPrice}
-                          onChange={(e) => setTotalPrice(e.target.value)}
+                          value={totalPrice ? formatPrice(totalPrice.toString()) : ""} // Format for UI
+                          onChange={handleTotalPriceChange} // Use function to update state
                           required
                           className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10"
                         />
                       </div>
                       <IoIosInformationCircleOutline
-                        className="text-[#FFFFFF4D] text-[25px] absolute right-4"
+                        className="text-[#FFFFFF4D] text-[25px] absolute right-4 cursor-pointer"
                         onClick={handleinfoTotalAmmount}
                       />
                     </div>
@@ -510,6 +535,7 @@ useEffect(() => {
                           value="daily"
                           checked={kametiType === "daily"}
                           disabled={!!id} // Disable input if ID is available
+
                           onChange={(e) =>
                             setKametiType(e.target.checked ? "daily" : "")
                           }
@@ -636,6 +662,7 @@ useEffect(() => {
                               <input
                                 type="text"
                                 placeholder="e.g 200"
+                                disabled
                                 value={
                                   pricePerDayKameti
                                     ? (Number(pricePerDayKameti) || 0).toFixed(
@@ -694,6 +721,8 @@ useEffect(() => {
                                 type="text"
                                 placeholder="e.g 200"
                                 value={pricePerDayKameti}
+                                disabled
+
                                 onChange={(e) =>
                                   setPricePerDayKameti(e.target.value)
                                 }
@@ -723,7 +752,7 @@ useEffect(() => {
                       <IoIosInformationCircleOutline
                         onClick={handleinfoTotalMonth}
                         // Replace with your desired icon, e.g., calendar
-                        className="text-[#FFFFFF4D] text-[25px] absolute right-4"
+                        className="text-[#FFFFFF4D] text-[25px] absolute right-4 cursor-pointer"
                       />
                     </div>
                   </div>
@@ -733,12 +762,14 @@ useEffect(() => {
                       <label className="text-[white]">Monthly Amount</label>
                     </div>
                     <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] mb-5 flex items-center px-4 relative">
-                      <input
-                        type="text"
-                        placeholder="e.g 24000"
-                        value={pricePerKameti}
-                        className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10"
-                      />
+                    <input
+  type="text"
+  placeholder="e.g 24000"
+  value={pricePerKameti ? new Intl.NumberFormat().format(pricePerKameti) : ""}
+  disabled
+  className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10"
+/>
+
                       {/* <IoIosInformationCircleOutline
     onClick={handleinfoMonthlyAmmount}
       className="text-[white] text-[25px] absolute right-4"
@@ -748,24 +779,26 @@ useEffect(() => {
                 </div>
 
                 <div className="flex w-[100%] justify-center sm:flex-row flex-col items-center">
-                  <div className="sm:w-[90%] w-[100%] flex items-center flex-col">
-                    <div className="w-[100%] sm:mt-2 mt-0 mb-2">
-                      <label className="text-[white]">My Kameties</label>
-                    </div>
-                    <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] sm:mb-5 flex items-center px-4 relative">
-                      <input
-                        type="text"
-                        placeholder="e.g 1,2"
-                        value={myTotalKameties}
-                        onChange={(e) => setMyTotalKameties(e.target.value)}
-                        className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10"
-                      />
-                      <IoIosInformationCircleOutline
-                        onClick={handleinfoMyKametie}
-                        className="text-[#FFFFFF4D] text-[25px] absolute right-4"
-                      />
-                    </div>
-                  </div>
+                <div className="sm:w-[90%] w-[100%] flex items-center flex-col">
+  <div className="w-[100%] sm:mt-2 mt-0 mb-2">
+    <label className="text-[white]">My Kameties</label>
+  </div>
+  <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] sm:mb-5 flex items-center px-4 relative">
+    <input
+      type="text"
+      placeholder="e.g 1,2"  // Placeholder stays the same
+      value={myTotalKameties ? formatPrice(myTotalKameties) : ""}  // Format the value for display
+      onChange={(e) => setMyTotalKameties(e.target.value)}  // Keep raw value in state
+      className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10"
+    />
+    <IoIosInformationCircleOutline
+      onClick={handleinfoMyKametie}
+      className="text-[#FFFFFF4D] text-[25px] absolute right-4 cursor-pointer"
+    />
+  </div>
+</div>
+
+
 
                   <div className="sm:w-[90%] w-[100%] sm:ml-10 flex items-center flex-col">
                     <div className="w-[100%] sm:mt-2 mt-5 mb-2">
@@ -807,24 +840,31 @@ useEffect(() => {
                 </div>
 
                 <div className="flex w-[100%] justify-center sm:flex-row flex-col items-center">
-                  <div className="sm:w-[90%] w-[100%] flex items-center flex-col">
-                    <div className="w-[100%] sm:mt-2 mt-0 mb-2">
-                      <label className="text-[white]"> Start Date</label>
-                    </div>
-                    <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] sm:mb-5 flex items-center">
-                      <div className="w-[90%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center">
-                        {/* <img className="h-[25px]" src={date} /> */}
-                        <input
-                          onFocus={(e) => (e.target.type = "date")}
-                          // onBlur={(e) => (e.target.type = "text")}
-                          placeholder="MM-DD-YY"
-                          value={startingDate}
-                          onChange={(e) => setStartingDate(e.target.value)}
-                          className="outline-none border-none text-[white] bg-colorinput w-[100%] h-[40px] pl-2"
-                        />
-                      </div>
-                    </div>
-                  </div>
+<div className="sm:w-[90%] w-[100%] flex items-center flex-col">
+  <div className="w-[100%] sm:mt-2 mt-0 mb-2">
+    <label className="text-[white]">Start Date</label>
+  </div>
+  <div
+    className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] sm:mb-5 flex items-center"
+    onClick={() => document.getElementById('startDateInput').showPicker()} // Open the date picker
+  >
+    <div className="w-[90%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center">
+      <input
+        id="startDateInput" // Add an ID to the input for easy targeting
+        type="text" // Keep the type as "text" to maintain the placeholder
+        onFocus={(e) => {
+          e.target.type = "date"; // Change to "date" type when focused
+          e.target.showPicker(); // Open the date picker immediately
+        }}
+        onBlur={(e) => (e.target.type = "text")} // Revert to "text" type when blurred
+        placeholder="MM-DD-YY"
+        value={startingDate}
+        onChange={(e) => setStartingDate(e.target.value)}
+        className="outline-none border-none text-[white] bg-colorinput w-[100%] h-[40px] pl-2"
+      />
+    </div>
+  </div>
+</div>
 
                   <div className="sm:w-[90%] w-[100%] sm:ml-10 flex items-center flex-col">
                     <div className="w-[100%] sm:mt-2 mt-5 mb-2">
@@ -837,7 +877,7 @@ useEffect(() => {
                           onFocus={(e) => (e.target.type = "date")}
                           // onBlur={(e) => (e.target.type = "text")}
                           placeholder="MM-DD-YY"
-                          value={formatDate(endingDate)}
+                          value={formatDate(endingDate, "endDate")}
                           disabled
                           onChange={(e) => setEndingDate(e.target.value)}
                           className="outline-none border-none text-[white] bg-colorinput w-[100%] h-[40px] pl-2"

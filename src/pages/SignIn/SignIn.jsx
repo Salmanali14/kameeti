@@ -344,7 +344,7 @@ export default function SignIn() {
             </p>
 
             <div className="text-center mt-5">
-              <p className="text-white text-sm">Or Signin with </p>
+              <p className="text-white text-sm">Or </p>
               <div className="flex justify-center gap-3 mt-3">
                 {/* Google Login Button */}
                 <div className="flex justify-center items-center w-[100%] cursor-pointer  text-[13px]">
@@ -356,8 +356,8 @@ export default function SignIn() {
                 </div>
 
                 {/* Facebook Login Button */}
-                <div className="flex justify-center items-center w-[100%] cursor-pointer text-white bg-[#1a73e8] rounded-[4px] px-4 h-[40px] gap-2 text-[13px]">
-                  <FaFacebookF className="text-[20px]" />{" "}
+                <div className="flex justify-center items-center w-[100%] cursor-pointer text-white bg-[#1a73e8] rounded-[4px] px-3 h-[40px] gap-2 text-[13px]">
+                  <FaFacebookF className="text-[19px]" />
                   {/* Added text size for icon */}
                   <FacebookLogin
                     appId="1594999661137496"
@@ -365,6 +365,7 @@ export default function SignIn() {
                     fields="name,email,picture"
                     callback={responseFacebook}
                     cssClass="facebook-small-button"
+                    textButton="Sign in with Facebook" // Change the text here
                   />
                 </div>
               </div>

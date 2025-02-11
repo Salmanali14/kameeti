@@ -5,7 +5,10 @@ import editimg from "../../images/paymentImage/editProfile.png";
 import remove from "../../images/paymentImage/Remove.png";
 import delete1 from "../../images/paymentImage/deleteRecord.png";
 import folder from "../../images/paymentImage/allRecord.png";
+import allrec from "../../images/allRecord.png";
+
 import PrivacyPolicy from "../../images/privacyPolicy.png";
+
 import needHelp from "../../images/needHelp.png";
 import rateUs from "../../images/rateUs.png";
 import shareLink from "../../images/shareLink.png";
@@ -37,15 +40,20 @@ import PhoneInput from "react-phone-input-2";
 import { TbMenu2 } from "react-icons/tb";
 import more from "../../images/more2.png";
 
+import { FaRegEyeSlash } from "react-icons/fa";
+import { MdOutlineRemoveRedEye } from "react-icons/md";
+
 import { MdModeEditOutline } from "react-icons/md";
 
 import MobileSidebar from "../../components/MobileSidebar/MobileSidebar";
 
 export default function More() {
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [btnloader, setBTnloader] = useState(false);
   let [cropModal, setcropModal] = useState(false);
   const [profile, setProfile] = useState("");
-  const [profileImage, setProfileImage] = useState("");
   let [myprflimg, setmyprflimg] = useState(null);
   const [allKametiCounts, setAllKametiCounts] = useState(0);
   const [key, setKey] = useState("");
@@ -351,6 +359,55 @@ export default function More() {
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
   };
+ 
+  const [showPasswordForm, setShowPasswordForm] = useState(false); // State to toggle modal
+  const [oldPassword, setOldPassword] = useState(""); // Old password field
+  const [newPassword, setNewPassword] = useState(""); // New password field
+  const [confirmPassword, setConfirmPassword] = useState(""); // Confirm new password field
+  const [error, setError] = useState(""); // Error handling
+  const [successMessage, setSuccessMessage] = useState(""); // Success message
+
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      setError("New passwords do not match!");
+      return;
+    }
+
+    const payload = {
+      oldPassword : oldPassword,
+      newPassword: newPassword,
+    };
+
+    try {
+      const response = await axios.post(`${apiBaseUrl}changePassword`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // Set the success message from the response
+      setSuccessMessage(response.data.message);
+      setError("");
+      // setShowPasswordForm(false); // Close form after successful change
+      setOldPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+    } catch (error) {
+      // If the error has a response object, we can grab more specific details from it
+      const errorMessage = error.response?.data?.message || "An error occurred while changing the password.";
+      setError(errorMessage);
+      setSuccessMessage("");
+    }
+    
+  };
+
+  const handleFormToggle = () => {
+    if(!showPasswordForm)
+    {
+      setSuccessMessage("");
+      setError("");
+    }
+    setShowPasswordForm(!showPasswordForm); // Toggle modal visibility
+  };
 
   return (
     <>
@@ -393,7 +450,7 @@ export default function More() {
     />
     
     {/* Centered h1 in small screens */}
-    <h1 className="text-white sm:text-[25px]  sm:mr-0 mr-8 text-[20px] font-bold flex items-center justify-center sm:ml-5 sm:mb-6 w-full">
+    <h1 className="text-white sm:text-[25px]  sm:mr-0 mr-8 text-[20px] font-bold flex  sm:ml-5 sm:mb-6 w-full">
       <img
         className="hidden sm:block w-[40px] mr-3"
         src={more}
@@ -488,23 +545,97 @@ export default function More() {
                         Deleted Records ({delKametiCounts})
                       </h2>
                     </div>
+                    <div
+      style={{ boxShadow: "0px 0px 20px 0px #00000040" }}
+      className="sm:w-[17%] w-[40%] m-3 relative h-[130px] sm:h-[150px] cursor-pointer rounded-[18px] bg-[#444343] flex justify-center items-center flex-col"
+    >
+      <img
+        className="w-[45px]"
+        src={allrec}
+        alt="folder icon"
+        onClick={handleFormToggle} // Open modal on click
+      />
+      <h2 className="text-white sm:text-[13px] text-[12px] mt-1"  onClick={handleFormToggle} >Change Password</h2>
 
-                    {/* <div
-                      style={{ boxShadow: "0px 0px 20px 0px #00000040" }}
-                      className="sm:sm:w-[17%]  w-[40%] m-3 relative  h-[130px] sm:h-[150px] cursor-pointer rounded-[18px]  bg-[#444343] flex justify-center items-center flex-col"
-                    >
-                      <img
-                        className="w-[45px]"
-                        onClick={handleallrecords}
-                        src={folder}
-                      />
-                      <h2
-                        className="text-white sm:text-[13px] text-[12px] mt-1"
-                        onClick={handleallrecords}
-                      >
-                        Change Password{" "}
-                      </h2>
-                    </div> */}
+      {/* Modal for Password Change */}
+      {showPasswordForm && (
+           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+           <div className="bg-[#343434] p-5 rounded-lg shadow-lg w-[500px]">
+             <h2 className="text-lg text-white font-bold mb-3">Change Password</h2>
+     
+             {/* Input Fields for Password Change */}
+             <div>
+               {/* Old Password */}
+               <div className="bg-[#FFFFFF2B] rounded-[10px] mt-4 flex items-center relative">
+                 <input
+                   type={showOldPassword ? "text" : "password"}
+                   placeholder="Old Password"
+                   value={oldPassword}
+                   onChange={(e) => setOldPassword(e.target.value)}
+                   className="w-full outline-none rounded-[60px] h-[40px] pl-3 pr-10 bg-[#191717] text-[#FFFFFF]"
+                 />
+                 <span
+                   className="absolute right-3 cursor-pointer text-white"
+                   onClick={() => setShowOldPassword(!showOldPassword)}
+                 >
+                   {showOldPassword ? <MdOutlineRemoveRedEye /> : <FaRegEyeSlash />}
+                 </span>
+               </div>
+     
+               {/* New Password */}
+               <div className="bg-[#FFFFFF2B] rounded-[10px] mt-4 flex items-center relative">
+                 <input
+                   type={showNewPassword ? "text" : "password"}
+                   placeholder="New Password"
+                   value={newPassword}
+                   onChange={(e) => setNewPassword(e.target.value)}
+                   className="w-full outline-none rounded-[60px] h-[40px] pl-3 pr-10 bg-[#191717] text-[#FFFFFF]"
+                 />
+                 <span
+                   className="absolute right-3 cursor-pointer text-white"
+                   onClick={() => setShowNewPassword(!showNewPassword)}
+                 >
+                   {showNewPassword ? <MdOutlineRemoveRedEye /> : <FaRegEyeSlash />}
+                 </span>
+               </div>
+     
+               {/* Confirm New Password */}
+               <div className="bg-[#FFFFFF2B] rounded-[10px] mt-4 flex items-center relative">
+                 <input
+                   type={showConfirmPassword ? "text" : "password"}
+                   placeholder="Confirm New Password"
+                   value={confirmPassword}
+                   onChange={(e) => setConfirmPassword(e.target.value)}
+                   className="w-full outline-none rounded-[60px] h-[40px] pl-3 pr-10 bg-[#191717] text-[#FFFFFF]"
+                 />
+                 <span
+                   className="absolute right-3 cursor-pointer text-white"
+                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                 >
+                   {showConfirmPassword ? <MdOutlineRemoveRedEye /> : <FaRegEyeSlash />}
+                 </span>
+               </div>
+             </div>
+     
+             {/* Buttons to Submit or Cancel */}
+             <div className="flex justify-center mt-3">
+               <button
+                 onClick={handleFormToggle} // Close modal on cancel
+                 className="bg-gray-500 text-white px-4 py-2 rounded-md"
+               >
+                 Cancel
+               </button>
+               <button
+                 onClick={handleChangePassword}
+                 className="bg-[#a87f0b] text-white px-4 ml-4 py-2 rounded-md"
+               >
+                 Save
+               </button>
+             </div>
+           </div>
+         </div>
+      )}
+    </div>
                     <div
                       onClick={privacyPolicy}
                       style={{ boxShadow: "0px 0px 20px 0px #00000040" }}
@@ -558,7 +689,7 @@ export default function More() {
                     </div>
                     <div
                       onClick={handleDelAccountAlert}
-                      v
+                      
                       style={{ boxShadow: "0px 0px 20px 0px #00000040" }}
                       className="sm:sm:w-[17%]  w-[42%] m-3 relative  h-[130px] sm:h-[150px] cursor-pointer rounded-[18px]  bg-[#444343] flex justify-center items-center flex-col"
                     >
