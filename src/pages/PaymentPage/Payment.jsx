@@ -173,7 +173,6 @@ const fetchKametis = async (type) => {
         ...dailyCommTemp,
         ...monthlyCommTemp,
       ].find((committee) => committee.id === parseInt(urlId, 10));
-      console.log(activeCommitteeExist);
 
       if (activeCommitteeExist) {
         setSelectedCommittee(activeCommitteeExist);
@@ -189,7 +188,6 @@ const fetchKametis = async (type) => {
       // Fallback when no ID is in the URL
       const firstCommittee = kametees[0];
       if (firstCommittee) {
-        console.log(firstCommittee?.id);
         setSelectedCommittee(firstCommittee);
         setKametiType(firstCommittee?.kametiType || type);
         fetchPayments(firstCommittee?.id, firstCommittee?.kametiType);
@@ -490,27 +488,7 @@ const fetchKametis = async (type) => {
     }
   }, [calendarKey]);
 
-  //   useEffect(() => {
-  //     if (selectedCommittee?.id && highlightedDatesMap[selectedCommittee?.id]) {
-  //       setHighlightedDates({
-  //         dates: highlightedDatesMap[selectedCommittee?.id],
-  //         committeeId: selectedCommittee?.id,
-  //       });
-  //     } else {
-  //       setHighlightedDates({ dates: [], committeeId: selectedCommittee?.id });
-  //     }
 
-  //  const minDate = new Date(Math.min(...months));
-  //   let maxDate = new Date(selectedCommittee?.endingMonth);
-
-  //     const today = new Date();
-  //     setDate(today);
-  //   }, [selectedCommittee?.id, highlightedDatesMap]);
-  //   const minDate = months.length > 0
-  //   ? new Date(Math.min(...months.map(date => new Date(date).getTime())))
-  //   : null;
-  // const today = new Date();
-  // const maxDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
   useEffect(() => {
     if (selectedCommittee?.id && highlightedDatesMap[selectedCommittee?.id]) {
@@ -522,10 +500,13 @@ const fetchKametis = async (type) => {
       setHighlightedDates({ dates: [], committeeId: selectedCommittee?.id });
     }
 
+
+
     // Ensure the calendar always scrolls to the current month on page load
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth(); // 0-indexed (January is 0)
+
 
     const scrollToCurrentMonth = () => {
       const monthElement = document.querySelector(
@@ -540,9 +521,26 @@ const fetchKametis = async (type) => {
     scrollToCurrentMonth();
   }, [selectedCommittee, highlightedDatesMap]); // Dependency adjusted
 
-  const minDate = new Date(Math.min(...months));
+  const currentDate = new Date();
+  const committeeStartDate = selectedCommittee?.startingMonth
+    ? new Date(selectedCommittee.startingMonth)
+    : null;
 
-  let maxDate = new Date(selectedCommittee?.endingMonth);
+  // If kametiType is "daily", force start date to the 1st of the starting month
+  if (selectedCommittee?.kametiType === "daily" && committeeStartDate) {
+    committeeStartDate.setDate(1); // Set to 1st of the month
+  }
+  const committeeEndDate = selectedCommittee?.endingMonth
+    ? new Date(selectedCommittee.endingMonth)
+    : null;
+  
+  // If current date is greater than end date, update end date to current date
+  const adjustedEndDate =
+    committeeEndDate && currentDate > committeeEndDate ? currentDate : committeeEndDate;
+  // Ensure minDate allows backward navigation
+  const adjustedMinDate = committeeStartDate
+    ? new Date(committeeStartDate.setMonth(committeeStartDate.getMonth()))
+    : null;
 
   const handleDateClick = (value) => {
     const clickedDate = value.toDateString();
@@ -627,13 +625,12 @@ const fetchKametis = async (type) => {
 
   const handleMonthSelect = (month) => {
     setSelectedMonth(month);
-    console.log(month);
+
     // Filter payments for the selected month from selectedCommittee object
     const selectedPayments = filteredPayments.filter((payment) => {
       const paymentDate = new Date(payment.date);
-      console.log(ok);
+  
       const selectedMonthDate = new Date(Number(month));
-      console.log(new Date(selectedMonthDate).getMonth());
       return (
         paymentDate.getMonth() + 1 === selectedMonthDate.getMonth() + 1 &&
         paymentDate.getFullYear() === selectedMonthDate.getFullYear()
@@ -1391,46 +1388,47 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
     bg-[#333232] p-2 sm:p-4 overflow-hidden"
                     >
                       <div className="w-full overflow-auto calendar-container">
-                        <Calendar
-                          key={calendarKey}
-                          ref={calendarRef}
-                          onChange={setDate}
-                          value={date}
-                          tileClassName={({ date }) => {
-                            const isHighlighted =
-                              highlightedDates.committeeId ===
-                                selectedCommittee?.id &&
-                              highlightedDates.dates.some(
-                                (d) =>
-                                  new Date(d).toDateString() ===
-                                  date.toDateString()
-                              );
+                      <Calendar
+                        key={calendarKey}
+                        ref={calendarRef}
+                        onChange={setDate}
+                        value={date}
+                        tileClassName={({ date }) => {
+                          const isHighlighted =
+                            highlightedDates.committeeId === selectedCommittee?.id &&
+                            highlightedDates.dates.some(
+                              (d) => new Date(d).toDateString() === date.toDateString()
+                            );
 
-                            return isHighlighted ? "highlighted" : null;
-                          }}
-                          tileDisabled={({ date, view }) => {
-                            if (
-                              selectedCommittee?.kametiType == "daily" &&
-                              date.getDate() === 31
-                            ) {
+                          return isHighlighted ? "highlighted" : null;
+                        }}
+                        tileDisabled={({ date, view }) => {
+                          if (selectedCommittee?.kametiType == "daily" && date.getDate() === 31) {
+                            return true;
+                          }
+
+                          if (selectedCommittee?.endingMonth) {
+                            const committeeEndDate = new Date(selectedCommittee.endingMonth);
+                            if (date > committeeEndDate) {
                               return true;
                             }
+                          }
 
-                            return (
-                              view === "month" &&
-                              date.getMonth() !== new Date(date).getMonth()
-                            );
-                          }}
-                          className="react-calendar w-full max-w-[400px] sm:max-w-[600px] md:max-w-[800px]"
-                          onClickDay={handleDateClick}
-                          minDate={minDate}
-                          maxDate={maxDate}
-                          view="month"
-                          nextLabel="›"
-                          prevLabel="‹"
-                          next2Label={null}
-                          prev2Label={null}
-                        />
+                          return view === "month" && date.getMonth() !== new Date(date).getMonth();
+
+                          
+                        }}
+                        className="react-calendar w-full max-w-[400px] sm:max-w-[600px] md:max-w-[800px]"
+                        onClickDay={handleDateClick}
+                        minDate={adjustedMinDate} // Allows navigation but prevents selection before start date
+                        maxDate={adjustedEndDate}
+                        view="month"
+                        nextLabel="›"
+                        prevLabel="‹"
+                        next2Label={null}
+                        prev2Label={null}
+                        defaultActiveStartDate={currentDate}  // Ensures the calendar opens on the current month
+                      />
                       </div>
                     </div>
                   </div>
