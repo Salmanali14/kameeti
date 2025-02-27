@@ -102,18 +102,18 @@ export default function Signup() {
     
     setBTnloader(true)
     try {
-      let cleanPhone = phone;
+      // let cleanPhone = phone;
       
-      if (cleanPhone.startsWith("92")) {
-        cleanPhone = cleanPhone.substring(2); // Remove "92"
-      }
+      // if (cleanPhone.startsWith("92")) {
+      //   cleanPhone = cleanPhone.substring(2); // Remove "92"
+      // }
 
-      if (!cleanPhone.startsWith("0")) {
-        cleanPhone = "0" + cleanPhone;
-      }
+      // if (!cleanPhone.startsWith("0")) {
+      //   cleanPhone = "0" + cleanPhone;
+      // }
       const response = await axios.post(`${apiBaseUrl}register`, {
         email: email,
-        phoneNumber: cleanPhone,
+        phoneNumber: phone,
         password: password,
         loginWith: "signup",
         fcmtoken: "asdf",
@@ -124,7 +124,7 @@ export default function Signup() {
       });
   
       if (!toast.isActive(toastId)) {
-        toast.success("Account created successfully!", { toastId });
+        toast.success("Successfully sign up!", { toastId });
         setBTnloader(false)
       }
   
@@ -289,7 +289,9 @@ export default function Signup() {
     </p>
   </div>
   {screenwidth > 430 && (
-   <div className="w-[50%] h-[100vh] flex justify-center items-center">
+  
+          <div className="hidden sm:flex w-[50%] h-full justify-center items-center">
+
           <div className="relative flex justify-center items-center">
             <img className="w-[100%] z-10" src={logo} alt="Laptop" />
          

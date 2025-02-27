@@ -58,6 +58,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { TbMenu2 } from "react-icons/tb";
 import MobileSidebar from "../../components/MobileSidebar/MobileSidebar";
+import { BiSolidDownArrow } from "react-icons/bi";
+
 export default function Payment() {
   const [isCopied, setIsCopied] = useState(false);
   const apiBaseUrl = import.meta.env.VITE_APP_API_URL;
@@ -74,6 +76,7 @@ export default function Payment() {
   const [kametiType, setKametiType] = useState("daily");
   const [selectedRow, setSelectedRow] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchParams] = useSearchParams();
 
   const urlId = searchParams.get("id"); // Get the ID from the URL
@@ -85,7 +88,8 @@ export default function Payment() {
   const [showModal, setShowModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
-
+  const [dailyCommittees, setDailyCommittees] = useState([]);
+  const [monthlyCommittees, setMonthlyCommittees] = useState([]);
   // Function to open modal and set date
   const handleDateClick1 = (index) => {
     setEditingIndex(index);
@@ -142,67 +146,83 @@ export default function Payment() {
   const [activeKameti, setActiveKameti] = useState(null);
   // console.log(filteredPayments)
 
-const fetchKametis = async (type) => {
-  try {
-    // Set loading to true at the start
-    setLoading(true);
 
-    const response = await axios.get(`${apiBaseUrl}payment`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const dailyCommTemp = response?.data?.data?.daily_committees;
-    const monthlyCommTemp = response?.data?.data?.monthly_committees;
-
-    let kametees;
-    if (type === "daily") {
-      setCommitteeData(dailyCommTemp);
-      kametees = dailyCommTemp;
-    } else {
-      setCommitteeData(monthlyCommTemp);
-      kametees = monthlyCommTemp;
-    }
-
-    // Check if the URL has a valid id
-    if (urlId) {
-      console.log(urlId);
-
-      const activeCommitteeExist = [
-        ...dailyCommTemp,
-        ...monthlyCommTemp,
-      ].find((committee) => committee.id === parseInt(urlId, 10));
-
-      if (activeCommitteeExist) {
-        setSelectedCommittee(activeCommitteeExist);
-        setKametiType(activeCommitteeExist?.kametiType || type);
-        fetchPayments(
-          activeCommitteeExist?.id,
-          activeCommitteeExist?.kametiType
-        );
-      } else {
-        console.warn("No committee found with the given URL ID");
+  const fetchKametis = async () => {
+      try {
+          setLoading(true);
+          const response = await axios.get(`${apiBaseUrl}payment`, {
+              headers: { Authorization: `Bearer ${token}` },
+          });
+  
+          let dailyData = response?.data?.data?.daily_committees || [];
+          let monthlyData = response?.data?.data?.monthly_committees || [];
+  
+          // If urlId exists, filter data
+          if (urlId) {
+              dailyData = dailyData.filter(item => item.id == urlId);
+              monthlyData = monthlyData.filter(item => item.id == urlId);
+          }
+  
+          setDailyCommittees(dailyData);
+          setMonthlyCommittees(monthlyData);
+  
+          // Ensure daily Kameti is selected by default
+          if (dailyData.length > 0) {
+              setCommitteeData(dailyData);
+              setSelectedCommittee(dailyData[0]);
+              setKametiType("daily");
+              fetchPayments(dailyData[0].id, "daily");
+          } else if (monthlyData.length > 0) {
+              setCommitteeData(monthlyData);
+              setSelectedCommittee(monthlyData[0]);
+              setKametiType("monthly");
+              fetchPayments(monthlyData[0].id, "monthly");
+          } else {
+              setCommitteeData([]);
+              setSelectedCommittee(null);
+              setKametiType("daily"); // Default to daily even if no data
+          }
+  
+      } catch (error) {
+          console.error("Error fetching data:", error);
+      } finally {
+          setLoading(false);
       }
-    } else {
-      // Fallback when no ID is in the URL
-      const firstCommittee = kametees[0];
-      if (firstCommittee) {
-        setSelectedCommittee(firstCommittee);
-        setKametiType(firstCommittee?.kametiType || type);
-        fetchPayments(firstCommittee?.id, firstCommittee?.kametiType);
-      }
+  };
+  
+  
+  // Fetch data when the component mounts
+  useEffect(() => {
+    
+
+    fetchKametis();
+  }, []);
+  
+
+
+const handleKametiTypeChange = (selectedType) => {
+  setKametiType(selectedType);
+console.log(selectedType)
+  // Use stored data instead of refetching API
+  if (selectedType === "daily") {
+    setCommitteeData(dailyCommittees);
+    if (dailyCommittees.length > 0) {
+      setSelectedCommittee(dailyCommittees[0]);
+      fetchPayments(dailyCommittees[0].id, "daily");
     }
-  } catch (error) {
-    console.error("Error fetching data:", error);
-  } finally {
-    // Set loading to false at the end
-    setLoading(false);
+  } else {
+    setCommitteeData(monthlyCommittees);
+    if (monthlyCommittees.length > 0) {
+      setSelectedCommittee(monthlyCommittees[0]);
+      fetchPayments(monthlyCommittees[0].id, "monthly");
+    }
   }
 };
 
 
+
   const fetchPayments = async (kametiId, type) => {
+    // console.log(kametiId,urlId)
     setBTnloader(true);
     try {
       const response = await axios.get(
@@ -337,9 +357,7 @@ const fetchKametis = async (type) => {
   const handleAlertCancel = () => {
     setShowConfirmAlert(false); // Hide the confirm alert
   };
-  useEffect(() => {
-    fetchKametis(kametiType);
-  }, [kametiType]);
+ 
 
   useEffect(() => {
     if (selectedCommittee) {
@@ -380,12 +398,7 @@ const fetchKametis = async (type) => {
     setFilteredPayments(sorted);
   };
 
-  const handleKametiTypeChange = (selectedType) => {
-    // const selectedType = event.target.value;
-    // console.log(selectedType)
-    setKametiType(selectedType);
-    fetchKametis(selectedType);
-  };
+
 
   const handleCommitteeChange = (event) => {
     const commId = parseInt(event.target.value, 10); // Convert the value to an integer
@@ -571,7 +584,7 @@ const fetchKametis = async (type) => {
         amount: price,
       });
       setModalVisible(true);
-      setConfirmMessage("Do you want to cancel payment for this date?");
+      setConfirmMessage("Do you want to unpay kameti?");
       setConfirmAction("unpayCommitee");
       setShowConfirmAlert(true);
     } else {
@@ -610,7 +623,7 @@ const fetchKametis = async (type) => {
             "By paying the kameti for this date, the remaining two days' payments will also be covered."
           );
         } else {
-          setConfirmMessage("Do you pay kameti?");
+          setConfirmMessage("Do you want to pay kameti?");
         }
 
         setConfirmAction("payCommitee");
@@ -765,6 +778,12 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
       document.removeEventListener("mousedown", handleClickOutside); // Cleanup listener on unmount
     };
   }, [showDropdown]);
+
+  const formatPrice = (value) => {
+    // Ensure value is a string before calling replace
+    let formattedValue = String(value).replace(/[^0-9]/g, ""); // Remove non-numeric characters
+    return new Intl.NumberFormat().format(formattedValue); // Format with commas
+  };
   
   return (
     <>
@@ -776,17 +795,18 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
               <FadeLoader color="#A87F0B" />
             </div>
           ) : (
-            <div className="sm:w-[80%] w-[100%] h-[100%] sm:overflow-scroll sm:pb-3   sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px] ">
-              <div className="w-[100%] flex justify-between items-center h-[80px] sm:p-0 p-3 sm:mt-6 border-b-[1px] border-[#535353]">
-                <span className="flex justify-center items-center w-full sm:w-auto sm:flex-row">
+            <div className="sm:w-[80%] w-[100%] h-[100%] sm:overflow-scroll  pb-3  sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px]">
+            <div className="w-[100%] h-[90px]  flex justify-between items-center pt-7  border-b-[1px] border-[#535353]">
+              <span className="flex justify-center items-center w-full sm:w-auto sm:flex-row">
                             {screenwidth < 430 && (
                               <IconButton
                                 color="inherit"
                                 aria-label="open drawer"
                                 onClick={toggleDrawer(true)}
                                 edge="start"
+                                  
                               >
-                                <TbMenu2 className="text-white text-[35px] bg-[#A87F0B] rounded-lg p-[2px]" />
+                                <TbMenu2 className="text-white text-[35px] bg-[#A87F0B] rounded-lg p-[2px] ml-2" />
                               </IconButton>
                             )}
                             <MobileSidebar
@@ -795,7 +815,7 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
                             />
                
                     <div className="flex justify-center items-center w-full sm:w-auto">
-                      <h1 className="text-white sm:text-[25px] text-[20px] font-bold flex sm:mr-0 mr-8  items-center justify-center sm:ml-5">
+                      <h1 className="text-[white] sm:text-[25px] text-[20px] font-bold  sm:mb-6 flex items-center sm:ml-5 sm:mr-0 mr-6  justify-center sm:justify-start w-full">
                         {/* Image visible only on larger screens */}
                         <img
                           className="hidden sm:block w-[40px] mr-3"
@@ -823,99 +843,94 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
                 <div className="w-[100%] mt-2 bg-[#282828] shadow-[inset_16px_6px_24px_0px_#FFFFFF40] flex justify-between items-center h-[100px]">
                   {/* Left Section */}
                   <div className="w-[50%] ml-5 flex flex-col justify-center">
-                    <p className="text-gray-300 font-semibold text-[14px]">
+                  <p className="text-gray-300 font-semibold text-[13px] block sm:hidden">
+  {truncateText(selectedCommittee?.kametiName, 19) || "No Kameti"}
+</p>
+<p className="text-gray-300 font-semibold text-[14px] hidden sm:block">
+  {selectedCommittee?.kametiName || "No Kameti"}
+</p>
 
-                      {truncateText(selectedCommittee?.kametiName, 15) ||
-                        "No Kameti"}
-                    </p>
-                    <h1 className="text-yellow-500 font-bold text-[20px] sm:text-[28px]">
-                      Rs.{" "}
-                      {(selectedCommittee?.totalPrice &&
-                      selectedCommittee?.myTotalKametis
-                        ? parseInt(selectedCommittee?.totalPrice) /
-                          parseInt(selectedCommittee?.myTotalKametis)
-                        : 0
-                      ).toLocaleString()}
-                    </h1>
+<div className="flex items-center cursor-pointer">
+        <h1 className="text-yellow-500 font-bold text-[17px] sm:text-[28px]">
+          Rs.{" "}
+          {(
+            selectedCommittee?.totalPrice && selectedCommittee?.myTotalKametis
+              ? parseInt(selectedCommittee?.totalPrice) / parseInt(selectedCommittee?.myTotalKametis)
+              : 0
+          ).toLocaleString()}
+        </h1>
+        {/* Clicking Arrow Opens the Dropdown */}
+        {urlId ? (
+                    ""
+                  ) : (
+        <BiSolidDownArrow
+          className="ml-3 text-white"
+          size={18}
+          onClick={() => setIsDropdownOpen(true)}
+        />
+                  )}
+      </div>
+
+      {/* Dropdown Select (Directly Opens When Clicking Arrow) */}
+      <Select
+        value={selectedCommittee?.id || ""}
+        onChange={handleCommitteeChange}
+        displayEmpty
+        open={isDropdownOpen} // Controlled open state
+        onClose={() => setIsDropdownOpen(false)} // Close when clicking outside
+        sx={{
+          width: { xs: "150px", sm: "250px" },
+          fontSize: { xs: "12px", sm: "14px" },
+         visibility:"hidden",
+         height:"0px",
+          backgroundColor: "#585858",
+          color: "white",
+          borderRadius: "5px",
+          marginTop: "5px",
+          "& .MuiSvgIcon-root": { color: "#999" },
+          "&:hover": { borderColor: "#ccc" },
+        }}
+        MenuProps={{
+          PaperProps: {
+            sx: {
+              backgroundColor: "#282828", // 🔴 Red background for the dropdown menu
+            },
+          },
+        }}
+      >
+        
+        {committeeData?.length === 0 ? (
+          <MenuItem value="" disabled>No kameti</MenuItem>
+        ) : (
+          committeeData.map((comm, index) => {
+            const calculatedValue =
+              comm.totalPrice && comm.myTotalKametis
+                ? "Rs. " + (parseInt(comm.totalPrice) / parseInt(comm.myTotalKametis)).toLocaleString()
+                : "Rs. 0";
+
+            return (
+              <MenuItem
+                key={index}
+                value={comm.id}
+                sx={{
+                  fontSize: { xs: "12px", sm: "14px" },
+                  backgroundColor: selectedCommittee?.id === comm.id ? "#A87F0B !important" : "transparent",
+                  color: selectedCommittee?.id === comm.id ? "white" : "white",
+                  "&:hover": { backgroundColor: "#A87F0B", color: "white" },
+                }}
+              >
+                {comm.kametiName} ({calculatedValue})
+              </MenuItem>
+            );
+          })
+        )}
+      </Select>
 
                     {/* <p className="text-gray-400 text-[12px] mt-1">
                     Select Kameti
                   </p> */}
                   </div>
-                  {urlId ? (
-                    ""
-                  ) : (
-                    <div className="flex justify-start flex-col mr-3">
-                      <Select
-                        value={selectedCommittee?.id || ""}
-                        onChange={handleCommitteeChange}
-                        displayEmpty
-                        sx={{
-                          width: "200px",
-                          outline: "none",
-
-                          backgroundColor: "#373737",
-                          color: "#999",
-                          fontSize: "14px",
-                          height: "40px",
-                          borderRadius: "5px",
-                          paddingLeft: "8px",
-                          paddingRight: "12px",
-                          "& .MuiSvgIcon-root": { color: "#999" }, // Dropdown arrow color
-                          "&:hover": { borderColor: "#ccc" }, // Border color on hover
-                        }}
-                        MenuProps={{
-                          PaperProps: {
-                            sx: {
-                              backgroundColor: "#373737", // Background color of dropdown
-                              color: "#fff", // Text color
-                            },
-                          },
-                        }}
-                      >
-                        {committeeData?.length === 0 ? (
-                          <MenuItem value="" disabled>
-                            No kameti
-                          </MenuItem>
-                        ) : (
-                          committeeData.map((comm, index) => {
-                            const calculatedValue =
-                              comm.totalPrice && comm.myTotalKametis
-                                ? "Rs. " +
-                                  (
-                                    parseInt(comm.totalPrice) /
-                                    parseInt(comm.myTotalKametis)
-                                  ).toLocaleString()
-                                : "Rs. 0";
-
-                            return (
-                              <MenuItem
-                                key={index}
-                                value={comm.id}
-                                className="max-w-[250px]"
-                                sx={{
-                                  backgroundColor:
-                                    selectedCommittee?.id === comm.id
-                                      ? "#A87F0B !important"
-                                      : "transparent",
-                                  color:
-                                    selectedCommittee?.id === comm.id
-                                      ? "white"
-                                      : "#999",
-                                  "&:hover": {
-                                    backgroundColor: "#A87F0B",
-                                    color: "white",
-                                  },
-                                }}
-                              >
-                                {comm.kametiName} ({calculatedValue})
-                              </MenuItem>
-                            );
-                          })
-                        )}
-                      </Select>
-                    </div>
-                  )}
+             
                 </div>
               ) : (
                 ""
@@ -925,7 +940,7 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
               ) : (
                 <div className="w-[100%] flex items-center justify-center">
                   <div className="flex w-[45%] sm:w-[23%] mt-9 mb-2 items-center relative">
-                    <div className="bg-[#181818] border text-white outline-none border-[#A87F0B] rounded-[30px] h-[39px] sm:h-[45px] w-[100%] relative">
+                    <div className="bg-[#181818] border text-white outline-none border-[#e2e2e269] rounded-[30px] h-[39px] sm:h-[45px] w-[100%] relative">
                       <button
                         className={`text-white absolute left-0 rounded-[30px] h-[38px] sm:h-[44px] sm:text-[16px] w-[53%] ${
                           kametiType === "daily" ? "bg-[#A87F0B]" : ""
@@ -1050,7 +1065,7 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
                           {
                             image: k6,
                             title: "Paid Amount",
-                            value: Number(
+                            value:    "Rs." + Number(
                               selectedCommittee?.paidAmount
                             ).toLocaleString(),
                           },
@@ -1075,7 +1090,7 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
                             image: k9,
                             title: "Paid Kameties",
                             value:
-                              "Rs." +
+                       
                               (
                                 parseInt(selectedCommittee?.noOfPaidKameties) *
                                 parseInt(selectedCommittee?.myTotalKametis)
@@ -1174,54 +1189,71 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
                                   {/* Conditional Dropdown for 'Withdrawal Dates' */}
                                   {item.title === "Withdrawal Dates" ? (
                                     <div
-                                      className="relative bg-[#A87F0B] w-[280px] rounded-[20px] px-[15px] py-[10px] shadow-[inset_0px_-7px_4px_0px_#00000040]"
+                                      className="relative bg-[#A87F0B] w-[270px] md:w-[100%] lg:w-[240px] xl:w-[250px] sm:rounded-[20px] rounded-[10px] sm:px-[25px] px-[20px]  sm:py-[10px] py-[6px]  shadow-[inset_0px_-7px_4px_0px_#00000040] "
                                       onClick={toggleDropdown}
                                     >
-                                      <h4 className="text-xs sm:text-sm text-[#CACACA] sm:leading-[1.2]">
+                                      <h4 className="text-[13px] sm:text-[18px] text-[#FFFFFF] ">
                                         {item.title}
                                       </h4>
-                                      <div className="flex items-center justify-between w-full text-sm">
-                                        <button>{item.value}</button>
+                                      <div className="flex items-center justify-between w-full text-sm sm:text-[17px]">
+                                        <button className="font-['Poppins'] font-normal text-[17px]  tracking-[0%]">
+                                          {item.value}
+                                        </button>
+
                                         {isToggled ? (
                                           <img
                                             src={toogle2}
                                             alt="Toggle Two"
-                                            className="w-[25px] cursor-pointer"
+                                            className="w-[22px] cursor-pointer"
                                           />
                                         ) : (
                                           <img
                                             src={toogle}
                                             alt="Toggle One"
-                                            className="w-[25px] cursor-pointer"
+                                            className="w-[22px] cursor-pointer"
                                           />
                                         )}
                                       </div>
                                       {!showModal && showDropdown && (
-  <div
-    ref={dropdownRef}
-    className="absolute top-full left-0 z-10 w-[280px] max-h-[155px] overflow-y-auto dropdown-scrollbar bg-[#333] text-white rounded-md mt-2 p-2 shadow-[inset_0px_-7px_4px_0px_#00000040]"
-    onClick={(e) => e.stopPropagation()}
-  >
-    {selectedCommittee?.withdraw.map((date, index) => (
-      <div key={index} className="dropdown-item flex items-center mb-5 justify-between">
-        <div className="flex items-center w-[70%]">
-          <span className="rounded-[100px] bg-[#A87F0B] text-center w-[30px] text-[15px]">{index + 1}</span>
-          <strong className="ml-3 text-[16px] text-right">
-            Rs.{parseInt(selectedCommittee?.totalPrice) / parseInt(selectedCommittee?.myTotalKametis)}
-          </strong>
-        </div>
-        <span
-          className="text-right text-[13px] text-center w-[40%] cursor-pointer flex items-center justify-between"
-          onClick={() => handleDateClick1(index)}
-        >
-          {date == null ? "Select Date" :  formatDate(date)}
-          <FaCalendarAlt className="text-yellow-500 text-[16px] w-[16px] h-[16px]" />
-        </span>
-      </div>
-    ))}
-  </div>
-)}
+                                        <div
+                                          ref={dropdownRef}
+                                          className="absolute top-full left-0 z-10 w-[270px] md:w-[100%] lg:w-[240px] xl:w-[250px] max-h-[155px] overflow-y-auto dropdown-scrollbar bg-[#333] text-white rounded-md mt-2 p-2 shadow-[inset_0px_-7px_4px_0px_#00000040]"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          {selectedCommittee?.withdraw.map(
+                                            (date, index) => (
+                                              <div
+                                                key={index}
+                                                className="dropdown-item flex items-center mb-5 justify-between"
+                                              >
+                                                <div className="flex items-center w-[70%]">
+                                                  <span className="rounded-[100px] bg-[#A87F0B] text-center w-[30px] text-[15px]">
+                                                    {index + 1}
+                                                  </span>
+                                                  <strong className="ml-3 text-[16px] text-right font-sans">
+  Rs.{formatPrice(
+    parseInt(selectedCommittee?.totalPrice) /
+    parseInt(selectedCommittee?.myTotalKametis)
+  )}
+</strong>
 
+                                                </div>
+                                                <span
+                                                  className="text-right text-[13px] text-center w-[40%] cursor-pointer flex items-center justify-between"
+                                                  onClick={() =>
+                                                    handleDateClick1(index)
+                                                  }
+                                                >
+                                                  {date == null
+                                                    ? "Select Date"
+                                                    : formatDate(date)}
+                                                  <FaCalendarAlt className="text-yellow-500 text-[16px] w-[16px] h-[16px]" />
+                                                </span>
+                                              </div>
+                                            )
+                                          )}
+                                        </div>
+                                      )}
 
                                       {/* Modal for Calendar */}
                                       {showModal && (
@@ -1233,34 +1265,42 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
 
                                             {/* DatePicker */}
                                             <div className="flex justify-center items-center text-white w-full bg-[#373737] p-4 rounded-lg">
-                                            <DatePicker
-  selected={selectedDate}
-  onChange={(date) => setSelectedDate(date)}
-  className="text-center text-white"
-  calendarClassName="bg-[#373737] text-white" // Apply styles to the calendar
-  inline
-  filterDate={(date) => {
-    // Disable the 31st for "daily" kametiType
-    if (selectedCommittee?.kametiType === "daily") {
-      return date.getDate() !== 31; // Disable 31st
-    }
-    return true; // Enable all other dates
-  }}
-  dayClassName={(date) => {
-    if (selectedCommittee?.kametiType === "daily" && date.getDate() === 31) {
-      return "hidden-date"; // Add class to hide 31st date
-    }
-    return null;
-  }}
-/>
-
-
+                                              <DatePicker
+                                                selected={selectedDate}
+                                                onChange={(date) =>
+                                                  setSelectedDate(date)
+                                                }
+                                                className="text-center text-white"
+                                                calendarClassName="bg-[#373737] text-white" // Apply styles to the calendar
+                                                inline
+                                                filterDate={(date) => {
+                                                  // Disable the 31st for "daily" kametiType
+                                                  if (
+                                                    selectedCommittee?.kametiType ===
+                                                    "daily"
+                                                  ) {
+                                                    return (
+                                                      date.getDate() !== 31
+                                                    ); // Disable 31st
+                                                  }
+                                                  return true; // Enable all other dates
+                                                }}
+                                                dayClassName={(date) => {
+                                                  if (
+                                                    selectedCommittee?.kametiType ===
+                                                      "daily" &&
+                                                    date.getDate() === 31
+                                                  ) {
+                                                    return "hidden-date"; // Add class to hide 31st date
+                                                  }
+                                                  return null;
+                                                }}
+                                              />
                                             </div>
-
 
                                             {/* Buttons */}
                                             <div className="flex justify-center mt-3">
-                                            <button
+                                              <button
                                                 className="bg-gray-500 text-white px-4 py-2 rounded-md"
                                                 onClick={handleCancel}
                                               >
@@ -1272,7 +1312,6 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
                                               >
                                                 Save
                                               </button>
-                                             
                                             </div>
                                           </div>
                                         </div>
@@ -1287,9 +1326,11 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
   {new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR' }).format(Number(item.value) || 0)}
 </p> */}
 
-                                      <p className="text-sm sm:text-lg text-[#FFFFFF] sm:leading-[1.2]">
-                                        {item.value}
-                                      </p>
+<p className="text-sm sm:text-lg text-[#FFFFFF] sm:leading-[1.2] font-sans">
+  {item.value}
+</p>
+
+
                                     </>
                                   )}
                                 </div>
@@ -1302,78 +1343,55 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
                   </div>
 
                   <div className="w-full flex flex-col items-center ">
-                    <div className="text-white p-6 text-center space-y-4 rounded-lg">
-                      <p className="text-sm sm:text-lg">
-                        Want to share history with others? Tap Below
-                      </p>
-                      <div className="flex justify-center items-center space-x-2 text-[#CACACA]">
-                        <a
-                          href={`https://app.Kameti.pk/detail/${
-                            selectedCommittee?.kametiType === "daily"
-                              ? selectedCommittee?.id
-                              : selectedCommittee?.id
-                          }`}
-                          className="underline text-[15px]"
-                        >
-                          {selectedCommittee?.kametiType === "daily"
-                            ? `https://app.kameti.pk/detail/${selectedCommittee?.id}`
-                            : `https://app.Kameti.pk/detail/${selectedCommittee?.id}`}
-                        </a>
-                        <div className="flex space-x-2">
-                          <span
-                            className="cursor-pointer"
-                            onClick={handleShareLink}
-                            title="Share Link"
-                          >
-                            <IoShareSocial size={23} />
-                          </span>
-                          <span className="cursor-pointer" title="Translate">
-                            <GrLanguage size={23} onClick={handleOpenWeb} />
-                          </span>
-                          <div
-                            style={{
-                              position: "relative",
-                              display: "inline-block",
-                            }}
-                          >
-                            <span
-                              className="cursor-pointer"
-                              onClick={handleCopyLink}
-                              title="Copy Link"
-                            >
-                              {isCopied ? (
-                                <LuCopyCheck size={23} /> // Show check icon after copy
-                              ) : (
-                                <MdContentCopy size={23} /> // Show copy icon initially
-                              )}
-                            </span>
+                  <div className="text-white p-4 sm:p-6 text-center space-y-4 rounded-lg w-full max-w-[100%] sm:max-w-[900px] mx-auto">
+  <p className="text-sm sm:text-lg">
+    Want to share history with others? Tap Below
+  </p>
+  <div className="flex flex-wrap justify-center items-center space-x-2 text-[#CACACA]">
+    <a
+      href={`https://app.Kameti.pk/detail/${selectedCommittee?.id}`}
+      className="underline text-[14px] sm:text-[15px] break-all"
+    >
+      {`https://app.kameti.pk/detail/${selectedCommittee?.id}`}
+    </a>
+    <div className="flex space-x-2">
+      <span
+        className="cursor-pointer"
+        onClick={handleShareLink}
+        title="Share Link"
+      >
+        <IoShareSocial size={20} className="sm:size-[23px]" />
+      </span>
+      <span className="cursor-pointer" title="Translate">
+        <GrLanguage size={20} className="sm:size-[23px]" onClick={handleOpenWeb} />
+      </span>
+      <div className="relative inline-block">
+        <span
+          className="cursor-pointer"
+          onClick={handleCopyLink}
+          title="Copy Link"
+        >
+          {isCopied ? (
+            <LuCopyCheck size={20} className="sm:size-[23px]" />
+          ) : (
+            <MdContentCopy size={20} className="sm:size-[23px]" />
+          )}
+        </span>
 
-                            {isCopied && (
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  top: "100%",
-                                  left: "50%",
-                                  transform: "translateX(-50%)",
-                                  backgroundColor: "gray",
-                                  color: "white",
-                                  padding: "5px 10px",
-                                  borderRadius: "4px",
-                                  marginTop: "5px",
-                                  fontSize: "12px",
-                                }}
-                              >
-                                Copied!
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+        {isCopied && (
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 bg-gray-600 text-white px-2 py-1 rounded-md mt-1 text-xs">
+            Copied!
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
 
-                      <p className="text-sm sm:text-lg">
-                        Want to pay Kameti? Tap Below
-                      </p>
-                    </div>
+  <p className="text-sm sm:text-lg">
+    Want to pay Kameti? Tap Below
+  </p>
+</div>
+
 
                     {/* Calendar Header */}
                     <div
@@ -1438,9 +1456,18 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
                 </p> */}
                 </div>
               ) : (
-                <p className="text-[#ffffff] text-center pt-24 text-2xl">
-                  No Kameti Found
+                <div className="flex justify-center items-center w-[100%] h-[70%] text-white">
+                <p className="text-[#ffffff] text-center sm:text-[20px] text-[15px]">
+                  No record(s) found, click to create{" "}
+                  <span
+                    className="underline cursor-pointer text-[#A87F0B] hover:text-[#d4a20a]"
+                    onClick={() => navigate("/create")} // Change the route as needed
+                  >
+                    Kameti
+                  </span>
                 </p>
+              </div>
+              
               )}
             </div>
           )}

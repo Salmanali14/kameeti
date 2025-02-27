@@ -61,9 +61,11 @@ export default function Sidebar() {
   return (
     <div className='w-[20%]  bg-[#3B3B3B] h-[100vh] flex flex-col items-center'>
       
-      <img className='w-[45%] mt-5 ' src={logo} />
+      <div className="w-full flex justify-center  h-[90px] border-b-[1px] border-[#535353]">
+    <img className="w-[45%] h-full object-contain" src={logo} alt="Logo" />
+  </div>
       <div
-  className={`w-[100%] h-[65px] mt-10 bg-sidebar pl-7 flex items-center cursor-pointer ${isActive('/create', 'bg-sidecircle', '') ? 'bg-sidecircle shadow-[inset_-2px_-9px_17.6px_0px_#0000004D]' : ''}`}
+  className={`w-[100%] h-[65px] mt-7 bg-sidebar pl-7 flex items-center cursor-pointer ${isActive('/create', 'bg-sidecircle', '') ? 'bg-sidecircle shadow-[inset_-2px_-9px_17.6px_0px_#0000004D]' : ''}`}
   onClick={() => handleNavigation('/create')}
 >
         <div className={`w-[45px] h-[45px] rounded-[50%] justify-center flex items-center`}>
@@ -71,20 +73,20 @@ export default function Sidebar() {
         </div>
         <p className='text-white ml-4 text-[18px]'>Create</p>
       </div>
-      <div className={`w-[100%] h-[65px] mt-5 bg-sidebar pl-7 flex items-center cursor-pointer ${isActive('/payment', 'bg-sidecircle', '') ? 'bg-sidecircle shadow-[inset_-2px_-9px_17.6px_0px_#0000004D]' : ''}`} onClick={() => handleNavigation('/payment')}>
+      <div className={`w-[100%] h-[65px] mt-4 bg-sidebar pl-7 flex items-center cursor-pointer ${isActive('/payment', 'bg-sidecircle', '') ? 'bg-sidecircle shadow-[inset_-2px_-9px_17.6px_0px_#0000004D]' : ''}`} onClick={() => handleNavigation('/payment')}>
         <div className={` w-[45px] h-[45px] rounded-[50%] justify-center flex items-center`}>
           <img className='w-[45px]' src={payment} />
         </div>
         <p className='text-white ml-4 text-[18px]'>Payments</p>
       </div>
-      <div className={`w-[100%] h-[65px] mt-5 bg-sidebar pl-7 flex items-center cursor-pointer ${isActive('/history', 'bg-sidecircle', '')? 'bg-sidecircle shadow-[inset_-2px_-9px_17.6px_0px_#0000004D]' : ''}`} onClick={() => handleNavigation('/history')}>
+      <div className={`w-[100%] h-[65px] mt-4 bg-sidebar pl-7 flex items-center cursor-pointer ${isActive('/history', 'bg-sidecircle', '')? 'bg-sidecircle shadow-[inset_-2px_-9px_17.6px_0px_#0000004D]' : ''}`} onClick={() => handleNavigation('/history')}>
         <div className={`w-[45px] h-[45px] rounded-[50%] justify-center flex items-center`}>
           <img className='w-[45px]' src={file} />
         </div>
         <p className='text-white ml-4 text-[18px]'>All Kameties</p>
       </div>
       <div 
-      className={`w-[100%] h-[65px] mt-5 bg-sidebar pl-7 flex items-center cursor-pointer 
+      className={`w-[100%] h-[65px] mt-4 bg-sidebar pl-7 flex items-center cursor-pointer 
       ${isActive(['/more', '/delete', '/allrecords','/privacyPolicy'], 'bg-sidecircle', '') ? 
         'bg-sidecircle shadow-[inset_-2px_-9px_17.6px_0px_#0000004D]' : ''}`}
       onClick={() => handleNavigation('/more')}

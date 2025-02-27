@@ -322,11 +322,16 @@ export default function Payment() {
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
   };
+  const formatPrice = (value) => {
+    // Ensure value is a string before calling replace
+    let formattedValue = String(value).replace(/[^0-9]/g, ""); // Remove non-numeric characters
+    return new Intl.NumberFormat().format(formattedValue); // Format with commas
+  };
   return (
     <>
       <div className="bg-[#2A2A2A] text-white min-h-screen">
         {/* Header Section */}
-        <div className="bg-[#A87F0B] text-center py-1 text-[20px] sm:text-[27px]">
+        <div className="bg-[#A87F0B] text-center py-1 px-2 text-[20px] sm:text-[27px]">
 
         {selectedCommittee?.kametiName}'s Kameti
         </div>
@@ -369,142 +374,162 @@ export default function Payment() {
 
           <div className="grid grid-cols-1 bg-[#333232] rounded-b-[20px] mb-12">
             {/* Mapping through the separate sections */}
-            {Object.entries({
-              monthly: [
-                ...(selectedCommittee?.kametiType === "daily"
-                  ? [
-                      {
-                        image: daily1,
-                        title: "Daily Amount",
-                        value:
-                          "Rs." +
-                          Number(
-                            selectedCommittee?.pricePerDayKameti
-                          ).toLocaleString(),
-                      },
-                      {
-                        image: daily2,
-                        title: "Daily Payable",
-                        value:
-                          "Rs." +
-                          Number(
-                            selectedCommittee?.perDayPayablePrice
-                          ).toLocaleString(),
-                      },
-                    ]
-                  : []),
-                {
-                  image: k1,
-                  title: "Monthly Amount",
-                  value:
-                    "Rs." +
-                    Number(
-                      selectedCommittee?.pricePerMonthKameti
-                    ).toLocaleString(),
-                },
-                {
-                  image: k2,
-                  title: "Monthly Payable",
-                  value:
-                    "Rs." +
-                    Number(
-                      selectedCommittee?.pricePerMonthKameti *
-                        selectedCommittee?.myTotalKametis
-                    ).toLocaleString(),
-                },
-                {
-                  image: k3,
-                  title: "Total Payable",
-                  value: "Rs." + selectedCommittee?.totalPrice,
-                },
-                {
-                  image: k4,
-                  title: "Total Months",
-                  value: selectedCommittee?.totalMonths,
-                },
-              ],
-              amounts: [
-                {
-                  image: k5,
-                  title: "Total Amount",
-                  value:
-                    "Rs." +
-                    parseInt(selectedCommittee?.totalPrice) /
-                      parseInt(selectedCommittee?.myTotalKametis),
-                },
-                {
-                  image: k6,
-                  title: "Paid Amount",
-                  value:
-                    "Rs." +
-                    parseInt(selectedCommittee?.noOfPaidKameties) *
-                      parseInt(selectedCommittee?.myTotalKametis),
-                },
-                {
-                  image: k7,
-                  title: "Remaining Amount",
-                  value:
-                    "Rs." +
-                    Number(selectedCommittee?.remainingAmount).toLocaleString(),
-                },
-              ],
-              kameties : [
-                {
-                  image: k8,
-                  title: "My Kameties",
-                  value: (selectedCommittee?.myTotalKametis || 0).toLocaleString(),
-                },
-                {
-                  image: k9,
-                  title: "Paid Kameties",
-                  value:
-                    "Rs. " +
-                    (
-                      (Number(selectedCommittee?.noOfPaidKameties) || 0) *
-                      (Number(selectedCommittee?.myTotalKametis) || 0)
-                    ).toLocaleString(),
-                },
-                {
-                  image: k10,
-                  title: "Kameties Payable",
-                  value:
-                    ((selectedCommittee?.kametiType === "daily" ? 30 : 1) *
-                      (Number(selectedCommittee?.totalMonths) || 0) *
-                      (Number(selectedCommittee?.myTotalKametis) || 0)
-                    ).toLocaleString(),
-                },
-                {
-                  image: k11,
-                  title: "Remaining Kameties",
-                  value:
-                    (
-                      ((selectedCommittee?.kametiType === "daily" ? 30 : 1) *
-                        (Number(selectedCommittee?.totalMonths) || 0) *
-                        (Number(selectedCommittee?.myTotalKametis) || 0)) -
-                      ((Number(selectedCommittee?.noOfPaidKameties) || 0) *
-                        (Number(selectedCommittee?.myTotalKametis) || 0))
-                    ).toLocaleString(),
-                },
-              ],
-              
-               dates: [
-                                       {
-                                         image: k12,
-                                         title: "Start Date",
-                                         value: formatDate(selectedCommittee?.startingMonth),
-                                       },
-                                       {
-                                         image: k13,
-                                         title: "End Date",
-                                         value: formatDate(selectedCommittee?.endingMonth),
-                                       },
-                                       {
-                                         image: k14,
-                                         title: "Withdrawal Dates",
-                                         value: "Click To View",
-                                       },
-                                     ],
-            }).map(([section, items], sectionIndex) => (
+              {Object.entries({
+                             monthly: [
+                               ...(selectedCommittee?.kametiType === "daily"
+                                 ? [
+                                     {
+                                       image: daily1,
+                                       title: "Daily Amount",
+                                       value:
+                                         "Rs." +
+                                         Number(
+                                           selectedCommittee?.pricePerDayKameti
+                                         ).toLocaleString(),
+                                     },
+                                     {
+                                       image: daily2,
+                                       title: "Daily Payable",
+                                       value:
+                                         "Rs." +
+                                         Number(
+                                           selectedCommittee?.perDayPayablePrice
+                                         ).toLocaleString(),
+                                     },
+                                   ]
+                                 : []),
+                               {
+                                 image: k1,
+                                 title: "Monthly Amount",
+                                 value:
+                                   "Rs." +
+                                   Number(
+                                     selectedCommittee?.pricePerMonthKameti
+                                   ).toLocaleString(),
+                               },
+                               {
+                                 image: k2,
+                                 title: "Monthly Payable",
+                                 value:
+                                   "Rs." +
+                                   Number(
+                                     selectedCommittee?.pricePerMonthKameti *
+                                       selectedCommittee?.myTotalKametis
+                                   ).toLocaleString(),
+                               },
+                               {
+                                 image: k3,
+                                 title: "Total Payable",
+                                 value:
+                                 "Rs." +
+                                 Number(selectedCommittee?.totalPrice || 0).toLocaleString(),
+                               },
+                               {
+                                 image: k4,
+                                 title: "Total Months",
+                                 value:
+                                 (selectedCommittee?.totalMonths || 0).toLocaleString(),
+                               },
+                             ],
+                             amounts: [
+                               {
+                                 image: k5,
+                                 title: "Total Amount",
+                                 value:
+                                   "Rs." +
+                                   (
+                                     parseFloat(selectedCommittee?.totalPrice) /
+                                     parseFloat(selectedCommittee?.myTotalKametis)
+                                   ).toLocaleString(),
+                               },
+                               {
+                                 image: k6,
+                                 title: "Paid Amount",
+                                 value:    "Rs." + Number(
+                                   selectedCommittee?.paidAmount
+                                 ).toLocaleString(),
+                               },
+                               {
+                                 image: k7,
+                                 title: "Remaining Amount",
+                                 value:
+                                   "Rs." +
+                                   Number(
+                                     selectedCommittee?.remainingAmount
+                                   ).toLocaleString(),
+                               },
+                             ],
+                             kameties: [
+                               {
+                                 image: k8,
+                                 title: "My Kameties",
+                                 value:
+  (selectedCommittee?.myTotalKametis || 0).toLocaleString(),
+                               },
+                               {
+                                 image: k9,
+                                 title: "Paid Kameties",
+                                 value:
+                            
+                                   (
+                                     parseInt(selectedCommittee?.noOfPaidKameties) *
+                                     parseInt(selectedCommittee?.myTotalKametis)
+                                   ).toLocaleString(),
+                               },
+                               {
+                                 image: k10,
+                                 title: "Kameties Payable",
+     
+                                 value:
+                                   selectedCommittee?.kametiType === "daily"
+                                     ? parseInt(selectedCommittee?.totalMonths) *
+                                       30 *
+                                       parseInt(selectedCommittee?.myTotalKametis)
+                                     : parseInt(selectedCommittee?.totalMonths) *
+                                       parseInt(selectedCommittee?.myTotalKametis),
+                               },
+                               {
+                                 image: k11,
+                                 title: "Remaining Kameties",
+                                 value:
+                                   selectedCommittee?.kametiType === "daily"
+                                     ? parseInt(selectedCommittee?.totalMonths) *
+                                         30 *
+                                         parseInt(
+                                           selectedCommittee?.myTotalKametis
+                                         ) -
+                                       parseInt(
+                                         selectedCommittee?.noOfPaidKameties
+                                       ) *
+                                         parseInt(selectedCommittee?.myTotalKametis)
+                                     : parseInt(selectedCommittee?.totalMonths) *
+                                         parseInt(
+                                           selectedCommittee?.myTotalKametis
+                                         ) -
+                                       parseInt(
+                                         selectedCommittee?.noOfPaidKameties
+                                       ) *
+                                         parseInt(selectedCommittee?.myTotalKametis),
+                               },
+                             ],
+                             dates: [
+                               {
+                                 image: k12,
+                                 title: "Start Date",
+                                 value: formatDate(selectedCommittee?.startingMonth),
+                               },
+                               {
+                                 image: k13,
+                                 title: "End Date",
+                                 value: formatDate(selectedCommittee?.endingMonth),
+                               },
+                               {
+                                 image: k14,
+                                 title: "Withdrawal Dates",
+                                 value: "Click To View",
+                               },
+                             ],
+                           }).map(([section, items], sectionIndex) => (
               <div key={sectionIndex} className="mt-6">
                 {/* Section Header */}
                 <h3 className="font-medium text-lg pl-6 sm:pl-8 md:pl-12 lg:pl-16 xl:pl-20 text-sm sm:text-lg md:text-xl lg:text-2xl">
@@ -544,25 +569,25 @@ export default function Payment() {
                                       className="relative bg-[#A87F0B] w-[280px] rounded-[20px] px-[15px] py-[10px] shadow-[inset_0px_-7px_4px_0px_#00000040]"
                                       onClick={toggleDropdown}
                                     >
-                                      <h4 className="text-xs sm:text-lg text-[#CACACA] sm:leading-[1.2]">
-                                        {item.title}
-                                      </h4>
-                                      <div className="flex items-center justify-between w-full">
-                                        <button>{item.value}</button>
-                                        {isToggled ? (
-                                          <img
-                                            src={toogle2}
-                                            alt="Toggle Two"
-                                            className="w-[25px] cursor-pointer"
-                                          />
-                                        ) : (
-                                          <img
-                                            src={toogle}
-                                            alt="Toggle One"
-                                            className="w-[25px] cursor-pointer"
-                                          />
-                                        )}
-                                      </div>
+                                      <h4 className="text-xs sm:text-sm text-[#CACACA] sm:leading-[1.2]">
+                                                                            {item.title}
+                                                                          </h4>
+                                                                          <div className="flex items-center justify-between w-full text-sm">
+                                                                            <button>{item.value}</button>
+                                                                            {isToggled ? (
+                                                                              <img
+                                                                                src={toogle2}
+                                                                                alt="Toggle Two"
+                                                                                className="w-[25px] cursor-pointer"
+                                                                              />
+                                                                            ) : (
+                                                                              <img
+                                                                                src={toogle}
+                                                                                alt="Toggle One"
+                                                                                className="w-[25px] cursor-pointer"
+                                                                              />
+                                                                            )}
+                                                                          </div>
                                                               {showDropdown && (
                           <div
                          
@@ -574,7 +599,10 @@ export default function Payment() {
                                 <div className="flex items-center w-[70%]">
                                   <span className="rounded-[100px] bg-[#A87F0B] text-center w-[30px] text-[15px]">{index + 1}</span>
                                   <strong className="ml-3 text-[16px] text-right">
-                                    Rs.{parseInt(selectedCommittee?.totalPrice) / parseInt(selectedCommittee?.myTotalKametis)}
+                                  Rs.{formatPrice(
+    parseInt(selectedCommittee?.totalPrice) /
+    parseInt(selectedCommittee?.myTotalKametis)
+  )}
                                   </strong>
                                 </div>
                                 <span
@@ -658,8 +686,8 @@ export default function Payment() {
           </div>
         </div>
 
-        <p className="text-center py-5 text-sm sm:text-lg md:text-md ">
-          ©avicennaenterprisesolutions | All Rights Reserved
+        <p className="text-center py-5 sm:text-[15px] text-[12px] px-1">
+          ©Avicenna Enterprise Solutions | All Rights Reserved
         </p>
       </div>
 

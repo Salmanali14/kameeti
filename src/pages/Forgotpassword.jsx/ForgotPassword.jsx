@@ -16,6 +16,7 @@ import { FaRegEyeSlash } from "react-icons/fa";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 
 import ClipLoader from "react-spinners/ClipLoader";
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -25,6 +26,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 
 export default function ForgotPassword() {
     const [confirmPassword, setConfirmPassword] = useState("");
+    const navigate = useNavigate();
 
     const [email, setEmail] = useState(""); // Email input
     const [otp, setOtp] = useState(null); // OTP value
@@ -65,7 +67,7 @@ export default function ForgotPassword() {
           console.log("okkkkk");
           setIsOtpSent(true); // Mark OTP as sent
           setShowEmail(false);
-          setSuccessMessage("OTP sent successfully!");
+          setSuccessMessage("OTP sent successfully! Please check your email");
           setError(""); // Reset error message
         } else {
           setError(response.data.message || "Failed to send OTP.");
@@ -155,6 +157,9 @@ export default function ForgotPassword() {
       } finally {
         setLoading(false); // Hide loader
       }
+    };
+    const handleBack = () => {
+      navigate("/signin");
     };
     
     
@@ -377,15 +382,16 @@ export default function ForgotPassword() {
       WhatsApp Support
     </button> */}
  
-
-    {/* Back Button */}
-    <Link
-  to="/signin"
-  className="h-[50px] sm:text-[20px] w-[65%] mt-10 flex justify-center items-center font-medium text-[#A87F0B]"
->
-  <IoArrowBack className="mr-2 text-xl" />
-  Back
-</Link>
+ <button
+      className="bg-[#A87F0B] text-white font-bold rounded-[10px] h-[50px] sm:w-[65%] w-[100%] flex justify-center items-center p-3 sm:mt-3 mt-5"
+      style={{
+        boxShadow: "-4px -6px 6.8px 0px rgba(0, 0, 0, 0.25) inset",
+      }}
+      onClick={handleBack} // Navigate to /signin
+    >
+      <IoArrowBack className="mr-2 text-xl" />
+      Back
+    </button>
   </div>
 
   {/* Right Side (Image Section for larger screens) */}

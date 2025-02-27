@@ -42,34 +42,57 @@ export default function Create() {
   const [showWithdrawDates, setShowWithdrawDates] = useState(false);
 
   let navigate = useNavigate();
-
-  const handleReset = () => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "This will reset all form fields!",
-      icon: "warning",
-      confirmButtonText: "OK",
-      confirmButtonColor: "#a87f0b", // Change button color (green)
-      showCancelButton: true,
-      cancelButtonText: "Cancel",
-      cancelButtonColor: "#85837d",
-      background: "#373737",
-      color: "#fff",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        // Reset form fields
-        setKametiHolderName("");
-        setTotalPrice("");
-        setPricePerKameti("");
-        setPricePerDayKameti("");
-        setTotalMonths("");
-        setMyTotalKameties("");
-        setPayablePerMonth("");
-        setStartingDate("");
-        setEndingDate("");
+console.log("startingDate",)
+const handleReset = () => {
+  Swal.fire({
+    title: "Are you sure?",
+    text: "This will reset all form fields!",
+    icon: "warning",
+    confirmButtonText: "OK",
+    confirmButtonColor: "#a87f0b", // Change confirm button color
+    cancelButtonText: "Cancel",
+    cancelButtonColor: "#85837d", // Change cancel button color
+    background: "#373737",
+    color: "#fff",
+    showCancelButton: true,
+    customClass: {
+      confirmButton: 'confirm-btn',  // Custom class for confirm button
+      cancelButton: 'cancel-btn',    // Custom class for cancel button
+    },
+    didOpen: () => {
+      // Apply inline styles to the confirm button
+      const confirmButton = document.querySelector('.swal2-confirm');
+      const cancelButton = document.querySelector('.swal2-cancel');
+      
+      if (confirmButton) {
+        confirmButton.style.backgroundColor = "#a87f0b"; // OK button color
+        confirmButton.style.color = "white";
+        confirmButton.style.borderRadius = "10px"; // Rounded corners for the confirm button
+        confirmButton.style.width = "100px";
       }
-    });
-  };
+      
+      if (cancelButton) {
+        cancelButton.style.backgroundColor = "#85837d"; // Cancel button color
+        cancelButton.style.color = "white";
+        cancelButton.style.borderRadius = "10px"; // Rounded corners for the cancel button
+        cancelButton.style.width = "100px";
+      }
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Reset form fields
+      setKametiHolderName("");
+      setTotalPrice("");
+      setPricePerKameti("");
+      setPricePerDayKameti("");
+      setTotalMonths("");
+      setMyTotalKameties("");
+      setPayablePerMonth("");
+      setStartingDate("");
+      setEndingDate("");
+    }
+  });
+};
   const handleAlertConfirm = () => {
     // Close the confirmation alert after user confirms
     setShowConfirmAlert(false);
@@ -111,8 +134,9 @@ export default function Create() {
     const day = String(date.getDate()).padStart(2, "0");
 
     return type == "endDate"
-      ? `${month}-${day}-${year}`
-      : `${month}-${day}-${year}`;
+      ? `${month}/${day}/${year}`
+      : `${month}/${day}/${year}`;
+      
   };
 
   const dateToTimestamp = (date) => {
@@ -140,9 +164,11 @@ export default function Create() {
   }, [startingDate, totalMonths]);
 
   const formatPrice = (value) => {
-    let formattedValue = value.replace(/[^0-9]/g, ""); // Remove non-numeric characters
+    // Ensure value is a string before calling replace
+    let formattedValue = String(value).replace(/[^0-9]/g, ""); // Remove non-numeric characters
     return new Intl.NumberFormat().format(formattedValue); // Format with commas
   };
+  
 
   const handleTotalPriceChange = (e) => {
     let rawValue = e.target.value.replace(/[^0-9]/g, ""); // Keep only numbers
@@ -167,6 +193,13 @@ export default function Create() {
     if (!kametiHolderName) {
       if (!toast.isActive(toastId)) {
         toast.error("Kameti holder name is required.", { toastId });
+      }
+      setBTnloader(false);
+      return;
+    }
+    if (!totalPrice || isNaN(totalPrice)) {
+      if (!toast.isActive(toastId)) {
+        toast.error("Total Amount is required and must be valid.", { toastId });
       }
       setBTnloader(false);
       return;
@@ -406,8 +439,8 @@ export default function Create() {
       <div className="w-[100%] h-[100vh] flex justify-center items-center bg-black">
         <div className="w-[100%] h-[100vh] flex">
           {screenwidth > 430 && <Sidebar />}
-          <div className="sm:w-[80%] w-[100%] h-[100%] sm:overflow-scroll  pb-3 sm:ml-[2px] sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px]">
-            <div className="w-[100%] flex justify-between items-center sm:h-max h-[80px] sm:p-0 p-3 sm:mt-6 border-b-[1px] border-[#535353]">
+          <div className="sm:w-[80%] w-[100%] h-[100%] sm:overflow-scroll  pb-3  sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px]">
+            <div className="w-[100%] h-[90px]  flex justify-between items-center pt-7  border-b-[1px] border-[#535353]">
               <span className="flex justify-center items-center w-full sm:w-auto sm:flex-row">
                 {screenwidth < 430 && (
                   <IconButton
@@ -416,7 +449,7 @@ export default function Create() {
                     onClick={toggleDrawer(true)}
                     edge="start"
                   >
-                    <TbMenu2 className="text-white text-[35px] bg-[#A87F0B] rounded-lg p-[2px]" />
+                    <TbMenu2 className="text-white text-[35px] bg-[#A87F0B] rounded-lg p-[2px] ml-2" />
                   </IconButton>
                 )}
                 <MobileSidebar
@@ -474,7 +507,8 @@ export default function Create() {
                           placeholder="Abdullah"
                           value={kametiHolderName}
                           onChange={(e) => setKametiHolderName(e.target.value)}
-                          className="outline-none border-none text-[white] placeholder-[#CACACA] bg-colorinput w-[100%] h-[40px] pl-1"
+                          className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10 "
+
                           required
                         />
                       </div>
@@ -489,13 +523,13 @@ export default function Create() {
                       <div className="w-[80%] flex items-center">
                         <input
                           type="text"
-                          placeholder="e.g 24000"
+                          placeholder="e.g 24,000"
                           value={
                             totalPrice ? formatPrice(totalPrice.toString()) : ""
                           } // Format for UI
                           onChange={handleTotalPriceChange} // Use function to update state
                           required
-                          className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10"
+                          className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10 pl-1"
                         />
                       </div>
                       <IoIosInformationCircleOutline
@@ -741,7 +775,9 @@ export default function Create() {
                         placeholder="e.g 12"
                         value={totalMonths}
                         onChange={(e) => setTotalMonths(e.target.value)}
-                        className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10"
+                        className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10 pl-1"
+
+
                       />
                       <IoIosInformationCircleOutline
                         onClick={handleinfoTotalMonth}
@@ -758,132 +794,144 @@ export default function Create() {
                     <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] mb-5 sm:sm-mb-5 flex items-center px-4 relative">
                       <input
                         type="text"
-                        placeholder="e.g 24000"
+                        placeholder="e.g 24,000"
                         value={
                           pricePerKameti
                             ? new Intl.NumberFormat().format(pricePerKameti)
                             : ""
                         }
                         disabled
-                        className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10"
+                        className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10 pl-1"
                       />
 
-                      {/* <IoIosInformationCircleOutline
-    onClick={handleinfoMonthlyAmmount}
-      className="text-[white] text-[25px] absolute right-4"
-    /> */}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex w-[100%] justify-center sm:flex-row flex-col items-center">
-                  <div className="sm:w-[90%] w-[100%] flex items-center flex-col">
-                    <div className="w-[100%] sm:mt-2 mt-0 mb-2">
-                      <label className="text-[white]">My Kameties</label>
-                    </div>
-                    <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] mb-5 flex items-center px-4 relative">
-                      <input
-                        type="text"
-                        placeholder="e.g 1,2" // Placeholder stays the same
-                        value={
-                          myTotalKameties ? formatPrice(myTotalKameties) : ""
-                        } // Format the value for display
-                        onChange={(e) => setMyTotalKameties(e.target.value)} // Keep raw value in state
-                        className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10"
-                      />
                       <IoIosInformationCircleOutline
-                        onClick={handleinfoMyKametie}
-                        className="text-[#FFFFFF4D] text-[25px] absolute right-4 cursor-pointer"
-                      />
-                    </div>
-                  </div>
-                  <div className=" sm:w-[90%] w-[100%] sm:ml-10 flex items-center flex-col">
-                    <div className="w-[100%] sm:mt-2 mt-0 mb-2">
-                      <label className="text-[white]">Start Date</label>
-                    </div>
-                    
-                    <div
-                     className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] sm:mb-5 flex items-center  relative"
-                      onClick={() =>
-                        document.getElementById("startDateInput").showPicker()
-                      } // Open the date picker
-                    >
-                      <div className="w-[90%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center">
-                        <input
-                          id="startDateInput" // Add an ID to the input for easy targeting
-                          type="text" // Keep the type as "text" to maintain the placeholder
-                          onFocus={(e) => {
-                            e.target.type = "date"; // Change to "date" type when focused
-                            e.target.showPicker(); // Open the date picker immediately
-                          }}
-                          onBlur={(e) => (e.target.type = "text")} // Revert to "text" type when blurred
-                          placeholder="MM-DD-YY"
-                          value={startingDate}
-                          onChange={(e) => setStartingDate(e.target.value)}
-                          className="outline-none border-none text-[white] bg-colorinput w-[100%] h-[40px] pl-2"
-                        />
-                      </div>
+    onClick={handleinfoMonthlyAmmount}
+     className="text-[#FFFFFF4D] text-[25px] absolute right-4 cursor-pointer"
+    />
                     </div>
                   </div>
                 </div>
-                <div className="flex w-[100%] justify-center sm:flex-row flex-col items-center">
-                <div className="sm:w-[90%] w-[100%] flex items-center flex-col">
-                <div className="w-[100%] sm:mt-2 mt-5 mb-2">
-                      <label className="text-[white]">End Date</label>
-                    </div>
-                    <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] mb-5 flex items-center">
-                      <div className="w-[80%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center">
-                        {/* <img className="h-[25px]" src={date} /> */}
-                        <input
-                          onFocus={(e) => (e.target.type = "date")}
-                          // onBlur={(e) => (e.target.type = "text")}
-                          placeholder="MM-DD-YY"
-                          value={formatDate(endingDate, "endDate")}
-                          disabled
-                          onChange={(e) => setEndingDate(e.target.value)}
-                          className="outline-none border-none text-[white] bg-colorinput w-[100%] h-[40px] pl-2"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="sm:w-[90%] w-[100%] sm:ml-10 flex items-center flex-col">
-                    <div className="w-[100%] sm:mt-2 mt-0 mb-2">
-                      <label className="text-[white]"> Withdrawal Dates</label>
-                    </div>
-                    <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] mb-5 flex items-center">
-                      <div className="w-[80%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center">
-                        {/* <img className="h-[25px]" src={date} /> */}
-                        <button
-                          className="text-[white] outline-none border-none text-left w-[100%] h-[50px] pl-2 "
-                          onClick={openWithdrawDatesModal}
-                        >
-                          {withdrawDates.length === 0
-                            ? "Set Withdraw Dates"
-                            : withdrawDates
-                                .filter(
-                                  (date) => !isNaN(new Date(date).getTime())
-                                )
-                                .map((date) =>
-                                  date == null
-                                    ? "N/A"
-                                    : new Date(date).toLocaleDateString()
-                                )
-                                .join(", ")}
-                        </button>
 
-                        {showWithdrawDates && (
-                          <WithdrawDates
-                            counts={myTotalKameties} // Example value, replace with actual data
-                            dates={withdrawDates} // Initial empty dates array
-                            isCreating={true}
-                            onClose={() => setShowWithdrawDates(false)}
-                            onCreate={handleSaveWithdrawDates}
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <div className="flex w-[100%] justify-center sm:flex-row flex-col items-center">
+  <div className="sm:w-[90%] w-[100%] flex items-center flex-col">
+    <div className="w-[100%] sm:mt-2 mt-0 mb-2">
+      <label className="text-[white]">My Kameties</label>
+    </div>
+    <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] mb-5 flex items-center px-4 relative">
+      <input
+        type="text"
+        placeholder="e.g 1,2" // Placeholder stays the same
+        value={myTotalKameties ? formatPrice(myTotalKameties) : ""}
+        onChange={(e) => setMyTotalKameties(e.target.value)} // Keep raw value in state
+        className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10 pl-1"
+
+      />
+      <IoIosInformationCircleOutline
+        onClick={handleinfoMyKametie}
+        className="text-[#FFFFFF4D] text-[25px] absolute right-4 cursor-pointer"
+      />
+    </div>
+  </div>
+  <div className="sm:w-[90%] w-[100%] sm:ml-10 flex items-center flex-col">
+  <div className="w-[100%] sm:mt-2 mt-0 mb-2">
+    <label className="text-[white]">Start Date</label>
+  </div>
+  <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] sm:mb-5 flex items-center relative">
+    <div className="w-[90%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center">
+      <input
+        id="startDateInput"
+        type="text"
+        onFocus={(e) => {
+          if (myTotalKameties && totalMonths) {
+            e.target.type = "date";
+            e.target.showPicker();
+          }
+        }}
+        placeholder="MM-DD-YY"
+        value={startingDate}
+        onChange={(e) => {
+          setStartingDate(e.target.value);
+
+          if (e.target.value === "") {
+            setEndingDate("");
+          }
+        }}
+        className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA]"
+        disabled={!myTotalKameties || !totalMonths}
+      />
+      {/* Add custom calendar icon */}
+      <i
+        className="fa fa-calendar absolute right-4 text-brown-500"
+        style={{ top: "50%", transform: "translateY(-50%)" }}
+        onClick={() => {
+          if (myTotalKameties && totalMonths) {
+            document.getElementById("startDateInput").showPicker();
+          }
+        }}
+      />
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div className="flex w-[100%] justify-center sm:flex-row flex-col items-center">
+  <div className="sm:w-[90%] w-[100%] flex items-center flex-col">
+    <div className="w-[100%] sm:mt-2 mt-5 mb-2">
+      <label className="text-[white]">End Date</label>
+    </div>
+    <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] mb-5 flex items-center">
+      <div className="w-[80%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center">
+        <input
+          onFocus={(e) => (e.target.type = "date")}
+          placeholder="MM-DD-YY"
+          value={formatDate(endingDate, "endDate")}
+          disabled
+          onChange={(e) => setEndingDate(e.target.value)}
+          className="outline-none border-none text-[white] bg-colorinput w-full h-[40px] placeholder-[#CACACA] pr-10"
+       
+        />
+      </div>
+    </div>
+  </div>
+
+  <div className="sm:w-[90%] w-[100%] sm:ml-10 flex items-center flex-col">
+    <div className="w-[100%] sm:mt-2 mt-0 mb-2">
+      <label className="text-[white]">Withdrawal Dates</label>
+    </div>
+    <div className="bg-[#FFFFFF2B] rounded-[10px] h-[50px] w-[100%] mb-5 flex items-center">
+      <div className="w-[80%] ml-[20px] h-[45px] outline-none border-none justify-center flex items-center">
+        <button
+          className="text-[white] outline-none border-none text-left w-[100%] h-[50px] "
+          onClick={openWithdrawDatesModal}
+        >
+          {withdrawDates.length === 0
+            ? "Set Withdraw Dates"
+            : withdrawDates
+                .filter((date) => !isNaN(new Date(date).getTime()))
+                .map((date) => 
+                  date == null
+                    ? "N/A"
+                    : formatDate(new Date(date), "withdrawDate")
+                )
+                .join(", ")}
+        </button>
+
+        {showWithdrawDates && (
+          <WithdrawDates
+            counts={myTotalKameties}
+            dates={withdrawDates}
+            isCreating={true}
+            onClose={() => setShowWithdrawDates(false)}
+            onCreate={handleSaveWithdrawDates}
+          />
+        )}
+      </div>
+    </div>
+  </div>
+</div>
+
+
               </div>
               <div className="flex w-[95%] sm:w-[90%] justify-center items-center mt-5 mb-5">
                 <div className="flex flex-col sm:flex-row sm:w-[100%] w-[100%] justify-between items-center sm:gap-7 gap-5">
@@ -965,7 +1013,7 @@ export default function Create() {
       <InfoModal
         info={shareMonthlyAmmount}
         handleCloseshare={handleCloseshare}
-        message="Share this kameti app with your friends to benefit from its features."
+        message="Monthly amount that we pay each month."
       />
     </>
   );

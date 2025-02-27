@@ -16,6 +16,9 @@ import MobileScreen from "./components/MobileScreen/MobileScreen";
 import EditProfile from "./pages/EditProfile/EditProfile";
 import kametiSetting from "./pages/kametiSetting/KametiSetting";
 import PrivacyPolicy from "./pages/PrivacyPolicy/PrivacyPolicy";
+import 'typeface-poppins';
+
+
 
 function App() {
   const RequireAuth = ({ children }) => {

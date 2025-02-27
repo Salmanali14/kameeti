@@ -39,6 +39,7 @@ import InfoModal from "../../components/InfoModal/InfoModal";
 import PhoneInput from "react-phone-input-2";
 import { TbMenu2 } from "react-icons/tb";
 import more from "../../images/more2.png";
+import { AiFillLock } from "react-icons/ai";
 
 import { FaRegEyeSlash } from "react-icons/fa";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
@@ -57,6 +58,9 @@ export default function More() {
   let [myprflimg, setmyprflimg] = useState(null);
   const [allKametiCounts, setAllKametiCounts] = useState(0);
   const [key, setKey] = useState("");
+  const [isAdsToggled, setIsAdsToggled] = useState(false);
+  const [isNotificationsToggled, setIsNotificationsToggled] = useState(false);
+
   let [cropPrfl, setCropPrfl] = useState({
     unit: "%",
     x: 50,
@@ -178,9 +182,11 @@ export default function More() {
     return new File([blob], fileName, { type: blob.type });
   };
 
-  const [isToggled, setIsToggled] = useState(false); // Track toggle state
-
-  const handleProfileUpdate = async (newValue,isToggleAction = false) => {
+  const [isToggled, setIsToggled] = useState(() => {
+    return localStorage.getItem("isToggled") === "true"; // Get from localStorage
+  });
+  
+  const handleProfileUpdate = async (notificationValue, isToggleAction = false) => {
     const successToastId = "profileUpdateSuccessToast"; // Unique ID for success toast
     const errorToastId = "profileUpdateErrorToast"; // Unique ID for error toast
   
@@ -200,18 +206,22 @@ export default function More() {
       formData.append("address", address);
       formData.append("phoneNumber", phone);
   
+      // Set the isToggled state and save it to localStorage
+      setIsToggled(notificationValue);
+      localStorage.setItem("isToggled", notificationValue);
+  
       // Conditionally add or remove the fcmtoken
-      if (newValue) {
-        console.log(newValue)
-        formData.append("fcmtoken", 'abcd'); // Add fcmtoken if toggle is on
+      if (notificationValue) {
+        console.log(notificationValue);
+        formData.append("fcmtoken", "abcd");
       } else {
-        formData.append("fcmtoken", ''); // Optionally send a flag to remove the token
+        formData.append("fcmtoken", "");
       }
   
       if (typeof file === "string") {
-        formData.append("profileUrl", file); // existing URL
+        formData.append("profileUrl", file);
       } else {
-        formData.append("profileUrl", file); // new file
+        formData.append("profileUrl", file);
       }
   
       const response = await axios.post(
@@ -225,17 +235,17 @@ export default function More() {
         }
       );
   
-      if (!isToggleAction) { 
+      if (!isToggleAction) {
         if (!toast.isActive(successToastId)) {
           const successMessage =
             response?.data?.message || "User data updated successfully";
           toast.success(successMessage, { toastId: successToastId });
         }
       }
-      
-      
   
-      fetchUserData(); // Refresh user data after update
+      if (notificationValue !== true && notificationValue !== false) {
+        fetchUserData(); // Refresh user data after update
+      }
     } catch (error) {
       console.error("Error details:", error);
       const errorMessage =
@@ -249,6 +259,11 @@ export default function More() {
       setBTnloader(false);
     }
   };
+  useEffect(() => {
+    const storedToggle = localStorage.getItem("isToggled") === "true";
+    setIsToggled(storedToggle);
+  }, []);
+  
 
   const [userData, setUserData] = useState(null);
   // console.log(userData)
@@ -359,7 +374,7 @@ export default function More() {
   const toggleDrawer = (open) => () => {
     setDrawerOpen(open);
   };
- 
+
   const [showPasswordForm, setShowPasswordForm] = useState(false); // State to toggle modal
   const [oldPassword, setOldPassword] = useState(""); // Old password field
   const [newPassword, setNewPassword] = useState(""); // New password field
@@ -374,41 +389,61 @@ export default function More() {
     }
 
     const payload = {
-      oldPassword : oldPassword,
+      oldPassword: oldPassword,
       newPassword: newPassword,
     };
 
     try {
-      const response = await axios.post(`${apiBaseUrl}changePassword`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.post(
+        `${apiBaseUrl}changePassword`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       // Set the success message from the response
       setSuccessMessage(response.data.message);
       setError("");
       // setShowPasswordForm(false); // Close form after successful change
-      setOldPassword("")
-      setNewPassword("")
-      setConfirmPassword("")
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
     } catch (error) {
       // If the error has a response object, we can grab more specific details from it
-      const errorMessage = error.response?.data?.message || "An error occurred while changing the password.";
+      const errorMessage =
+        error.response?.data?.message ||
+        "An error occurred while changing the password.";
       setError(errorMessage);
       setSuccessMessage("");
     }
-    
   };
 
   const handleFormToggle = () => {
-    if(!showPasswordForm)
-    {
+    if (!showPasswordForm) {
       setSuccessMessage("");
       setError("");
     }
     setShowPasswordForm(!showPasswordForm); // Toggle modal visibility
   };
-
+  useEffect(() => {
+    if (successMessage) {
+      const timer = setTimeout(() => {
+        setSuccessMessage("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMessage]);
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+  
   return (
     <>
       <Cropper
@@ -431,35 +466,35 @@ export default function More() {
               <FadeLoader color="#A87F0B" />
             </div>
           ) : (
-            <div className="sm:w-[80%] w-[100%] h-[100vh]  overflow-y-scroll sm:pb-3 ml-[2px] sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px]">
-             <div className="w-[100%] flex justify-between items-center sm:p-0 p-3 sm:h-max h-[80px] sm:mt-6 border-b-[1px] border-[#535353]">
-  <span className="flex justify-center items-center w-full">
-    {screenwidth < 430 && (
-      <IconButton
-        color="inherit"
-        aria-label="open drawer"
-        onClick={toggleDrawer(true)}
-        edge="start"
-      >
-        <TbMenu2 className="text-white text-[35px] bg-[#A87F0B] rounded-lg p-[2px]" />
-      </IconButton>
-    )}
-    <MobileSidebar
-      drawerOpen={drawerOpen}
-      toggleDrawer={toggleDrawer}
-    />
-    
-    {/* Centered h1 in small screens */}
-    <h1 className="text-white sm:text-[25px]  sm:mr-0 mr-8 text-[20px] font-bold flex  sm:ml-5 sm:mb-6 w-full">
-      <img
-        className="hidden sm:block w-[40px] mr-3"
-        src={more}
-        alt="More Icon"
-      />
-      Settings
-    </h1>
-  </span>
-</div>
+            <div className="sm:w-[80%] w-[100%] h-[100%] sm:overflow-scroll  pb-3  sm:rounded-l-[0px] rounded-l-[20px] rounded-r-[20px]">
+            <div className="w-[100%] h-[90px]  flex justify-between items-center pt-7  border-b-[1px] border-[#535353]">
+                <span className="flex justify-center items-center w-full">
+                  {screenwidth < 430 && (
+                    <IconButton
+                      color="inherit"
+                      aria-label="open drawer"
+                      onClick={toggleDrawer(true)}
+                      edge="start"
+                    >
+                      <TbMenu2 className="text-white text-[35px] bg-[#A87F0B] rounded-lg p-[2px] ml-2" />
+                    </IconButton>
+                  )}
+                  <MobileSidebar
+                    drawerOpen={drawerOpen}
+                    toggleDrawer={toggleDrawer}
+                  />
+
+                  {/* Centered h1 in small screens */}
+                  <h1 className="text-[white] sm:text-[25px] text-[20px] font-bold  sm:mb-6 flex items-center sm:ml-5 sm:mr-0 mr-6  justify-center sm:justify-start w-full">
+                    <img
+                      className="hidden sm:block w-[40px] mr-3"
+                      src={more}
+                      alt="More Icon"
+                    />
+                    Settings
+                  </h1>
+                </span>
+              </div>
 
               <div className="w-[100%] p-1 flex justify-center items-center flex-col">
                 <div className="w-[100%] sm:w-[90%] rounded-[10px] sm:rounded-[35px] h-[120px] bg-[#343434] mt-6 flex justify-between items-center">
@@ -492,7 +527,7 @@ export default function More() {
                       style={{
                         boxShadow: "-4.2px 5.88px 7.22px 0px #00000038 inset",
                       }}
-                      className="hidden sm:flex mr-5 justify-center items-center sm:w-[130px] w-[100px] h-[38px] rounded-[30px] hover:bg-gray-700  text-white text-[13px] bg-[#626262] shadow-custom-inset"
+                      className="hidden sm:flex mr-5 justify-center items-center sm:w-[130px] w-[100px] h-[38px] rounded-[10px] hover:bg-gray-500  text-white text-[13px] bg-[#626262] shadow-custom-inset"
                     >
                       <img className="w-[15px]" src={editimg} />
                       {"\u00A0"}Edit Profile
@@ -523,7 +558,7 @@ export default function More() {
                       />
                       <img className="w-[40px] sm:w-[45px]" src={folder} />
                       <h2 className="text-white sm:text-[13px] text-[12px] mt-1">
-                        All Records ({allKametiCounts})
+                        All Kameties ({allKametiCounts})
                       </h2>
                     </div>
 
@@ -542,104 +577,149 @@ export default function More() {
 
                       <img className="w-[40px] sm:w-[45px]" src={delete1} />
                       <h2 className="text-white sm:text-[13px] text-[12px] mt-1">
-                        Deleted Records ({delKametiCounts})
+                        All Deleted ({delKametiCounts})
                       </h2>
                     </div>
                     <div
-      style={{ boxShadow: "0px 0px 20px 0px #00000040" }}
-      className="sm:w-[17%] w-[40%] m-3 relative h-[130px] sm:h-[150px] cursor-pointer rounded-[18px] bg-[#444343] flex justify-center items-center flex-col"
-    >
-      <img
-        className="w-[45px]"
-        src={allrec}
-        alt="folder icon"
-        onClick={handleFormToggle} // Open modal on click
-      />
-      <h2 className="text-white sm:text-[13px] text-[12px] mt-1"  onClick={handleFormToggle} >Change Password</h2>
+                      style={{ boxShadow: "0px 0px 20px 0px #00000040" }}
+                      className="sm:sm:w-[17%] w-[42%] m-3 relative h-[130px] sm:h-[150px] cursor-pointer rounded-[18px] bg-[#444343] flex justify-center items-center flex-col"
+                      >
+                      <img
+                        className="w-[45px]"
+                        src={allrec}
+                        alt="folder icon"
+                        onClick={handleFormToggle} // Open modal on click
+                      />
+                      <h2
+                        className="text-white text-center sm:text-[13px] text-[12px] mt-1"
+                        onClick={handleFormToggle}
+                      >
+                        Change Password
+                      </h2>
 
-      {/* Modal for Password Change */}
-      {showPasswordForm && (
-           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-           <div className="bg-[#343434] p-5 rounded-lg shadow-lg w-[500px]">
-             <h2 className="text-lg text-white font-bold mb-3">Change Password</h2>
-     
-             {/* Input Fields for Password Change */}
-             <div>
-               {/* Old Password */}
-               <div className="bg-[#FFFFFF2B] rounded-[10px] mt-4 flex items-center relative">
-                 <input
-                   type={showOldPassword ? "text" : "password"}
-                   placeholder="Old Password"
-                   value={oldPassword}
-                   onChange={(e) => setOldPassword(e.target.value)}
-                   className="w-full outline-none rounded-[60px] h-[40px] pl-3 pr-10 bg-[#191717] text-[#FFFFFF]"
-                 />
-                 <span
-                   className="absolute right-3 cursor-pointer text-white"
-                   onClick={() => setShowOldPassword(!showOldPassword)}
-                 >
-                   {showOldPassword ? <MdOutlineRemoveRedEye /> : <FaRegEyeSlash />}
-                 </span>
-               </div>
-     
-               {/* New Password */}
-               <div className="bg-[#FFFFFF2B] rounded-[10px] mt-4 flex items-center relative">
-                 <input
-                   type={showNewPassword ? "text" : "password"}
-                   placeholder="New Password"
-                   value={newPassword}
-                   onChange={(e) => setNewPassword(e.target.value)}
-                   className="w-full outline-none rounded-[60px] h-[40px] pl-3 pr-10 bg-[#191717] text-[#FFFFFF]"
-                 />
-                 <span
-                   className="absolute right-3 cursor-pointer text-white"
-                   onClick={() => setShowNewPassword(!showNewPassword)}
-                 >
-                   {showNewPassword ? <MdOutlineRemoveRedEye /> : <FaRegEyeSlash />}
-                 </span>
-               </div>
-     
-               {/* Confirm New Password */}
-               <div className="bg-[#FFFFFF2B] rounded-[10px] mt-4 flex items-center relative">
-                 <input
-                   type={showConfirmPassword ? "text" : "password"}
-                   placeholder="Confirm New Password"
-                   value={confirmPassword}
-                   onChange={(e) => setConfirmPassword(e.target.value)}
-                   className="w-full outline-none rounded-[60px] h-[40px] pl-3 pr-10 bg-[#191717] text-[#FFFFFF]"
-                 />
-                 <span
-                   className="absolute right-3 cursor-pointer text-white"
-                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                 >
-                   {showConfirmPassword ? <MdOutlineRemoveRedEye /> : <FaRegEyeSlash />}
-                 </span>
-               </div>
-             </div>
-     
-             {/* Buttons to Submit or Cancel */}
-             <div className="flex justify-center mt-3">
-               <button
-                 onClick={handleFormToggle} // Close modal on cancel
-                 className="bg-gray-500 text-white px-4 py-2 rounded-md"
-               >
-                 Cancel
-               </button>
-               <button
-                 onClick={handleChangePassword}
-                 className="bg-[#a87f0b] text-white px-4 ml-4 py-2 rounded-md"
-               >
-                 Save
-               </button>
-             </div>
-           </div>
-         </div>
-      )}
-    </div>
+                      {/* Modal for Password Change */}
+                      {showPasswordForm && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                          <div className="bg-[#343434] p-5 rounded-lg shadow-lg w-[500px]">
+                            <h2 className="text-[19px] text-center text-white font-bold mb-3">
+                              Change Password
+                            </h2>
+                            {successMessage && (
+                              <div className="text-center w-full text-green-500">
+                                {successMessage}
+                              </div>
+                            )}
+
+                            {error && (
+                              <div className="text-center w-full text-red-500">
+                                {error}
+                              </div>
+                            )}
+
+                            {/* Input Fields for Password Change */}
+                            <div>
+                              {/* Old Password */}
+                              <div className="bg-[#FFFFFF2B] rounded-[10px] mt-4 flex items-center relative">
+                                <input
+                                  type={showOldPassword ? "text" : "password"}
+                                  placeholder="Old Password"
+                                  value={oldPassword}
+                                  onChange={(e) =>
+                                    setOldPassword(e.target.value)
+                                  }
+                                  className="w-full outline-none rounded-[60px] h-[40px] pl-3 pr-10 bg-[#191717] text-[#FFFFFF]"
+                                />
+                                <span
+                                  className="absolute right-3 cursor-pointer text-white"
+                                  onClick={() =>
+                                    setShowOldPassword(!showOldPassword)
+                                  }
+                                >
+                                  {showOldPassword ? (
+                                    <MdOutlineRemoveRedEye />
+                                  ) : (
+                                    <FaRegEyeSlash />
+                                  )}
+                                </span>
+                              </div>
+
+                              {/* New Password */}
+                              <div className="bg-[#FFFFFF2B] rounded-[10px] mt-4 flex items-center relative">
+                                <input
+                                  type={showNewPassword ? "text" : "password"}
+                                  placeholder="New Password"
+                                  value={newPassword}
+                                  onChange={(e) =>
+                                    setNewPassword(e.target.value)
+                                  }
+                                  className="w-full outline-none rounded-[60px] h-[40px] pl-3 pr-10 bg-[#191717] text-[#FFFFFF]"
+                                />
+                                <span
+                                  className="absolute right-3 cursor-pointer text-white"
+                                  onClick={() =>
+                                    setShowNewPassword(!showNewPassword)
+                                  }
+                                >
+                                  {showNewPassword ? (
+                                    <MdOutlineRemoveRedEye />
+                                  ) : (
+                                    <FaRegEyeSlash />
+                                  )}
+                                </span>
+                              </div>
+
+                              {/* Confirm New Password */}
+                              <div className="bg-[#FFFFFF2B] rounded-[10px] mt-4 flex items-center relative">
+                                <input
+                                  type={
+                                    showConfirmPassword ? "text" : "password"
+                                  }
+                                  placeholder="Confirm New Password"
+                                  value={confirmPassword}
+                                  onChange={(e) =>
+                                    setConfirmPassword(e.target.value)
+                                  }
+                                  className="w-full outline-none rounded-[60px] h-[40px] pl-3 pr-10 bg-[#191717] text-[#FFFFFF]"
+                                />
+                                <span
+                                  className="absolute right-3 cursor-pointer text-white"
+                                  onClick={() =>
+                                    setShowConfirmPassword(!showConfirmPassword)
+                                  }
+                                >
+                                  {showConfirmPassword ? (
+                                    <MdOutlineRemoveRedEye />
+                                  ) : (
+                                    <FaRegEyeSlash />
+                                  )}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Buttons to Submit or Cancel */}
+                            <div className="flex justify-center mt-3 w-full">
+                              <button
+                                onClick={handleFormToggle} // Close modal on cancel
+                                className="bg-[#5B5B5B] text-white px-4 py-2 rounded-[10px] w-1/2"
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={handleChangePassword}
+                                className="bg-[#A87F0B] text-white px-4 py-2 ml-4 rounded-[10px] w-1/2"
+                              >
+                                Save
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                     <div
                       onClick={privacyPolicy}
                       style={{ boxShadow: "0px 0px 20px 0px #00000040" }}
-                      className="sm:sm:w-[17%]  w-[42%] m-3 relative  h-[130px] sm:h-[150px] cursor-pointer rounded-[18px]  bg-[#444343] flex justify-center items-center flex-col"
+                      className="sm:sm:w-[17%] w-[42%] m-3 relative h-[130px] sm:h-[150px] cursor-pointer rounded-[18px] bg-[#444343] flex justify-center items-center flex-col"
+                    
                     >
                       <img
                         className="w-[25px] sm:w-[30px]"
@@ -676,7 +756,7 @@ export default function More() {
                       className="sm:sm:w-[17%]  w-[42%] m-3 relative  h-[130px] sm:h-[150px] cursor-pointer rounded-[18px]  bg-[#444343] flex justify-center items-center flex-col"
                     >
                       <IoIosInformationCircleOutline
-                        onClick={(e)=>{
+                        onClick={(e) => {
                           e.stopPropagation();
                           handleinfoShare();
                         }}
@@ -689,7 +769,6 @@ export default function More() {
                     </div>
                     <div
                       onClick={handleDelAccountAlert}
-                      
                       style={{ boxShadow: "0px 0px 20px 0px #00000040" }}
                       className="sm:sm:w-[17%]  w-[42%] m-3 relative  h-[130px] sm:h-[150px] cursor-pointer rounded-[18px]  bg-[#444343] flex justify-center items-center flex-col"
                     >
@@ -699,26 +778,39 @@ export default function More() {
                         Delete Account
                       </h2>
                     </div>
-                    {/* <div className="sm:sm:w-[17%]  w-[40%] m-3 relative  h-[130px] sm:h-[150px] cursor-pointer rounded-[18px] flex justify-center items-center flex-col">
-                      <div className=" justify-center items-center">
-                        <Toggle />
+                    <div className="sm:w-[17%] w-[40%] m-3 relative h-[130px] sm:h-[150px] cursor-pointer rounded-[18px] flex justify-center items-center flex-col">
+        <div className="justify-center items-center">
+        <button
+  onClick={async () => {
+    const newAdsValue = !isAdsToggled;
+    setIsAdsToggled(newAdsValue);
+    // await handleProfileUpdate({ ads: newAdsValue }); // Pass an object with specific key
+  }}
+  className={`${
+    isAdsToggled ? "bg-white" : "bg-white"
+  } w-12 h-6 rounded-full flex items-center justify-${
+    isAdsToggled ? "end" : "start"
+  } px-1 transition-colors`}
+>
+  <div className="w-4 h-4 bg-[#A87F0B] rounded-full"></div>
+</button>
 
-                        <h2 className="text-white sm:text-[13px] text-[12px] mt-1 mr-2">
-                          Remove Ads
-                        </h2>
-                        <p className="text-[8px] text-[#FFFFFF66]">
-                          Help cover the server and maintenance cost associate
-                          with your account by having ads
-                        </p>
-                      </div>
-                    </div> */}
+          <h2 className="text-white sm:text-[13px] text-[12px] mt-1 mr-2">Remove Ads</h2>
+          <p className="text-[8px] text-[#FFFFFF66]">
+            Help cover the server and maintenance cost associated with your account by having ads.
+          </p>
+        </div>
+      </div>
+
+ 
+
                     <div className="sm:sm:w-[17%]  w-[40%] m-3 relative  h-[130px] sm:h-[150px] cursor-pointer rounded-[18px] flex justify-center items-center flex-col">
                       <div className="justify-center items-center">
                         <button
                           onClick={async () => {
                             const newValue = !isToggled;
-                            setIsToggled(newValue); 
-                            await handleProfileUpdate(newValue , true); // Pass the new value to the update function
+                            setIsToggled(newValue);
+                            await handleProfileUpdate(newValue, true); // Pass the new value to the update function
                           }}
                           className={`${
                             isToggled ? "bg-white" : "bg-white"
@@ -848,47 +940,49 @@ export default function More() {
             outline: "none",
             borderRadius: "10px",
             boxShadow: 24,
-            p: 4,
+            p: { xs: 2, sm: 4 },
+
           }}
         >
           <div className="flex justify-center flex-col items-center w-[100%]">
-            <div className="flex w-[100%]">
-              <div className="flex justify-between items-center w-[100%]">
-                <p className="text-[#A87F0B] font-[700]">Edit Profile</p>
-                <div
-                  onClick={handleedit}
-                  className="flex justify-center items-center w-[25px] h-[25px] rounded-full bg-[#747474]"
-                >
-                  <IoClose />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-center items-center flex-col mt-5 w-[100%]">
-            <div
-  className="h-[120px] w-[120px] border rounded-full absolute top-[50px]"
-  onClick={() => document.getElementById('img').click()} // Trigger the file input click
->
-  <div
-    className="w-[0px] h-[0px] absolute top-[93px] left-[86px]"
-  >
-    <div className="border rounded-full w-[22px] h-[22px] flex justify-center items-center text-sm font-[1500] text-white bg-[#747474]">
-      <MdModeEditOutline className="text-md" />
+          <div className="flex w-full pt-4 sm:pt-0 pt-4"> {/* Adjust padding for smaller screens */}
+  <div className="flex justify-center items-center w-full relative">
+    <p className="text-[#A87F0B] font-[700] absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[22px]">
+      Edit Profile
+    </p>
+    <div
+      onClick={handleedit}
+      className="flex justify-center items-center w-[25px] h-[25px] rounded-full bg-[#747474] absolute right-0"
+    >
+      <IoClose />
     </div>
-    <input
-      type="file"
-      name="img"
-      id="img"
-      className="opacity-0 w-[0px] h-[0px]"
-      onChange={handleImageChange}
-    />
   </div>
-  <img
-    src={tempimg ? tempimg : avatar} // tempimg will be the selected image if available, else fallback to avatar
-    className="rounded-full w-[120px] h-[120px]"
-  />
 </div>
 
-              <div className="flex justify-center flex-col mt-[100px] items-center w-[100%]">
+            <div className="flex justify-center items-center flex-col mt-12 sm:mt-9 w-[100%]">
+              <div
+                className="h-[120px] w-[120px] border rounded-full absolute top-[60px]"
+                onClick={() => document.getElementById("img").click()} // Trigger the file input click
+              >
+                <div className="w-[0px] h-[0px] absolute top-[93px] left-[86px]">
+                  <div className="border rounded-full w-[22px] h-[22px] flex justify-center items-center text-sm font-[1500] text-white bg-[#747474]">
+                    <MdModeEditOutline className="text-md" />
+                  </div>
+                  <input
+                    type="file"
+                    name="img"
+                    id="img"
+                    className="opacity-0 w-[0px] h-[0px]"
+                    onChange={handleImageChange}
+                  />
+                </div>
+                <img
+                  src={tempimg ? tempimg : avatar} // tempimg will be the selected image if available, else fallback to avatar
+                  className="rounded-full w-[120px] h-[120px]"
+                />
+              </div>
+
+              <div className="flex justify-center flex-col mt-[112px] items-center w-[100%]">
                 <div className="bg-[#FFFFFF2B] w-[100%] mt-5 rounded-[10px]">
                   <input
                     type="text"
@@ -898,41 +992,48 @@ export default function More() {
                     className="w-[100%] outline-none rounded-[60px] h-[40px] pl-3 pr-6 bg-[#191717] text-[#FFFFFF]"
                   />
                 </div>
-                <div className="bg-[#FFFFFF2B] w-[100%] mt-5 rounded-[10px]">
+                <div className="relative bg-[#FFFFFF2B] w-full mt-5 rounded-[10px]">
                   <input
                     type="text"
                     placeholder="Username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     disabled={tempUsername !== ""}
-                    className={`w-[100%] outline-none rounded-[60px] h-[40px] pl-3 pr-6 ${
+                    className={`w-full outline-none rounded-[60px] h-[40px] pl-3 pr-10 ${
                       tempUsername !== ""
-                        ? " text-gray-700 cursor-not-allowed"
+                        ? "text-white-500 cursor-not-allowed"
                         : "bg-[#191717] text-[#FFFFFF]"
                     }`}
                   />
+                  {tempUsername !== "" && (
+                    <AiFillLock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white-500" />
+                  )}
                 </div>
 
-                <div className="bg-[#FFFFFF2B] w-[100%] mt-5 rounded-[10px]">
+                <div className="relative bg-[#FFFFFF2B] w-full mt-5 rounded-[10px]">
                   <input
                     type="text"
                     placeholder="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled
-                    className="w-[100%] outline-none rounded-[60px] h-[40px] pl-3 pr-6 bg-gray-400 text-gray-700 cursor-not-allowed"
+                    className="w-full outline-none rounded-[60px] h-[40px] pl-3 pr-10 bg-gray-400 text-white-500 cursor-not-allowed"
                   />
+                  <AiFillLock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white-500" />
                 </div>
-
-                <div className="bg-[#FFFFFF2B] w-[100%] mt-5 rounded-[10px]">
+                <div className="relative bg-[#FFFFFF2B] w-full mt-5 rounded-[10px]">
                   <input
                     type="number"
-                    placeholder="phone"
+                    placeholder="Phone"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    disabled={tempPhone != ""} // Example limit for the number of digits
-                    className="w-[100%] outline-none rounded-[60px] h-[40px] pl-3 pr-6 bg-[#191717] text-[#FFFFFF]"
+                    disabled={phone !== ""} // Disable input only when phone has a value
+                    className={`w-full outline-none rounded-[60px] h-[40px] pl-3 pr-10 bg-[#191717] text-[#FFFFFF] 
+      ${phone !== "" ? "cursor-not-allowed" : "cursor-text"}`}
                   />
+                  {phone !== "" && (
+                    <AiFillLock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white-500" />
+                  )}
                 </div>
 
                 {/* <input type='text' placeholder='Phone Number' value={phone} onChange={(e) => setPhone(e.target.value)} className='w-[100%] outline-none rounded-[60px] h-[40px] pl-6 pr-6 mt-5 bg-[#333333] text-[#FFFFFF]' /> */}
@@ -974,7 +1075,7 @@ export default function More() {
                 <div className="flex justify-center mt-5 items-center w-[100%]">
                   <button
                     onClick={handleedit}
-                    className="bg-[#4B5563] text-white py-2 px-4 w-[190px] h-[35px] flex justify-center items-center rounded-[10px] mr-2  transition duration-200"
+                    className="bg-[#5B5B5B] text-white py-2 px-4 w-[190px] h-[35px] flex justify-center items-center rounded-[10px] mr-2  transition duration-200"
                   >
                     Cancel
                   </button>
@@ -983,7 +1084,7 @@ export default function More() {
                     className="bg-[#A87F0B] text-white py-2 px-4 w-[190px] h-[35px] flex justify-center items-center rounded-[10px]  transition duration-200"
                   >
                     {btnloader ? (
-                      <div cla>
+                      <div>
                         <ClipLoader
                           size={20}
                           color="#181818"

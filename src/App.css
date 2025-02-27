@@ -5,3 +5,18 @@
     align-items: center;
     padding: 7px;
   }
+  * {
+    font-family: 'Poppins', sans-serif;
+  }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    border-radius: 4px;
+
+    color-scheme: dark;
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Adjusted for brown color */
+    filter: invert(35%) sepia(60%) saturate(500%) hue-rotate(10deg) brightness(90%);
+  }
+  
+

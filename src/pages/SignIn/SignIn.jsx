@@ -86,7 +86,7 @@ export default function SignIn() {
         fcmtoken: "empty",
       });
 
-      toast.success("Sign in successfuly!", { toastId });
+      toast.success("Successfully sign in!", { toastId });
 
       localStorage.setItem("id", response?.data?.data?.id || 0);
       localStorage.setItem("token", response?.data?.data?.token);
@@ -148,10 +148,9 @@ export default function SignIn() {
       try {
         // Send the request to the backend with Facebook credentials
         const apiResponse = await axios.post(`${apiBaseUrl}login`, {
-          phoneNumber,
+      
           phoneNumber, // Send the user's input (email or phone number) as the "phoneNumber" key
           password: password, // Make sure to capture the password as well
-          password, // Make sure to capture the password as well
           fcmtoken: "empty",
           loginWith: "facebook", // Indicate Facebook login
           socialId: id, // Facebook user ID
@@ -192,7 +191,7 @@ export default function SignIn() {
 
             {/* Toggle Buttons */}
             <div className="flex w-1/2 sm:w-[240px] items-center relative mb-5">
-              <div className="bg-[#181818] border text-white outline-none border-[#A87F0B] rounded-[30px] h-[39px] sm:h-[45px] w-[100%]">
+              <div className="bg-[#181818] border text-white outline-none border-[#e2e2e269] rounded-[30px] h-[39px] sm:h-[45px] w-[100%]">
                 <button
                   className={`text-white absolute left-0 rounded-[30px] h-[39px] sm:h-[44px] sm:text-[16px] w-[53%] ${
                     !emailSelected ? "bg-[#A87F0B]" : ""
@@ -263,13 +262,13 @@ export default function SignIn() {
                 <img src={phoneIcon} width="23px" className="mr-2" />
                 <input
                   className="w-[100%] outline-none text-white"
-                  type="text" // Use text to enable custom validation
+                  type="tel" // Use text to enable custom validation
                   placeholder="Phone Number"
                   value={phoneNumber}
                   onChange={(e) => {
                   
-                    const value = e.target.value.replace(/[^0-9]/g, "");
-                    setPhoneNumber(value);
+                    // const value = e.target.value.replace(/[^0-9]/g, "");
+                    setPhoneNumber(e.target.value);
                   }}
                   onKeyDown={(e) => {
             
@@ -357,7 +356,7 @@ export default function SignIn() {
 
                 {/* Facebook Login Button */}
                 <div className="flex justify-center items-center w-[100%] cursor-pointer text-white bg-[#1a73e8] rounded-[4px] px-3 h-[40px] gap-2 text-[13px]">
-                  <FaFacebookF className="text-[19px]" />
+                  <FaFacebookF className="text-[16px]" />
                   {/* Added text size for icon */}
                   <FacebookLogin
                     appId="1594999661137496"
@@ -373,11 +372,13 @@ export default function SignIn() {
           </div>
 
           {/* Right Side (Image Section for larger screens) */}
-          <div className="hidden sm:flex w-[50%] h-[100vh] justify-center items-center">
+          <div className="hidden sm:flex w-[50%] h-full justify-center items-center">
             <div className="relative flex justify-center items-center">
               <img className="w-[100%] z-10" src={logo} alt="Laptop" />
             </div>
           </div>
+
+          
         </div>
 
         <ToastContainer
