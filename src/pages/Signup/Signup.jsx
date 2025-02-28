@@ -5,7 +5,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaRegEyeSlash } from "react-icons/fa";
 import { MdOutlineRemoveRedEye } from 'react-icons/md';
 import axios from 'axios';
-import { Slide, ToastContainer, toast } from 'react-toastify';
+import toast from "react-hot-toast";
+
 import 'react-toastify/dist/ReactToastify.css';
 import 'react-phone-input-2/lib/style.css';
 import PhoneInput from 'react-phone-input-2';
@@ -42,75 +43,59 @@ export default function Signup() {
   };
 
   const handleSignup = async () => {
-    const toastId = "signupToast"; // Unique ID for this toast
+    const toastId = "signupToast"; // Unique toast ID
+  
+    // Clear any previous toasts
+    toast.dismiss(toastId);
   
     if (!fullname) {
-   
-        toast.error("Fullname is required.", { toastId });
-      }   if (toastId) {
+      toast.error("Name is required.", { id: toastId });
       return;
     }
+  
     if (!username) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Username is required.", { toastId });
-      }
+      toast.error("Username is required.", { id: toastId });
       return;
     }
+  
     if (!email) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Email is required.", { toastId });
-      }
+      toast.error("Email is required.", { id: toastId });
       return;
     }
+  
     if (!validateEmail(email)) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Invalid email format.", { toastId });
-      }
+      toast.error("Invalid email format.", { id: toastId });
       return;
     }
+  
     if (!phone) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Phone number is required.", { toastId });
-      }
+      toast.error("Phone number is required.", { id: toastId });
       return;
     }
+  
     if (!password) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Password is required.", { toastId });
-      }
+      toast.error("Password is required.", { id: toastId });
       return;
     }
+  
     if (!ConfirmPassword) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Confirm password is required.", { toastId });
-      }
+      toast.error("Confirm password is required.", { id: toastId });
       return;
     }
+  
     if (password !== ConfirmPassword) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Passwords do not match.", { toastId });
-      }
+      toast.error("Passwords do not match.", { id: toastId });
       return;
     }
+  
     if (password.length < 6) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Password must be at least 6 characters long.", { toastId });
-      }
+      toast.error("Password must be at least 6 characters long.", { id: toastId });
       return;
     }
-    
-    
-    setBTnloader(true)
+  
+    setBTnloader(true);
+  
     try {
-      // let cleanPhone = phone;
-      
-      // if (cleanPhone.startsWith("92")) {
-      //   cleanPhone = cleanPhone.substring(2); // Remove "92"
-      // }
-
-      // if (!cleanPhone.startsWith("0")) {
-      //   cleanPhone = "0" + cleanPhone;
-      // }
       const response = await axios.post(`${apiBaseUrl}register`, {
         email: email,
         phoneNumber: phone,
@@ -123,24 +108,18 @@ export default function Signup() {
         fullName: fullname,
       });
   
-      if (!toast.isActive(toastId)) {
-        toast.success("Successfully sign up!", { toastId });
-        setBTnloader(false)
-      }
+      toast.success("Successfully signed up!", { id: toastId });
   
-      console.log(response?.data);
       localStorage.setItem("id", response?.data?.data?.id);
       localStorage.setItem("token", response?.data?.data?.token);
   
       setTimeout(() => {
         navigate("/create");
       }, 2000);
-      setBTnloader(false)
     } catch (error) {
-      if (!toast.isActive(toastId)) {
-        toast.error(error?.response?.data?.message, { toastId });
-        setBTnloader(false)
-      }
+      toast.error(error?.response?.data?.message || "Signup failed", { id: toastId });
+    } finally {
+      setBTnloader(false);
     }
   };
   
@@ -163,6 +142,12 @@ export default function Signup() {
       type="text"
       placeholder="Name"
       onChange={(e) => setFullname(e.target.value)}
+      style={{
+        WebkitTextFillColor: "white",
+        backgroundColor: "transparent",
+        caretColor: "white",
+        transition: "background-color 5000s ease-in-out 0s",
+      }}
     />
     </div>
   <div className="bg-[#6A6A6A80] flex items-center  rounded-[10px] h-[50px] sm:w-[70%] w-[100%] p-5 sm:mt-3 mt-5">
@@ -173,6 +158,12 @@ export default function Signup() {
       type="text"
       placeholder="Username"
       onChange={(e) => setUsername(e.target.value)}
+      style={{
+        WebkitTextFillColor: "white",
+        backgroundColor: "transparent",
+        caretColor: "white",
+        transition: "background-color 5000s ease-in-out 0s",
+      }}
     />
     </div>
 
@@ -213,6 +204,12 @@ export default function Signup() {
       type="email"
       placeholder="Email"
       onChange={(e) => setEmail(e.target.value)}
+      style={{
+        WebkitTextFillColor: "white",
+        backgroundColor: "transparent",
+        caretColor: "white",
+        transition: "background-color 5000s ease-in-out 0s",
+      }}
     />
     </div>
     <div className="bg-[#6A6A6A80] flex items-center  rounded-[10px] h-[50px] sm:w-[70%] w-[100%] p-5 sm:mt-3 mt-5">
@@ -223,6 +220,12 @@ export default function Signup() {
         type={showPassword ? "password" : "text"}
         placeholder="Password"
         onChange={(e) => setPassword(e.target.value)}
+        style={{
+          WebkitTextFillColor: "white",
+          backgroundColor: "transparent",
+          caretColor: "white",
+          transition: "background-color 5000s ease-in-out 0s",
+        }}
       />
       {showPassword ? (
         <FaRegEyeSlash
@@ -244,6 +247,12 @@ export default function Signup() {
           type={showConfirmPassword ? "password" : "text"}
           placeholder="Confirm Password"
           onChange={(e) => setConfirmPassword(e.target.value)}
+          style={{
+            WebkitTextFillColor: "white",
+            backgroundColor: "transparent",
+            caretColor: "white",
+            transition: "background-color 5000s ease-in-out 0s",
+          }}
         />
         {showConfirmPassword ? (
           <FaRegEyeSlash
@@ -266,6 +275,12 @@ export default function Signup() {
       type="text"
       placeholder="Address"
       // onChange={(e) => setEmail(e.target.value)}
+      style={{
+        WebkitTextFillColor: "white",
+        backgroundColor: "transparent",
+        caretColor: "white",
+        transition: "background-color 5000s ease-in-out 0s",
+      }}
     />
     </div>
     <button
@@ -302,18 +317,7 @@ export default function Signup() {
 
 </div>
 
-      <ToastContainer
-        position="top-center"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        transition={Slide}
-      />
+
     </>
   );
 }

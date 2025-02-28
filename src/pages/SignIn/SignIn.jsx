@@ -36,7 +36,7 @@ export default function SignIn() {
     console.log("Login started");
   };
 
-  let nevigate = useNavigate();
+  let navigate = useNavigate();
   const apiBaseUrl = import.meta.env.VITE_APP_API_URL;
   // console.log(apiBaseUrl);
   const validateEmail = (email) => {
@@ -51,57 +51,57 @@ export default function SignIn() {
 
   const handleSignIn = async () => {
     const toastId = "signInToast"; // Unique ID for this toast
-
+  
+    // Dismiss any existing toast with the same ID to prevent duplicates
+    toast.dismiss(toastId);
+  
     if (!phoneNumber) {
-      if (!toast.isActive(toastId)) {
-        toast.error(
-          emailSelected ? "Email is required." : "Phone number is required.",
-          { toastId }
-        );
-      }
+      toast.error(
+        emailSelected ? "Email is required." : "Phone number is required.",
+        { id: toastId } // Use 'id' instead of 'toastId'
+      );
       return;
     }
+  
     if (emailSelected && !validateEmail(phoneNumber)) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Invalid email format.", { toastId });
-      }
+      toast.error("Invalid email format.", { id: toastId });
       return;
     }
+  
     if (!emailSelected && !validatePhone(phoneNumber)) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Invalid phone number format.", { toastId });
-      }
+      toast.error("Invalid phone number format.", { id: toastId });
       return;
     }
+  
     if (!password) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Password is required.", { toastId });
-      }
+      toast.error("Password is required.", { id: toastId });
       return;
     }
-    setBTnloader(true)
+  
+    setBTnloader(true);
+    
     try {
       const response = await axios.post(`${apiBaseUrl}login`, {
-        phoneNumber: phoneNumber, // Send the user's input (email or phone number) as the "phoneNumber" key
-        password: password, // Make sure to capture the password as well
+        phoneNumber: phoneNumber, 
+        password: password,
         loginWith: "signup",
         fcmtoken: "empty",
       });
-
-      toast.success("Successfully sign in!", { toastId });
-
+  
+      toast.success("Successfully signed in!", { id: toastId });
+  
       localStorage.setItem("id", response?.data?.data?.id || 0);
       localStorage.setItem("token", response?.data?.data?.token);
-      setBTnloader(false)
+  
+      setBTnloader(false);
+      
       setTimeout(() => {
-        nevigate("/create");
+        navigate("/create");
       }, 2000);
-      setBTnloader(false)
+  
     } catch (error) {
-      if (!toast.isActive(toastId)) {
-        toast.error(error?.response?.data?.message, { toastId });
-        setBTnloader(false)
-      }
+      toast.error(error?.response?.data?.message || "Login failed", { id: toastId });
+      setBTnloader(false);
     }
   };
 
@@ -260,6 +260,8 @@ export default function SignIn() {
                   autoComplete="off"
                   style={{
                     WebkitTextFillColor: "white",
+                    backgroundColor: "transparent",
+                    caretColor: "white",
                     transition: "background-color 5000s ease-in-out 0s",
                   }}
                   placeholder="Email"
@@ -278,6 +280,8 @@ export default function SignIn() {
                   autoComplete="off"
                   style={{
                     WebkitTextFillColor: "white",
+                    backgroundColor: "transparent",
+                    caretColor: "white",
                     transition: "background-color 5000s ease-in-out 0s",
                   }}
                   onChange={(e) => {
@@ -311,6 +315,8 @@ export default function SignIn() {
                 autoComplete="off"
                 style={{
                   WebkitTextFillColor: "white",
+                  backgroundColor: "transparent",
+                  caretColor: "white",
                   transition: "background-color 5000s ease-in-out 0s",
                 }}
                 

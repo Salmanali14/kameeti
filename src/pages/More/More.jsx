@@ -189,8 +189,10 @@ export default function More() {
   });
   
   const handleProfileUpdate = async (notificationValue, isToggleAction = false) => {
-    const successToastId = "profileUpdateSuccessToast"; // Unique ID for success toast
-    const errorToastId = "profileUpdateErrorToast"; // Unique ID for error toast
+    setBTnloader(true); // ✅ Start loader before request
+  
+    const successToastId = "profileUpdateSuccessToast";
+    const errorToastId = "profileUpdateErrorToast";
   
     try {
       let file;
@@ -208,13 +210,10 @@ export default function More() {
       formData.append("address", address);
       formData.append("phoneNumber", phone);
   
-      // Set the isToggled state and save it to localStorage
       setIsToggled(notificationValue);
       localStorage.setItem("isToggled", notificationValue);
   
-      // Conditionally add or remove the fcmtoken
       if (notificationValue) {
-        console.log(notificationValue);
         formData.append("fcmtoken", "abcd");
       } else {
         formData.append("fcmtoken", "");
@@ -238,15 +237,13 @@ export default function More() {
       );
   
       if (!isToggleAction) {
-        if (!toast.isActive(successToastId)) {
-          const successMessage =
-            response?.data?.message || "User data updated successfully";
-          toast.success(successMessage, { toastId: successToastId });
-        }
+        const successMessage =
+          response?.data?.message || "User data updated successfully";
+        toast.success(successMessage, { id: successToastId });
       }
   
       if (notificationValue !== true && notificationValue !== false) {
-        fetchUserData(); // Refresh user data after update
+        fetchUserData();
       }
     } catch (error) {
       console.error("Error details:", error);
@@ -254,13 +251,16 @@ export default function More() {
         error?.response?.data?.message ||
         "An error occurred. Please try again later.";
   
-      if (!toast.isActive(errorToastId)) {
+      if (!toast.isActive || !toast.isActive(errorToastId)) {
         toast.error(errorMessage, { toastId: errorToastId });
       }
     } finally {
-      setBTnloader(false);
+      setTimeout(() => {
+        setBTnloader(false); // ✅ Stop loader after request completion
+      }, 500); // Small delay to improve UX
     }
   };
+  
   useEffect(() => {
     const storedToggle = localStorage.getItem("isToggled") === "true";
     setIsToggled(storedToggle);
@@ -1082,21 +1082,16 @@ export default function More() {
                     Cancel
                   </button>
                   <button
-                    onClick={handleProfileUpdate}
-                    className="bg-[#A87F0B] text-white py-2 px-4 w-[190px] h-[35px] flex justify-center items-center rounded-[10px]  transition duration-200"
-                  >
-                    {btnloader ? (
-                      <div>
-                        <ClipLoader
-                          size={20}
-                          color="#181818"
-                          className="mt-2"
-                        />
-                      </div>
-                    ) : (
-                      "Update"
-                    )}
-                  </button>
+  onClick={() => handleProfileUpdate()}
+  className="bg-[#A87F0B] text-white py-2 px-4 w-[190px] h-[35px] flex justify-center items-center rounded-[10px] transition duration-200"
+>
+  {btnloader ? (
+    <ClipLoader size={20} color="#181818" />
+  ) : (
+    "Update"
+  )}
+</button>
+
                 </div>
               </div>
             </div>

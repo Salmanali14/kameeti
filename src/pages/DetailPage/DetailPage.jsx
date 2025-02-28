@@ -536,7 +536,7 @@ export default function Payment() {
                            }).map(([section, items], sectionIndex) => (
                <div
                                        key={sectionIndex}
-                                       className="mt-6 mb-1 bg-[#2B2B2B] rounded-[8px] py-[25px] m-[30px]" // Add bottom margin here
+                                       className="mt-6 mb-1 bg-[#2B2B2B] rounded-[8px] py-[25px] sm:m-[30px] m-[0px]" // Add bottom margin here
                                      >
                                        {/* Section Header */}
                                        <h3 className="font-medium text-lg pl-6 sm:pl-6 text-sm sm:text-lg md:text-xl lg:text-2xl pb-3">

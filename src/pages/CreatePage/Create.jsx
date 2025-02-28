@@ -187,84 +187,66 @@ const handleReset = () => {
   }, [totalPrice, totalMonths]);
 
   const handleCreateCommittee = async () => {
-    const toastId = "createCommitteeToast"; // Unique ID for this toast
+    const toastId = "createCommitteeToast";
     setBTnloader(true);
-
+  
     // Validation for required fields
     if (!kametiHolderName) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Kameti holder name is required.", { toastId });
-      }
+      toast.dismiss(toastId);
+      toast.error("Kameti holder name is required.", { id: toastId });
       setBTnloader(false);
       return;
     }
+  
     if (!totalPrice || isNaN(totalPrice)) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Total Amount is required and must be valid.", { toastId });
-      }
+      toast.dismiss(toastId);
+      toast.error("Total Amount is required and must be valid.", { id: toastId });
       setBTnloader(false);
       return;
     }
-
+  
     if (!pricePerKameti || isNaN(pricePerKameti)) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Total Month kameti is required.", { toastId });
-      }
+      toast.dismiss(toastId);
+      toast.error("Total Month kameti is required.", { id: toastId });
       setBTnloader(false);
       return;
     }
-
+  
     if (!totalMonths || isNaN(totalMonths)) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Total months is required and must be valid.", { toastId });
-      }
+      toast.dismiss(toastId);
+      toast.error("Total months is required and must be valid.", { id: toastId });
       setBTnloader(false);
       return;
     }
-
-    if (!totalPrice || isNaN(totalPrice)) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Total price is required and must be valid.", { toastId });
-      }
-      setBTnloader(false);
-      return;
-    }
-
+  
     if (!myTotalKameties || isNaN(myTotalKameties)) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Total kameties is required and must be valid.", {
-          toastId,
-        });
-      }
+      toast.dismiss(toastId);
+      toast.error("Total kameties is required and must be valid.", { id: toastId });
       setBTnloader(false);
       return;
     }
-
+  
     if (!startingDate) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Starting date is required.", { toastId });
-      }
+      toast.dismiss(toastId);
+      toast.error("Starting date is required.", { id: toastId });
       setBTnloader(false);
       return;
     }
-
+  
     if (!endingDate) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Ending month is required.", { toastId });
-      }
+      toast.dismiss(toastId);
+      toast.error("Ending month is required.", { id: toastId });
       setBTnloader(false);
       return;
     }
-
-    // Additional validation
+  
     if (parseInt(myTotalKameties) > parseInt(totalMonths)) {
-      if (!toast.isActive(toastId)) {
-        toast.error("Total kameties cannot exceed total months.", { toastId });
-      }
+      toast.dismiss(toastId);
+      toast.error("Total kameties cannot exceed total months.", { id: toastId });
       setBTnloader(false);
       return;
     }
-
+  
     try {
       const response = await axios.post(
         `${apiBaseUrl}committee`,
@@ -272,25 +254,20 @@ const handleReset = () => {
           kametiName: kametiHolderName,
           pricePerMonthKameti: pricePerKameti,
           pricePerDayKameti: pricePerDayKameti,
-          totalPrice: totalPrice,
+          totalPrice,
           myTotalKametis: myTotalKameties,
-          totalMonths: totalMonths,
+          totalMonths,
           startingMonth: dateToTimestamp(startingDate),
           endingMonth: dateToTimestamp(endingDate),
-          kametiType: kametiType,
+          kametiType,
           myKametiWithdrawDate: withdrawDates,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      if (!toast.isActive(toastId)) {
-        toast.success(response?.data?.message, { toastId });
-      }
-
+  
+      toast.dismiss(toastId);
+      toast.success(response?.data?.message, { id: toastId });
+  
       setKametiHolderName("");
       setTotalPrice("");
       setPricePerKameti("");
@@ -300,21 +277,20 @@ const handleReset = () => {
       setPayablePerMonth("");
       setStartingDate("");
       setEndingDate("");
-
-      // Set the confirmation message
+  
       setConfirmMessage("Form reset successfully!");
     } catch (error) {
-      if (!toast.isActive(toastId)) {
-        toast.error(error?.response?.data?.message, { toastId });
-      }
+      toast.dismiss(toastId);
+      toast.error(error?.response?.data?.message, { id: toastId });
     } finally {
       setBTnloader(false);
     }
   };
+  
 
   const handleUpdateCommittee = async () => {
     const toastId = "updateCommitteeToast"; // Unique ID for this toast
-
+  
     try {
       const response = await axios.post(
         `${apiBaseUrl}committee/update`,
@@ -337,20 +313,17 @@ const handleReset = () => {
           },
         }
       );
-
-      if (!toast.isActive(toastId)) {
-        toast.success(response?.data?.message, { toastId });
-      }
-
+  
+      toast.success(response?.data?.message, { id: toastId }); // ✅ Corrected
+  
       setTimeout(() => {
         navigate("/history");
       }, 2000);
     } catch (error) {
-      if (!toast.isActive(toastId)) {
-        toast.error(error?.response?.data?.message, { toastId });
-      }
+      toast.error(error?.response?.data?.message, { id: toastId }); // ✅ Corrected
     }
   };
+  
 
   const handleSaveWithdrawDates = (dates) => {
     console.log(dates);
@@ -382,9 +355,10 @@ const handleReset = () => {
     if (myTotalKameties) {
       setShowWithdrawDates(true);
     } else {
-      if (!toast.isActive(toastId)) {
-        toast.error("Select total kameties first.", { toastId });
-      }
+      toast.dismiss(toastId);
+
+      toast.error("Select total kameties first.", { id: toastId });
+  
     }
   };
   useEffect(() => {
