@@ -5,7 +5,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaRegEyeSlash } from "react-icons/fa";
 import { MdOutlineRemoveRedEye } from 'react-icons/md';
 import axios from 'axios';
-import { Slide, ToastContainer, toast } from 'react-toastify';
+import toast from "react-hot-toast";
+
 import 'react-toastify/dist/ReactToastify.css';
 import 'react-phone-input-2/lib/style.css';
 import PhoneInput from 'react-phone-input-2';
@@ -149,18 +150,7 @@ export default function Signup() {
           <p className='text-[white] sm:mt-2 mt-5'>Already have an account?<Link to='/signin' className='text-[#A87F0B] ml-1'>Sign in</Link></p>
         </div>
       </div>
-      <ToastContainer
-        position="top-center"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        transition={Slide}
-      />
+ 
     </>
   );
 }

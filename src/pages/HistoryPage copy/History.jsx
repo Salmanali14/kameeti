@@ -9,7 +9,8 @@ import { FaSort } from "react-icons/fa";
 import money from '../../images/Moneypay.png'
 import calander from '../../images/appointment 1.png'
 import check from '../../images/Checkmark.png'
-import { Slide, ToastContainer, toast } from 'react-toastify';
+import toast from "react-hot-toast";
+
 import 'react-toastify/dist/ReactToastify.css';
 import bank from '../../images/paymentImage/banknotes 2.png'
 import lastdate from '../../images/paymentImage/calendar 2.png'
@@ -446,18 +447,7 @@ export default function History({ recordType = null }) {  // recordType will be 
         )}
 
       </div>
-      <ToastContainer
-        position="top-center"
-        autoClose={2000} // Auto close after 3 seconds
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        transition={Slide} // Optional transition effect
-      />
+
     </>
   )
 }

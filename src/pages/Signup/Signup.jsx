@@ -45,9 +45,9 @@ export default function Signup() {
     const toastId = "signupToast"; // Unique ID for this toast
   
     if (!fullname) {
-      if (!toast.isActive(toastId)) {
+   
         toast.error("Fullname is required.", { toastId });
-      }
+      }   if (toastId) {
       return;
     }
     if (!username) {

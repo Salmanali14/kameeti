@@ -9,7 +9,8 @@ import { FaSort } from "react-icons/fa";
 import money from "../../images/Moneypay.png";
 import calander from "../../images/appointment 1.png";
 import check from "../../images/Checkmark.png";
-import { Slide, ToastContainer, toast } from "react-toastify";
+import toast from "react-hot-toast";
+
 import "react-toastify/dist/ReactToastify.css";
 import bank from "../../images/paymentImage/banknotes 2.png";
 import lastdate from "../../images/paymentImage/calendar 2.png";
@@ -380,7 +381,11 @@ export default function History({ recordType = null }) {
 
                           </div> */}
 
-                          <div className="w-[100%] relative  bg-colorinput  items-center flex-row px-[12px] py-[14px] sm:p-[30px] rounded-[10px]"  onClick={() => handleShowKameti(payment.id)}>
+<div 
+  className="w-[100%] relative bg-colorinput items-center flex-row px-[12px] py-[14px] sm:p-[30px] rounded-[10px] cursor-pointer"  
+  onClick={() => handleShowKameti(payment.id)}
+>
+
                           <div className="w-full h-[30px] flex items-center flex-wrap sm:flex-nowrap relative">
   {/* Kameti Name Label */}
   <h2 className="text-white text-[12px] sm:text-[17px] w-auto sm:w-[19%] whitespace-nowrap">
@@ -693,18 +698,7 @@ export default function History({ recordType = null }) {
           />
         )}
       </div>
-      <ToastContainer
-        position="top-center"
-        autoClose={2000} // Auto close after 3 seconds
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        transition={Slide} // Optional transition effect
-      />
+
     </>
   );
 }

@@ -19,4 +19,8 @@
     filter: invert(35%) sepia(60%) saturate(500%) hue-rotate(10deg) brightness(90%);
   }
   
-
+  input:-webkit-autofill {
+    -webkit-text-fill-color: white !important;
+    background-color: transparent !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }

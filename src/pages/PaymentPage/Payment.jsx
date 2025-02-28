@@ -21,8 +21,13 @@ import Sidebar from "../../components/Sidebar/Sidebar";
 import { RiArrowDropDownLine } from "react-icons/ri";
 import { IoIosSearch } from "react-icons/io";
 import { FaSort } from "react-icons/fa";
+import { IoIosCheckmarkCircle } from "react-icons/io";
+
 import money from "../../images/Moneypay.png";
 import Calendar from "react-calendar";
+import { BiSolidDownArrow, BiSolidUpArrow } from "react-icons/bi";
+import { IoIosCheckmarkCircleOutline } from "react-icons/io";
+
 import "react-calendar/dist/Calendar.css";
 import { FaCalendarAlt } from "react-icons/fa";
 import "./Payment.css";
@@ -42,7 +47,6 @@ import Alert from "../../components/Alert/Alert";
 import { MdOutlineRestartAlt } from "react-icons/md";
 import unpay from "../../images/paymentImage/unpay.png";
 import axios from "axios";
-import { Slide, ToastContainer, toast } from "react-toastify";
 import { FadeLoader, HashLoader } from "react-spinners";
 import { Button, IconButton, MenuItem, Select } from "@mui/material";
 import kametiLogo2 from "../../images/kametiLogo2.png";
@@ -58,7 +62,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { TbMenu2 } from "react-icons/tb";
 import MobileSidebar from "../../components/MobileSidebar/MobileSidebar";
-import { BiSolidDownArrow } from "react-icons/bi";
+import toast from "react-hot-toast";
+
 
 export default function Payment() {
   const [isCopied, setIsCopied] = useState(false);
@@ -144,6 +149,7 @@ export default function Payment() {
   // const [rows, setRows] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("");
   const [activeKameti, setActiveKameti] = useState(null);
+  const [withdrawDateStatus, setWithdrawDateStatus] = useState([]);
   // console.log(filteredPayments)
 
 
@@ -152,7 +158,7 @@ export default function Payment() {
           setLoading(true);
           const response = await axios.get(`${apiBaseUrl}payment`, {
               headers: { Authorization: `Bearer ${token}` },
-          });
+          }); 
   
           let dailyData = response?.data?.data?.daily_committees || [];
           let monthlyData = response?.data?.data?.monthly_committees || [];
@@ -171,12 +177,14 @@ export default function Payment() {
               setCommitteeData(dailyData);
               setSelectedCommittee(dailyData[0]);
               setKametiType("daily");
+              setWithdrawDateStatus(dailyData[0].withdrawDateStatus)
               fetchPayments(dailyData[0].id, "daily");
           } else if (monthlyData.length > 0) {
               setCommitteeData(monthlyData);
               setSelectedCommittee(monthlyData[0]);
               setKametiType("monthly");
               fetchPayments(monthlyData[0].id, "monthly");
+              setWithdrawDateStatus(monthlyData[0].withdrawDateStatus)
           } else {
               setCommitteeData([]);
               setSelectedCommittee(null);
@@ -189,7 +197,7 @@ export default function Payment() {
           setLoading(false);
       }
   };
-  
+  console.log(selectedCommittee)
   
   // Fetch data when the component mounts
   useEffect(() => {
@@ -784,6 +792,14 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
     let formattedValue = String(value).replace(/[^0-9]/g, ""); // Remove non-numeric characters
     return new Intl.NumberFormat().format(formattedValue); // Format with commas
   };
+
+  const withdrawStatus = (index, value) => {
+    let counts = 2;
+    console.log("Withdraw Index:", index);
+    console.log("Withdraw Value:", value);
+    
+    selectedCommittee.withdrawDateStatus?.[index]
+  };
   
   return (
     <>
@@ -851,25 +867,25 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
 </p>
 
 <div className="flex items-center cursor-pointer">
-        <h1 className="text-yellow-500 font-bold text-[17px] sm:text-[28px]">
-          Rs.{" "}
-          {(
-            selectedCommittee?.totalPrice && selectedCommittee?.myTotalKametis
-              ? parseInt(selectedCommittee?.totalPrice) / parseInt(selectedCommittee?.myTotalKametis)
-              : 0
-          ).toLocaleString()}
-        </h1>
-        {/* Clicking Arrow Opens the Dropdown */}
-        {urlId ? (
-                    ""
-                  ) : (
-        <BiSolidDownArrow
-          className="ml-3 text-white"
-          size={18}
-          onClick={() => setIsDropdownOpen(true)}
-        />
-                  )}
-      </div>
+      <h1 className="text-yellow-500 font-bold text-[17px] sm:text-[28px]">
+        Rs.{" "}
+        {(
+          selectedCommittee?.totalPrice && selectedCommittee?.myTotalKametis
+            ? parseInt(selectedCommittee?.totalPrice) / parseInt(selectedCommittee?.myTotalKametis)
+            : 0
+        ).toLocaleString()}
+      </h1>
+      {/* Clicking Arrow Toggles the Icon */}
+      {!urlId && (
+        <div onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+          {isDropdownOpen ? (
+            <BiSolidUpArrow className="ml-3 text-white" size={18} />
+          ) : (
+            <BiSolidDownArrow className="ml-3 text-white" size={18} />
+          )}
+        </div>
+      )}
+    </div>
 
       {/* Dropdown Select (Directly Opens When Clicking Arrow) */}
       <Select
@@ -1201,17 +1217,13 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
                                         </button>
 
                                         {isToggled ? (
-                                          <img
-                                            src={toogle2}
-                                            alt="Toggle Two"
-                                            className="w-[22px] cursor-pointer"
-                                          />
+                                      
+                                          <BiSolidUpArrow/>
+
                                         ) : (
-                                          <img
-                                            src={toogle}
-                                            alt="Toggle One"
-                                            className="w-[22px] cursor-pointer"
-                                          />
+                                          <BiSolidDownArrow/>
+                                     
+
                                         )}
                                       </div>
                                       {!showModal && showDropdown && (
@@ -1220,38 +1232,37 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
                                           className="absolute top-full left-0 z-10 w-[270px] md:w-[100%] lg:w-[240px] xl:w-[250px] max-h-[155px] overflow-y-auto dropdown-scrollbar bg-[#333] text-white rounded-md mt-2 p-2 shadow-[inset_0px_-7px_4px_0px_#00000040]"
                                           onClick={(e) => e.stopPropagation()}
                                         >
-                                          {selectedCommittee?.withdraw.map(
-                                            (date, index) => (
-                                              <div
-                                                key={index}
-                                                className="dropdown-item flex items-center mb-5 justify-between"
-                                              >
-                                                <div className="flex items-center w-[70%]">
-                                                  <span className="rounded-[100px] bg-[#A87F0B] text-center w-[30px] text-[15px]">
-                                                    {index + 1}
-                                                  </span>
-                                                  <strong className="ml-3 text-[16px] text-right font-sans">
-  Rs.{formatPrice(
-    parseInt(selectedCommittee?.totalPrice) /
-    parseInt(selectedCommittee?.myTotalKametis)
-  )}
-</strong>
+                                     {selectedCommittee?.withdraw.map((date, index) => (
+  <div
+    key={index}
+    className="dropdown-item flex items-center mb-5 justify-between"
+  >
+    <div className="flex items-center w-[70%]">
+    {/* {withdrawDateStatus?.[index] && withdrawDateStatus?.[index] == 1 ? 
+      <IoIosCheckmarkCircle onClick={() => withdrawStatus(index, 1)} />
+      : <IoIosCheckmarkCircleOutline onClick={() => withdrawStatus(index, 0)} />
+    } */}
 
-                                                </div>
-                                                <span
-                                                  className="text-right text-[13px] text-center w-[40%] cursor-pointer flex items-center justify-between"
-                                                  onClick={() =>
-                                                    handleDateClick1(index)
-                                                  }
-                                                >
-                                                  {date == null
-                                                    ? "Select Date"
-                                                    : formatDate(date)}
-                                                  <FaCalendarAlt className="text-yellow-500 text-[16px] w-[16px] h-[16px]" />
-                                                </span>
-                                              </div>
-                                            )
-                                          )}
+      <span className="rounded-[100px] bg-[#A87F0B] text-center w-[30px] text-[15px]">
+        {index + 1}
+      </span>
+      <strong className="ml-3 text-[16px] text-right font-sans">
+        Rs.{formatPrice(
+          parseInt(selectedCommittee?.totalPrice) /
+          parseInt(selectedCommittee?.myTotalKametis)
+        )}
+      </strong>
+    </div>
+    <span
+      className="text-right text-[13px] text-center w-[40%] cursor-pointer flex items-center justify-between"
+      onClick={() => handleDateClick1(index)}
+    >
+      {date == null ? "Select Date" : formatDate(date)}
+      <FaCalendarAlt className="text-yellow-500 text-[16px] w-[16px] h-[16px]" />
+    </span>
+  </div>
+))}
+
                                         </div>
                                       )}
 
@@ -1488,18 +1499,7 @@ const link = `${baseUrl}/Detail/${selectedCommittee?.id}`;
         />
       )}
 
-      <ToastContainer
-        position="top-center"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        transition={Slide} // Optional transition effect
-      />
+   
     </>
   );
 }

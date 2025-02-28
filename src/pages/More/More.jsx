@@ -32,7 +32,9 @@ import Cropper from "../../components/Cropper/Cropper";
 import axios from "axios";
 import { ClipLoader, FadeLoader } from "react-spinners";
 import Share from "../ShareSocial/Share";
-import { Slide, ToastContainer, toast } from "react-toastify";
+
+import toast from "react-hot-toast";
+
 import "react-toastify/dist/ReactToastify.css";
 import { IoIosInformationCircleOutline } from "react-icons/io";
 import InfoModal from "../../components/InfoModal/InfoModal";
@@ -1145,18 +1147,7 @@ export default function More() {
           <br></br>
         </Box>
       </Modal>
-      <ToastContainer
-        position="top-center"
-        autoClose={2000} // Auto close after 3 seconds
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        transition={Slide} // Optional transition effect
-      />
+  
 
       <InfoModal
         info={info}

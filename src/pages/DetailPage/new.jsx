@@ -21,8 +21,6 @@ import calender2 from "../../images/paymentImage/payday 1.png";
 import money1 from "../../images/paymentImage/money (1) 2.png";
 import money2 from "../../images/paymentImage/money 2.png";
 import Alert from "../../components/Alert/Alert";
-import { BiSolidDownArrow, BiSolidUpArrow } from "react-icons/bi";
-
 import kametiLogo2 from "../../images/kametiLogo2.png";
 import toogle from "../../images/toogle.png";
 import toogle2 from "../../images/toogle2.png";
@@ -48,6 +46,7 @@ import { MdOutlineRestartAlt } from "react-icons/md";
 import { IoShareSocialSharp } from "react-icons/io5";
 
 import axios from "axios";
+
 import toast from "react-hot-toast";
 
 import { FadeLoader, HashLoader } from "react-spinners";
@@ -136,7 +135,6 @@ export default function Payment() {
     const timestamp = new Date(date).getTime();
     return timestamp;
   };
-  
 
   // const handleAlertCancel = () => {
   //   setShowConfirmAlert(false); // Hide the confirm alert
@@ -534,119 +532,111 @@ export default function Payment() {
                                },
                              ],
                            }).map(([section, items], sectionIndex) => (
-               <div
-                                       key={sectionIndex}
-                                       className="mt-6 mb-1 bg-[#2B2B2B] rounded-[8px] py-[25px] m-[30px]" // Add bottom margin here
-                                     >
-                                       {/* Section Header */}
-                                       <h3 className="font-medium text-lg pl-6 sm:pl-6 text-sm sm:text-lg md:text-xl lg:text-2xl pb-3">
-                                         {section === "monthly"
-                                           ? selectedCommittee?.kametiType == "daily"
-                                             ? "Daily Kameti Info"
-                                             : "Monthly Kameti Info"
-                                           : section === "amounts"
-                                           ? "Amounts Info"
-                                           : section === "kameties"
-                                           ? "Kameties Info"
-                                           : section === "dates"
-                                           ? "Dates Info"
-                                           : ""}
-                                       </h3>
-             
-                                       {/* Section Items */}
-                                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 p-2 font-medium text-lg ">
-                                         {items.map((item, index) => (
-                                           <div
-                                             key={index}
-                                             className="flex items-center p-4 space-x-4 relative"
-                                           >
-                                             {/* Conditionally Render Image */}
-                                             {item.title !== "Withdrawal Dates" && (
-                                               <img
-                                                 src={item.image}
-                                                 alt={item.title}
-                                                 className="w-[35px] h-[35px] sm:w-[65px] sm:h-[65px] object-cover rounded-md"
-                                               />
-                                             )}
-                                             <div>
-                                               {/* Conditional Dropdown for 'Withdrawal Dates' */}
-                                               {item.title === "Withdrawal Dates" ? (
-                                                             <div
-                                                                                     className="relative bg-[#A87F0B] w-[280px] rounded-[20px] px-[15px] py-[10px] shadow-[inset_0px_-7px_4px_0px_#00000040]"
-                                                                                     onClick={toggleDropdown}
-                                                                                   >
-                                                                                     <h4 className="text-xs sm:text-sm text-[#CACACA] sm:leading-[1.2]">
-                                                                                                                           {item.title}
-                                                                                                                         </h4>
-                                                                                                                         <div className="flex items-center justify-between w-full text-sm">
-                                                                                                                           <button>{item.value}</button>
-                                                                                                                           {isToggled ? (
-                                                                                                                             <img
-                                                                                                                               src={toogle2}
-                                                                                                                               alt="Toggle Two"
-                                                                                                                               className="w-[25px] cursor-pointer"
-                                                                                                                             />
-                                                                                                                           ) : (
-                                                                                                                             <img
-                                                                                                                               src={toogle}
-                                                                                                                               alt="Toggle One"
-                                                                                                                               className="w-[25px] cursor-pointer"
-                                                                                                                             />
-                                                                                                                           )}
-                                                                                                                         </div>
-                                                                                                             {showDropdown && (
-                                                                         <div
-                                                                        
-                                                                           className="absolute top-full left-0 z-10 w-[290px] max-h-[155px]  bg-[#333] text-white rounded-md mt-2 p-2 shadow-[inset_0px_-7px_4px_0px_#00000040]"
-                                                                           onClick={(e) => e.stopPropagation()}
-                                                                         >
-                                                                           {selectedCommittee?.withdraw.map((date, index) => (
-                                                                             <div key={index} className="dropdown-item flex items-center mb-5 justify-between">
-                                                                               <div className="flex items-center w-[70%]">
-                                                                                 <span className="rounded-[100px] bg-[#A87F0B] text-center w-[30px] text-[15px]">{index + 1}</span>
-                                                                                 <strong className="ml-3 text-[16px] text-right">
-                                                                                 Rs.{formatPrice(
-                                                   parseInt(selectedCommittee?.totalPrice) /
-                                                   parseInt(selectedCommittee?.myTotalKametis)
-                                                 )}
-                                                                                 </strong>
-                                                                               </div>
-                                                                               <span
-                                                                                 className="text-right text-[15px] text-center w-[30%] cursor-pointer flex items-center justify-between"
-                                                                              
-                                                                               >
-                                                                                 {date == null ? "N/A" :  formatDate(date)}
-                                                                             
-                                                                               </span>
-                                               
-                                               
-                                                                               
-                                                                             </div>
-                                                                           ))}
-                                                                         </div>
-                                                                       )}
-                                                                         </div>
-                                               ) : (
-                                                 <>
-                                                   <h4 className="text-xs sm:text-lg text-[#CACACA] sm:leading-[1.2]">
-                                                     {item.title}
-                                                   </h4>
-                                                   {/* <p className="text-sm sm:text-lg text-[#FFFFFF] sm:leading-[1.2]">
-               {new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR' }).format(Number(item.value) || 0)}
-             </p> */}
-             
-             <p className="text-sm sm:text-lg text-[#FFFFFF] sm:leading-[1.2] font-sans">
-               {item.value}
-             </p>
-             
-             
-                                                 </>
-                                               )}
-                                             </div>
-                                           </div>
-                                         ))}
-                                       </div>
-                                     </div>
+              <div key={sectionIndex} className="mt-6">
+                {/* Section Header */}
+                <h3 className="font-medium text-lg pl-6 sm:pl-8 md:pl-12 lg:pl-16 xl:pl-20 text-sm sm:text-lg md:text-xl lg:text-2xl">
+                  {section === "monthly"
+                    ? selectedCommittee?.kametiType == "daily"
+                      ? "Daily Kameti Info"
+                      : "Monthly Kameti Info"
+                    : section === "amounts"
+                    ? "Amounts Info"
+                    : section === "kameties"
+                    ? "Kameties Info"
+                    : section === "dates"
+                    ? "Dates Info"
+                    : ""}
+                </h3>
+                <hr className="h-[1px] bg-[#FFFFFF21] border-0 mt-1" />
+
+                {/* Section Items */}
+<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-4 p-2 font-medium text-lg ">
+                            {items.map((item, index) => (
+                              <div
+                                key={index}
+                                className="flex items-center p-4 space-x-4 relative"
+                              >
+                                {/* Conditionally Render Image */}
+                                {item.title !== "Withdrawal Dates" && (
+                                  <img
+                                    src={item.image}
+                                    alt={item.title}
+                                    className="w-[35px] h-[35px] sm:w-[65px] sm:h-[65px] object-cover rounded-md"
+                                  />
+                                )}
+                                <div>
+                                  {/* Conditional Dropdown for 'Withdrawal Dates' */}
+                                  {item.title === "Withdrawal Dates" ? (
+                                    <div
+                                      className="relative bg-[#A87F0B] w-[280px] rounded-[20px] px-[15px] py-[10px] shadow-[inset_0px_-7px_4px_0px_#00000040]"
+                                      onClick={toggleDropdown}
+                                    >
+                                      <h4 className="text-xs sm:text-sm text-[#CACACA] sm:leading-[1.2]">
+                                                                            {item.title}
+                                                                          </h4>
+                                                                          <div className="flex items-center justify-between w-full text-sm">
+                                                                            <button>{item.value}</button>
+                                                                            {isToggled ? (
+                                                                              <img
+                                                                                src={toogle2}
+                                                                                alt="Toggle Two"
+                                                                                className="w-[25px] cursor-pointer"
+                                                                              />
+                                                                            ) : (
+                                                                              <img
+                                                                                src={toogle}
+                                                                                alt="Toggle One"
+                                                                                className="w-[25px] cursor-pointer"
+                                                                              />
+                                                                            )}
+                                                                          </div>
+                                                              {showDropdown && (
+                          <div
+                         
+                            className="absolute top-full left-0 z-10 w-[280px] max-h-[155px] overflow-y-auto dropdown-scrollbar bg-[#333] text-white rounded-md mt-2 p-2 shadow-[inset_0px_-7px_4px_0px_#00000040]"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {selectedCommittee?.withdraw.map((date, index) => (
+                              <div key={index} className="dropdown-item flex items-center mb-5 justify-between">
+                                <div className="flex items-center w-[70%]">
+                                  <span className="rounded-[100px] bg-[#A87F0B] text-center w-[30px] text-[15px]">{index + 1}</span>
+                                  <strong className="ml-3 text-[16px] text-right">
+                                  Rs.{formatPrice(
+    parseInt(selectedCommittee?.totalPrice) /
+    parseInt(selectedCommittee?.myTotalKametis)
+  )}
+                                  </strong>
+                                </div>
+                                <span
+                                  className="text-right text-[15px] text-center w-[30%] cursor-pointer flex items-center justify-between"
+                               
+                                >
+                                  {date == null ? "N/A" :  formatDate(date)}
+                              
+                                </span>
+
+
+                                
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                          </div>
+                        ) : (
+                          <>
+                            <h4 className="text-xs sm:text-lg text-[#CACACA] sm:leading-[1.2]">
+                              {item.title}
+                            </h4>
+                            <p className="text-sm sm:text-lg text-[#FFFFFF] sm:leading-[1.2]">
+                              {item.value}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </div>
@@ -714,43 +704,39 @@ export default function Payment() {
         />
       )}
       {modalVisible && paymentDetails && (
-        <div className="fixed inset-0 bg-[rgba(0,0,0,0.6)] backdrop-blur-md flex justify-center items-center text-white px-4">
-        <div className="bg-[#1E1E1E] rounded-2xl shadow-xl w-full max-w-[22rem] text-center overflow-hidden">
-          {/* Header */}
-          <div className="bg-[#D1A30C] py-4 rounded-t-2xl">
-            <h2 className="text-xl font-bold tracking-wide">Kameti Payment Details</h2>
-          </div>
-      
-          {/* Body */}
-          <div className="p-6 space-y-4">
-            <div className="flex justify-between items-center border-b border-gray-600 pb-2">
-              <span className="font-semibold text-lg">Date:</span>
-              <span className="text-gray-300">{formatDate(paymentDetails.date)}</span>
+        <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex justify-center items-center text-white">
+          <div className="bg-[#2A2A2A] rounded-lg shadow-lg w-[90%] max-w-[20rem] text-center overflow-hidden">
+            <div className="bg-[#A87F0B] py-3">
+              <h2 className="text-xl font-bold">Kameti Payment Details</h2>
             </div>
-            <div className="flex justify-between items-center border-b border-gray-600 pb-2">
-              <span className="font-semibold text-lg">Price:</span>
-              <span className="text-gray-300">{formatPrice(paymentDetails.price)}</span>
+            <div className="p-6">
+              <div className="mb-4 flex justify-between items-center">
+                <span className="font-semibold text-lg">Date:</span>
+                <span>
+                  {formatDate(paymentDetails.date)}
+                </span>
+              </div>
+              <div className="mb-4 flex justify-between items-center">
+                <span className="font-semibold text-lg">Price:</span>
+                <span>{paymentDetails.price}</span>
+              </div>
+              <div className="mb-4 flex justify-between items-center">
+                <span className="font-semibold text-lg">Status:</span>
+                <span>Paid</span>
+              </div>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="font-semibold text-lg">Status:</span>
-              <span className="text-green-400 font-bold">Paid</span>
+            <div className="pb-6">
+              <button
+                onClick={() => setModalVisible(false)}
+                className="bg-[#A87F0B] text-white py-1 px-8 rounded-full text-lg font-medium"
+              >
+                Close
+              </button>
             </div>
-          </div>
-      
-          {/* Footer */}
-          <div className="pb-6">
-            <button
-              onClick={() => setModalVisible(false)}
-              className="bg-[#D1A30C] hover:bg-[#b68e0c] text-white py-2 px-8 rounded-full text-lg font-medium transition-all duration-200"
-            >
-              Close
-            </button>
           </div>
         </div>
-      </div>
-      
       )}
-    
+   
     </>
   );
 }

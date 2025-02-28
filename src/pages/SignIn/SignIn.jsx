@@ -13,7 +13,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import axios from "axios";
-import { Slide, ToastContainer, toast } from "react-toastify";
+
+import toast from "react-hot-toast";
+
 import "react-toastify/dist/ReactToastify.css";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { FaFacebookF } from "react-icons/fa";
@@ -251,8 +253,15 @@ export default function SignIn() {
               <div className="bg-[#6A6A6A80] flex items-center rounded-[10px] h-[50px] sm:w-[70%] w-[100%] p-5 sm:mt-3 mt-5">
                 <img src={emailIcon} width="23px" className="mr-2" />
                 <input
-                  className="w-[100%] outline-none text-white"
+                  className="w-[100%] outline-none text-white peer 
+                  autofill:bg-transparent autofill:text-white"
+   
                   type="email"
+                  autoComplete="off"
+                  style={{
+                    WebkitTextFillColor: "white",
+                    transition: "background-color 5000s ease-in-out 0s",
+                  }}
                   placeholder="Email"
                   onChange={(e) => setPhoneNumber(e.target.value)}
                 />
@@ -261,10 +270,16 @@ export default function SignIn() {
               <div className="bg-[#6A6A6A80] flex items-center rounded-[10px] h-[50px] sm:w-[70%] w-[100%] p-5 sm:mt-3 mt-5">
                 <img src={phoneIcon} width="23px" className="mr-2" />
                 <input
-                  className="w-[100%] outline-none text-white"
+                   className="w-[100%] outline-none text-white peer 
+                  autofill:bg-transparent autofill:text-white"
                   type="tel" // Use text to enable custom validation
                   placeholder="Phone Number"
                   value={phoneNumber}
+                  autoComplete="off"
+                  style={{
+                    WebkitTextFillColor: "white",
+                    transition: "background-color 5000s ease-in-out 0s",
+                  }}
                   onChange={(e) => {
                   
                     // const value = e.target.value.replace(/[^0-9]/g, "");
@@ -288,10 +303,18 @@ export default function SignIn() {
             <div className="bg-[#6A6A6A80] flex items-center rounded-[10px] h-[50px] sm:w-[70%] w-[100%] p-5 sm:mt-3 mt-5">
               <img src={passwordIcon} width="23px" className="mr-2" />
               <input
-                className="w-[100%] outline-none text-white"
+          className="w-[100%] outline-none text-white peer 
+                  autofill:bg-transparent autofill:text-white"
                 type={showPassword ? "password" : "text"}
                 placeholder="Password"
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="off"
+                style={{
+                  WebkitTextFillColor: "white",
+                  transition: "background-color 5000s ease-in-out 0s",
+                }}
+                
+
               />
               {showPassword ? (
                 <FaRegEyeSlash
@@ -381,19 +404,19 @@ export default function SignIn() {
           
         </div>
 
-        <ToastContainer
-          position="top-center"
-          autoClose={2000} // Auto close after 3 seconds
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          transition={Slide} // Optional transition effect
-        />
+        <style>
+    {`
+      input:-webkit-autofill {
+        -webkit-text-fill-color: white !important;
+        background-color: transparent !important;
+        transition: background-color 5000s ease-in-out 0s;
+      }
+    `}
+  </style>
       </GoogleOAuthProvider>
     </>
+    
   );
 }
+
+

@@ -24,7 +24,9 @@ import Alert from '../../components/Alert/Alert';
 import { MdOutlineRestartAlt } from "react-icons/md";
 
 import axios from 'axios';
-import { Slide, ToastContainer, toast } from 'react-toastify';
+
+import toast from "react-hot-toast";
+
 import { FadeLoader, HashLoader } from 'react-spinners';
 import { IconButton } from '@mui/material';
 import { TbMenu2 } from 'react-icons/tb';
@@ -510,18 +512,7 @@ export default function Payment() {
             accessFrom = "live"
           />
         )}
-      <ToastContainer
-        position="top-center"
-        autoClose={2000} // Auto close after 3 seconds
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        transition={Slide} // Optional transition effect
-      />
+ 
     </>
 
 

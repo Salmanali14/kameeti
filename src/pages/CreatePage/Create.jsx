@@ -6,7 +6,8 @@ import calender from "../../images/appointment 1.png";
 import custumer from "../../images/customer 1.png";
 import date from "../../images/start-date 1.png";
 import axios from "axios";
-import { Slide, ToastContainer, toast } from "react-toastify";
+import toast from "react-hot-toast";
+
 import "react-toastify/dist/ReactToastify.css";
 import { MdOutlineRestartAlt } from "react-icons/md";
 import Sidebar from "../../components/Sidebar/Sidebar";
@@ -983,18 +984,7 @@ const handleReset = () => {
           onCancel={handleAlertCancel} // Cancel button logic
         />
       )}
-      <ToastContainer
-        position="top-center"
-        autoClose={2000} // Auto close after 3 seconds
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        transition={Slide} // Optional transition effect
-      />
+
       <InfoModal
         info={shareTotalAmount}
         handleCloseshare={handleCloseshare}
